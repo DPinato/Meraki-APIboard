@@ -8,6 +8,12 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
 	QMainWindow::setWindowTitle("Meraki-APIboard");
 
+	// initialise UI
+	ui->snmpCheck->setChecked(false);
+	on_snmpCheck_clicked(false);
+	ui->nonMVPNCheck->setChecked(false);
+	on_nonMVPNCheck_clicked(false);
+
 
 	// I am doing this so I do not have to leave my API key in this code
 //	apiKey = getAPIkeyFromFile(QString("/home/davide/Desktop/apikey.txt"));
@@ -21,9 +27,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	manager = new QNetworkAccessManager(this);
 	manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
 	connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
-
-
 	connect(this, SIGNAL(orgQueryFinished()), this, SLOT(runNetworkQuery()));
+
+
+
+
 	runOrgQuery();
 
 
@@ -54,6 +62,7 @@ QString MainWindow::getAPIkeyFromFile(QString file) {
 }
 
 void MainWindow::updateUI() {
+	// for the organization/network tree view
 	// put the stuff in the UI after an API reply
 	QStandardItemModel *testTree = new QStandardItemModel(orgList.size(), 1, this);
 	testTree->setHeaderData(0, Qt::Horizontal, QString(""));
@@ -74,6 +83,44 @@ void MainWindow::updateUI() {
 	}
 
 	ui->treeView->setModel(testTree);
+
+
+}
+
+void MainWindow::updateNetworkUI(QModelIndex &index) {
+	// show information about the network/organization
+	qDebug() << index;
+	qDebug() << index.data() << "\t" << index.row();
+	qDebug() << index.parent().data() << "\t" << index.parent().row();
+	qDebug() << "\n";
+
+	int tmpOrgIndex, tmpNetIndex;
+
+	if (index.parent().data() == QVariant::Invalid) {
+		// an organization was selected in the tree view
+		tmpOrgIndex = index.row();
+		tmpNetIndex = -1;
+	} else {
+		// a network was selected in the tree view
+		tmpOrgIndex = index.parent().row();
+		tmpNetIndex = index.row();
+	}
+	qDebug() << "tmpOrgIndex: " << tmpOrgIndex << "\ttmpNetIndex: " << tmpNetIndex;
+
+	// show info about the organization
+	ui->orgNameEdit->setText(orgList.at(tmpOrgIndex)->getOrgName());
+
+
+	if (tmpNetIndex != -1) {
+		// show info about network
+		ui->networkNameEdit->setEnabled(true);
+		ui->networkNameEdit->setText(orgList.at(tmpOrgIndex)->getNetwork(tmpNetIndex).netName);
+	} else {
+		ui->networkNameEdit->setEnabled(false);
+		ui->networkNameEdit->setText("");
+	}
+
+
 
 
 }
@@ -275,3 +322,31 @@ void MainWindow::replyFinished(QNetworkReply *reply) {
 
 
 
+void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
+	updateNetworkUI(QModelIndex(index));
+}
+
+void MainWindow::on_snmpCheck_clicked(bool checked) {
+	// make SNMP related stuff non-editable
+	ui->snmpVerMenu->setEnabled(checked);
+	ui->snmpAuthMenu->setEnabled(checked);
+	ui->snmpPrivMenu->setEnabled(checked);
+	ui->snmpAuthPassEdit->setEnabled(checked);
+	ui->snmpAuthPassCheck->setEnabled(checked);
+	ui->snmpPrivPassEdit->setEnabled(checked);
+	ui->snmpPrivPassCheck->setEnabled(checked);
+	ui->snmpPeerIPListBrowser->setEnabled(checked);
+
+}
+
+void MainWindow::on_nonMVPNCheck_clicked(bool checked) {
+	// make non-Meraki VPN related stuff non-editable
+	ui->nonMVPNPeersMenu->setEnabled(checked);
+	ui->nonMVPNAddPeerButton->setEnabled(checked);
+	ui->nonMVPNPeerNameEdit->setEnabled(checked);
+	ui->nonMVPNPeerIPEdit->setEnabled(checked);
+	ui->nonMVPNSecretEdit->setEnabled(checked);
+	ui->nonMVPNSecretCheck->setEnabled(checked);
+	ui->nonMVPNSubnetBrowser->setEnabled(checked);
+
+}

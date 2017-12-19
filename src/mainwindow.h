@@ -38,7 +38,8 @@ public:
 	~MainWindow();
 
 	QString getAPIkeyFromFile(QString file);
-	void updateUI();
+	void updateUI();		// update the tree view of the organization/network
+	void updateNetworkUI(QModelIndex &index);
 
 
 	void processOrgQuery(QJsonDocument doc);
@@ -54,7 +55,15 @@ public slots:
 signals:
 	void orgQueryFinished();
 
-private:
+private slots:
+	void on_treeView_doubleClicked(const QModelIndex &index);
+
+
+	void on_snmpCheck_clicked(bool checked);
+
+	void on_nonMVPNCheck_clicked(bool checked);
+
+	private:
 	Ui::MainWindow *ui;
 
 	QString apiKey;		// holds the API key being used
