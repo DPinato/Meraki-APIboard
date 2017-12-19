@@ -4,12 +4,18 @@
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow) {
+
 	ui->setupUi(this);
+	QMainWindow::setWindowTitle("Meraki-APIboard");
 
 
 	// I am doing this so I do not have to leave my API key in this code
-	apiKey = getAPIkeyFromFile(QString("/home/davide/Desktop/apikey.txt"));
+//	apiKey = getAPIkeyFromFile(QString("/home/davide/Desktop/apikey.txt"));
+	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
 	qDebug() << apiKey;
+
+	orgQueryURL = QUrl("https://api.meraki.com/api/v0/organizations");
+	networkQueryURL = QUrl("https://api.meraki.com/api/v0/organizations/[organizationId]/networks");
 
 
 	manager = new QNetworkAccessManager(this);
@@ -17,18 +23,14 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
 
 
+	connect(this, SIGNAL(orgQueryFinished()), this, SLOT(runNetworkQuery()));
+	runOrgQuery();
 
 
-	QNetworkRequest request;
-	request.setUrl(QUrl("https://api.meraki.com/api/v0/organizations"));
-	request.setRawHeader("X-Cisco-Meraki-API-Key", QByteArray(apiKey.toStdString().c_str(), apiKey.length()));
-	request.setRawHeader("Content-Type", "application/json");
-
-
-	QNetworkReply *reply = manager->get(request);
-
-
-
+//	MOrganization *tmp = new MOrganization("TEST", 123);
+//	tmp->setOrgID(123321);
+//	tmp->setOrgName(QString("HASKDJHKASJDH"));
+//	tmp->showVariables();
 
 }
 
@@ -51,84 +53,223 @@ QString MainWindow::getAPIkeyFromFile(QString file) {
 
 }
 
+void MainWindow::updateUI() {
+	// put the stuff in the UI after an API reply
+	QStandardItemModel *testTree = new QStandardItemModel(orgList.size(), 1, this);
+	testTree->setHeaderData(0, Qt::Horizontal, QString(""));
 
+	for (int i = 0; i < orgList.size(); i++) {
+		// format the name of the org to look like "<org_name> (<org_id>)"
+		QString parent = orgList.at(i)->getOrgName() + " (" + orgList.at(i)->getOrgID() + ")";
+		testTree->setItem(i, new QStandardItem(parent));
+		testTree->item(i)->setFlags(Qt::ItemIsEditable);	// make items not editable
 
-void MainWindow::replyFinished(QNetworkReply *reply) {
-	QByteArray response = reply->readAll();
-	qDebug() << response;
+		// show all networks in the org as child
+		for (int n = 0; n < orgList.at(i)->getNetworksNum(); n++) {
+			testTree->item(i)->setChild(n, new QStandardItem(orgList.at(i)->getNetwork(n).netName));
+			testTree->item(i)->child(n)->setFlags(Qt::ItemIsEditable);
 
-//	jDoc.fromRawData(reply->readAll().toStdString().c_str(), reply->readAll().toStdString().size());
-	jDoc = QJsonDocument::fromJson(response);
+		}
 
-	if (jDoc.isNull()) {
-		qDebug() << "JSON IS NOT VALID";
-	} else {
-		qDebug() << "JSON IS VALID";
 	}
 
+	ui->treeView->setModel(testTree);
+
+
+}
+
+void MainWindow::runOrgQuery() {
+	qDebug() << "MainWindow::runOrgQuery()";
+
+	QNetworkRequest request;
+	request.setUrl(orgQueryURL);
+	request.setRawHeader("X-Cisco-Meraki-API-Key", QByteArray(apiKey.toStdString().c_str(), apiKey.length()));
+	request.setRawHeader("Content-Type", "application/json");
+
+	manager->get(request);
+
+}
+
+void MainWindow::runNetworkQuery() {
+	// query the API for list of networks for every organization retrieved previously
+	// https://api.meraki.com/api/v0/organizations/[organizationId]/networks
+	qDebug() << "MainWindow::runNetworkQuery()";
+
+	for (int i = 0; i < orgList.size(); i++) {
+		// build the URL containing the org ID
+		QString url = networkQueryURL.toString();
+		int index = url.indexOf(QString("[organizationId]"));
+		tmpNetURL = url.remove(index, QString("[organizationId]").length());
+
+		int index2 = tmpNetURL.lastIndexOf(QString("//"))+1;
+		tmpNetURL.insert(index2, orgList.at(i)->getOrgID());
+		qDebug() << tmpNetURL;
+
+
+		// do the query
+		QNetworkRequest request;
+		request.setUrl(tmpNetURL);
+		request.setRawHeader("X-Cisco-Meraki-API-Key", QByteArray(apiKey.toStdString().c_str(), apiKey.length()));
+		request.setRawHeader("Content-Type", "application/json");
+
+		manager->get(request);
+
+	}
+
+
+}
+
+void MainWindow::processOrgQuery(QJsonDocument doc) {
+	// call this after querying list of organizations
+	// https://api.meraki.com/api/v0/organizations
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID";
+		return;
+	}
 
 //	qDebug() << jDoc.toJson(QJsonDocument::Indented);
 
 
-	QJsonArray jArray = jDoc.array();
+	// get organization data
+	QJsonArray jArray = doc.array();
 //	qDebug() << jArray << "\t" << jArray.size();
 
-	orgIDs.resize(jArray.size());
-	orgName.resize(jArray.size());
-	samlURL.resize(jArray.size());
-	samlURLs.resize(jArray.size());
-
+	orgList.resize(jArray.size());
 
 	for (int index = 0; index < jArray.size(); index++) {
 		QJsonObject jObj = jArray.at(index).toObject();
+		orgList[index] = new MOrganization();
 
-		orgIDs[index] = jObj["id"].toVariant().toDouble();
-		qDebug() << jObj["id"].toVariant().toDouble();
-		orgName[index] = jObj["name"].toString();
-		qDebug() << jObj["name"].toString();
+		orgList[index]->setOrgID(jObj["id"].toVariant().toString());
+//		qDebug() << orgList[index]->getOrgID();
+
+		orgList[index]->setOrgName(jObj["name"].toString());
+//		qDebug() << orgList[index]->getOrgName();
 
 
 		// these are not necessarily be sent with the response
 		if (jObj["samlConsumerUrl"] != QJsonValue::Undefined) {
-			samlURL[index] = jObj["samlConsumerUrl"].toString();
-			qDebug() << jObj["samlConsumerUrl"].toString();
+			orgList[index]->setSamlURL(jObj["samlConsumerUrl"].toString());
+//			qDebug() << orgList[index]->getSamlURL();
 		}
 
+//		if (jObj.contains("samlConsumerUrls")) {
+//			// this not yet implemented
+//			qDebug() << "YES, index: " << index;
+//			QJsonArray tmpJArray = jObj["samlConsumerUrls"].toArray();
 
-		if (jObj["samlConsumerUrls"] != QJsonValue::Array) {
-			QJsonArray tmpJArray = jObj["samlConsumerUrls"].toArray();
-
-			QList<QString> tmpStrList;
-			for (int i = 0; i < tmpJArray.size(); i++) {
-				tmpStrList.append(tmpJArray.at(i).toString());
-				qDebug() << tmpJArray.at(i).toString();
-			}
-
-			samlURLs[index] = tmpStrList;
-		}
+//			for (int i = 0; i < tmpJArray.size(); i++) {
+//				qDebug() << tmpJArray.at(i).toString();
+//			}
+//		}
 
 
+//		qDebug() << "\n";
+
+	}
+
+
+
+	for (int i = 0; i < orgList.length(); i++) {
+		orgList.at(i)->showVariables();
+		qDebug() << "\n";
+	}
+
+}
+
+void MainWindow::processNetworkQuery(QJsonDocument doc) {
+	// call this after querying for the list of networks
+	qDebug() << "MainWindow::processNetworkQuery(...)";
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID";
+		return;
+	}
+
+	int orgIndex = -1;		// used to find in which organization these networks are
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size() << "\n";
+
+	networkVars tmpNetVar;
+
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		tmpNetVar.netID = jObj["id"].toString();
+		tmpNetVar.netName = jObj["name"].toString();
+		tmpNetVar.orgID = jObj["organizationId"].toVariant().toString();
+		tmpNetVar.netTimezone = jObj["timeZone"].toString();
+		tmpNetVar.netType = jObj["type"].toString();
+		tmpNetVar.netTags = (jObj["tags"].toString());
+
+		qDebug() << tmpNetVar.netID;
+		qDebug() << tmpNetVar.netName;
+		qDebug() << tmpNetVar.orgID;
+		qDebug() << tmpNetVar.netTimezone;
+		qDebug() << tmpNetVar.netType;
+		qDebug() << tmpNetVar.netTags;
 		qDebug() << "\n";
 
-	}
 
-
-
-
-
-
-	for (int i = 0; i < orgIDs.length(); i++) {
-		qDebug() << orgIDs.at(i);
-		qDebug() << "\t" << orgName.at(i);
-		qDebug() << "\t" << samlURL.at(i);
-
-		for (int l = 0; l < samlURLs.length(); l++) {
-			qDebug() << "\t\t" << samlURLs.at(l);
+		// do this only once for the first network
+		// the other networks will be in the same organization
+		if (orgIndex == -1) {
+			for (int l = 0; l < orgList.size(); l++) {
+				if (orgList.at(l)->getOrgID().compare(tmpNetVar.orgID) == 0) {
+					orgIndex = l;
+					break;
+				}
+			}
 		}
 
+		qDebug() << "orgIndex: " << orgIndex;
+		orgList[orgIndex]->setNetworksNum(orgList.at(orgIndex)->getNetworksNum()+1);	// increase number of networks in org
+		orgList[orgIndex]->setNetwork(tmpNetVar, i);
+
 	}
 
 
+
+
+}
+
+
+
+void MainWindow::replyFinished(QNetworkReply *reply) {
+	QByteArray response = reply->readAll();
+	qDebug() << reply->url();
+
+//	jDoc.fromRawData(reply->readAll().toStdString().c_str(), reply->readAll().toStdString().size());
+	QJsonDocument jDoc = QJsonDocument::fromJson(response);
+
+
+	// figure out what kind of query was made
+	QString tmp = orgQueryURL.toString();
+	qDebug() << reply->url().toString().endsWith(
+					tmp.right(tmp.length()-tmp.indexOf(QString("/organizations"))));
+	qDebug() << tmp.right(tmp.length()-tmp.indexOf(QString("/organizations")));
+
+	tmp = tmpNetURL;
+	qDebug() << reply->url().toString().endsWith(
+					tmp.right(tmp.length()-tmp.indexOf(QString("/networks"))));
+	qDebug() << tmp.right(tmp.length()-tmp.indexOf(QString("/networks")));
+	qDebug() << "\n\n";
+
+	if (reply->url().toString().endsWith(
+			orgQueryURL.toString().right(
+				orgQueryURL.toString().length()-orgQueryURL.toString().indexOf(QString("/organizations"))))) {
+		processOrgQuery(jDoc);
+		emit orgQueryFinished();
+	}
+
+	if (reply->url().toString().endsWith(
+			tmpNetURL.right(
+				tmpNetURL.length()-tmpNetURL.indexOf(QString("/networks"))))) {
+		processNetworkQuery(jDoc);
+
+	}
+
+	updateUI();
 
 }
 

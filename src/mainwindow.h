@@ -6,15 +6,23 @@
 #include <QDebug>
 #include <QList>
 #include <QByteArray>
+#include <QStandardItem>
+#include <QStandardItemModel>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QUrl>
 
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonValue>
+
+
+#include "morganization.h"
+
+class MOrganization;
 
 
 namespace Ui {
@@ -30,12 +38,21 @@ public:
 	~MainWindow();
 
 	QString getAPIkeyFromFile(QString file);
+	void updateUI();
+
+
+	void processOrgQuery(QJsonDocument doc);
+	void processNetworkQuery(QJsonDocument doc);
 
 
 
 public slots:
 	void replyFinished(QNetworkReply *reply);
+	void runOrgQuery();
+	void runNetworkQuery();
 
+signals:
+	void orgQueryFinished();
 
 private:
 	Ui::MainWindow *ui;
@@ -43,14 +60,20 @@ private:
 	QString apiKey;		// holds the API key being used
 
 	QNetworkAccessManager *manager;
-	QJsonDocument jDoc;
+
+	// keep them here for now, these will most likely have to be in a separate class
+	QUrl orgQueryURL;
+	QUrl networkQueryURL;
+	QString tmpNetURL;		// used for comparison with networkQueryURL
 
 
 	// hold variables from "Organizations" API responses
-	QVector<double> orgIDs;	// org IDs can be quite long, 15+ digits
-	QVector<QString> orgName;
-	QVector<QString> samlURL;
-	QVector<QList<QString>> samlURLs;
+	QVector<MOrganization *> orgList;
+
+//	QVector<double> orgIDs;	// org IDs can be quite long, 15+ digits
+//	QVector<QString> orgName;
+//	QVector<QString> samlURL;
+//	QVector<QList<QString>> samlURLs;
 
 
 };
