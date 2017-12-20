@@ -8,6 +8,7 @@
 #include <QByteArray>
 #include <QStandardItem>
 #include <QStandardItemModel>
+#include <QObject>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -21,16 +22,17 @@
 
 
 #include "morganization.h"
+#include "apihelper.h"
 
 class MOrganization;
+class APIHelper;
 
 
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
@@ -57,18 +59,18 @@ signals:
 
 private slots:
 	void on_treeView_doubleClicked(const QModelIndex &index);
-
-
 	void on_snmpCheck_clicked(bool checked);
-
 	void on_nonMVPNCheck_clicked(bool checked);
 
-	private:
+
+private:
 	Ui::MainWindow *ui;
 
 	QString apiKey;		// holds the API key being used
-
 	QNetworkAccessManager *manager;
+
+
+	APIHelper *apiHelpObj;
 
 	// keep them here for now, these will most likely have to be in a separate class
 	QUrl orgQueryURL;

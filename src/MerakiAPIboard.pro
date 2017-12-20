@@ -27,11 +27,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
 main.cpp \
 mainwindow.cpp \
-    morganization.cpp
+    morganization.cpp \
+    apihelper.cpp
 
 HEADERS += \
 mainwindow.h \
-    morganization.h
+    morganization.h \
+    apihelper.h
 
 FORMS += \
 mainwindow.ui

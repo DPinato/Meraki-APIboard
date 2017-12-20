@@ -16,12 +16,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 	// I am doing this so I do not have to leave my API key in this code
+
 //	apiKey = getAPIkeyFromFile(QString("/home/davide/Desktop/apikey.txt"));
 	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
 	qDebug() << apiKey;
 
 	orgQueryURL = QUrl("https://api.meraki.com/api/v0/organizations");
 	networkQueryURL = QUrl("https://api.meraki.com/api/v0/organizations/[organizationId]/networks");
+
+	apiHelpObj = new APIHelper(apiKey);
+
 
 
 	manager = new QNetworkAccessManager(this);
@@ -32,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-	runOrgQuery();
+//	runOrgQuery();
 
 
 //	MOrganization *tmp = new MOrganization("TEST", 123);
