@@ -12,6 +12,11 @@ struct networkVars {
 	QString netTags;		// tags assigned to network, these are returned as a single string
 };
 
+struct licensesPerDevice {
+	QString deviceType;		// device type, i.e. MS225, MX100, ...
+	int count;				// licenses available for the device type
+};
+
 class MOrganization {
 	public:
 		MOrganization();
@@ -26,6 +31,10 @@ class MOrganization {
 		void setSamlURL(QString url);
 		void setNetworksNum(int n);
 		void setNetwork(networkVars v, int index);
+		void setLicenseStatus(QString s);
+		void setLicenseExpDate(QString d);
+		void setLicenseDeviceNum(int n);
+		void setLicensePerDevice(licensesPerDevice a, int index);
 
 
 		// get
@@ -34,7 +43,10 @@ class MOrganization {
 		QString getSamlURL();
 		int getNetworksNum();
 		networkVars getNetwork(int index);
-
+		QString getLicenseStatus();
+		QString getLicenseExpireDate();
+		int getLicenseListSize();
+		licensesPerDevice getLicensePerDevice(int index);
 
 		// debug
 		void showVariables();
@@ -47,6 +59,11 @@ class MOrganization {
 		QVector<QString> samlURLs;	// SAML URLs for organization, not implemented yet
 
 		QVector<networkVars> netList;	// list of network associated with this organization
+
+		// this for licensing state
+		QString licStatus;				// state of the licensing for the org
+		QString licExpireDate;		// licensing expiration date
+		QVector<licensesPerDevice> licenseList;
 
 
 };

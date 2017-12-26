@@ -44,18 +44,16 @@ public:
 	void updateNetworkUI(QModelIndex &index);
 
 
-	void processOrgQuery(QJsonDocument doc);
-	void processNetworkQuery(QJsonDocument doc);
 
+
+	// TODO: I am sure there is a better arrangement than this
+	QVector<MOrganization *> orgList;
 
 
 public slots:
 	void replyFinished(QNetworkReply *reply);
-	void runOrgQuery();
-	void runNetworkQuery();
 
 signals:
-	void orgQueryFinished();
 
 private slots:
 	void on_treeView_doubleClicked(const QModelIndex &index);
@@ -78,8 +76,7 @@ private:
 	QString tmpNetURL;		// used for comparison with networkQueryURL
 
 
-	// hold variables from "Organizations" API responses
-	QVector<MOrganization *> orgList;
+
 
 //	QVector<double> orgIDs;	// org IDs can be quite long, 15+ digits
 //	QVector<QString> orgName;

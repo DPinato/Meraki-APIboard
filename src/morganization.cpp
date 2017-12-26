@@ -35,6 +35,22 @@ void MOrganization::setNetwork(networkVars v, int index) {
 	netList[index] = v;
 }
 
+void MOrganization::setLicenseStatus(QString s) {
+	licStatus = s;
+}
+
+void MOrganization::setLicenseExpDate(QString d) {
+	licExpireDate = d;
+}
+
+void MOrganization::setLicenseDeviceNum(int n) {
+	licenseList.resize(n);
+}
+
+void MOrganization::setLicensePerDevice(licensesPerDevice a, int index) {
+	licenseList[index] = a;
+}
+
 QString MOrganization::getOrgID() {
 	return id;
 }
@@ -55,6 +71,22 @@ networkVars MOrganization::getNetwork(int index) {
 	return netList.at(index);
 }
 
+QString MOrganization::getLicenseStatus() {
+	return licStatus;
+}
+
+QString MOrganization::getLicenseExpireDate() {
+	return licExpireDate;
+}
+
+int MOrganization::getLicenseListSize() {
+	return licenseList.size();
+}
+
+licensesPerDevice MOrganization::getLicensePerDevice(int index) {
+	return licenseList.at(index);
+}
+
 
 
 
@@ -72,7 +104,7 @@ void MOrganization::showVariables() {
 
 
 	// show networks
-	qDebug() << "\nNetworks in this organization: " << netList.size();
+	qDebug() << "Networks in this organization: " << netList.size();
 	for (int i = 0; i < netList.size(); i++) {
 		qDebug() << "\tName: " << netList.at(i).netName << "\ttype: " << netList.at(i).netType;
 		qDebug() << "\tnetID: " << netList.at(i).netID << "\torgID: " << netList.at(i).orgID;
