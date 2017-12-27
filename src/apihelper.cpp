@@ -298,8 +298,6 @@ bool APIHelper::processLicenseQuery(QJsonDocument doc, int orgIndex) {
 
 	licensesPerDevice tmpVar;
 
-	parent->orgList[orgIndex]->licS
-
 
 //		QJsonObject jObj = jArray.at(i).toObject();
 //		tmpVar.netID = jObj["id"].toString();
