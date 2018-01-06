@@ -3,12 +3,14 @@
 APIHelper::APIHelper(QString key, MainWindow *p) {
 	parent = p;
 	apiKey = key;
+	eventIndex = 0;
 
 	manager = new QNetworkAccessManager();
 	manager->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
 	QObject::connect(manager, SIGNAL(finished(QNetworkReply*)), parent, SLOT(replyFinished(QNetworkReply*)));
 
 	// TODO: think about a better arrangement for these, read from file?
+	baseURL = QString("");
 	orgQueryURL = QUrl("https://api.meraki.com/api/v0/organizations");
 	networkQueryURL = QUrl("https://api.meraki.com/api/v0/organizations/[organizationId]/networks");
 	licenseQueryURL = QUrl("https://api.meraki.com/api/v0/organizations/[organizationId]/licenseState");
@@ -22,30 +24,174 @@ APIHelper::~APIHelper() {
 	delete manager;
 }
 
+bool APIHelper::readURLListFromFile(QString urlFile) {
+	// get all the URLs and the HTTP method used from file
+	QString tmp;
+	int index;
+	int l = 0;
+	urlRequest tmpReq;
+
+
+	QFile readFile(urlFile);
+	if (!readFile.open(QIODevice::ReadOnly)) { return false; }
+
+	while(!readFile.atEnd()) {
+		// a line starting with # can be considered as a comment
+		tmp = readFile.readLine();
+
+		// first line will contain baseURL
+		if (baseURL.isEmpty()) {
+			index = tmp.indexOf(" ")+1;
+			l = tmp.length()-index;
+			baseURL = tmp.right(l).left(l-2);
+
+		} else {
+
+			if (tmp.length() > 2 && tmp.at(0) != '#') {
+				// get the HTTP method
+				index = tmp.indexOf(" ");
+
+				if (tmp.left(index) == "GET") {
+					tmpReq.reqType = 1;
+				} else if (tmp.left(index) == "PUT") {
+					tmpReq.reqType = 2;
+				} else if (tmp.left(index) == "POST") {
+					tmpReq.reqType = 3;
+				} else if (tmp.left(index) == "DELETE") {
+					tmpReq.reqType = 4;
+				}
+
+				// get URL for HTTP method
+				l = tmp.length()-index-1;
+				tmpReq.url = tmp.right(l).left(l-2);
+				urlList.append(tmpReq);
+
+			}
+		}
+
+	}
+
+
+	// debug
+	for (int i = 0; i < urlList.size(); i++) {
+		qDebug() << i << "\t" << urlList.at(i).reqType << "\t" << urlList.at(i).url;
+	}
+
+
+	return true;	// everything went OK
+
+}
+
+void APIHelper::runQuery(eventRequest e) {
+	// run the query corresponding to the query ID
+	// data is needed for POST and PUT
+	// this function can only be used for queries that need org ID and network ID, no others
+	qDebug() << "\nAPIHelper::runQuery(), queryID: " << e.urlListIndex;
+	QString queryURL;
+
+	if (e.orgIndex != -1) {
+		// put the organization ID in the URL
+		queryURL = urlList.at(e.urlListIndex).url;
+		qDebug() << queryURL.indexOf(QString("[organizationId]"));
+		queryURL = queryURL.replace(queryURL.indexOf(QString("[organizationId]"))
+									, QString("[organizationId]").length()
+									, parent->orgList.at(e.orgIndex)->getOrgID());
+
+		queryURL.insert(0, baseURL);
+	}
+
+	if (e.netIndex != -1) {
+		// put network ID in the URL
+
+	}
+
+	if (e.orgIndex == -1 && e.netIndex == -1) {
+		queryURL = QString(baseURL.left(baseURL.length()-1) + urlList.at(e.urlListIndex).url);
+	}
+
+	qDebug() << queryURL;
+
+
+	// do HTTP query
+	QNetworkRequest request;
+	request.setUrl(queryURL);
+	request.setRawHeader("X-Cisco-Meraki-API-Key", QByteArray(apiKey.toStdString().c_str(), apiKey.length()));
+	request.setRawHeader("Content-Type", "application/json");
+
+
+	if (urlList.at(e.urlListIndex).reqType == 1) {
+		manager->get(request);
+	} else if (urlList.at(e.urlListIndex).reqType == 2) {
+		manager->put(request, e.data);
+	} else if (urlList.at(e.urlListIndex).reqType == 3) {
+		manager->post(request, e.data);
+	} else if (urlList.at(e.urlListIndex).reqType == 4) {
+		manager->deleteResource(request);
+	}
+
+
+
+}
+
 void APIHelper::processQuery(QNetworkReply *r) {
 	// this function is supposed to be able to figure out which query was made
 	// and call the appropriate processing function
-	qDebug() << "APIHelper::processQuery(...)";
+	qDebug() << "\nAPIHelper::processQuery(...)";
+//	queueEventRequests[eventIndex].responseReceived = true;		// update the event in the queue
 
 	QByteArray response = r->readAll();
 	qDebug() << r->url();
-	qDebug() << response;
+	qDebug() << r->error();
+	qDebug() << "Response: " << response;
 
 	QJsonDocument jDoc = QJsonDocument::fromJson(response);
 
 
-
 	// figure out what kind of query was made
+//	int queryIndex = getQueryIndex(r);
+	int queryIndex = queueEventRequests.at(eventIndex).urlListIndex;
+	qDebug() << "eventIndex: " << eventIndex << "\tqueryIndex: " << queryIndex;
+
+	switch (queryIndex) {
+
+		case 27: {
+			// GET /organizations/[organizationId]/networks
+			processNetworkQuery(jDoc);
+			break;
+		}
+
+		case 41: {
+			// GET /organizations
+			processOrgQuery(jDoc);
+			break;
+		}
+
+
+	}
+
+
+/*
 	QString tmp = orgQueryURL.toString();
 	qDebug() << tmp.right(tmp.length()-tmp.indexOf(QString("/organizations")));
 	qDebug() << r->url().toString().endsWith(
 					tmp.right(tmp.length()-tmp.indexOf(QString("/organizations"))));
 
-
+	// query 41
 	if (r->url().toString().endsWith(
 			orgQueryURL.toString().right(
 				orgQueryURL.toString().length()-orgQueryURL.toString().indexOf(QString("/organizations"))))) {
 		processOrgQuery(jDoc);
+
+		// get all the information regarding the organizations
+		// 0, 9, 22, 27, (42), 47, 48, 49, 51, 63, 64
+		eventRequest tmp;
+		tmp.urlListIndex = 0;
+		tmp.orgIndex = 0;
+		tmp.netIndex = -1;
+		tmp.data = QByteArray(0);
+
+		putEventInQueue(tmp);	// GET /organizations/[organizationId]/snmp
+
 	}
 
 	if (r->url().toString().endsWith(
@@ -61,111 +207,42 @@ void APIHelper::processQuery(QNetworkReply *r) {
 		processLicenseQuery(jDoc, findOrg(id));
 	}
 
+*/
 
 
-	// tell MainWindow to update the GUI
-	parent->updateUI();
-
-}
-
-void APIHelper::runOrgQuery() {
-	// queries for all the organizations the user has access to
-	qDebug() << "APIHelper::runOrgQuery()";
-
-	QNetworkRequest request;
-	request.setUrl(orgQueryURL);
-	request.setRawHeader("X-Cisco-Meraki-API-Key", QByteArray(apiKey.toStdString().c_str(), apiKey.length()));
-	request.setRawHeader("Content-Type", "application/json");
-
-	manager->get(request);
+	queueEventRequests[eventIndex].responseProcessed = true;		// update the event in the queue
+	eventIndex++;
 
 }
 
-void APIHelper::runOrgQuery(int index) {
-	// get all networks for the org at the index
-	qDebug() << "APIHelper::runNetworkQuery(int)";
+void APIHelper::putEventInQueue(eventRequest e) {
+	// if the queue is empty, run it immediately
+	// otherwise it will be run when it is time
+
+	// if the organization list is empty, do not do anything
+	if (parent->orgList.size() == 0) { return; }
 
 
-	// build the URL containing the org ID
-	QString url = networkQueryURL.toString();
-	int i = url.indexOf(QString("[organizationId]"));
-	tmpURL = url.remove(i, QString("[organizationId]").length());
+	queueEventRequests.append(e);
+	qDebug() << "\nAPIHelper::putEventInQueue(...)\t" << eventIndex << "\t" << queueEventRequests.size();
 
-	int index2 = tmpURL.lastIndexOf(QString("//"))+1;
-	tmpURL.insert(index2, parent->orgList.at(index)->getOrgID());
-	qDebug() << tmpURL;
-
-
-	// do the query
-	QNetworkRequest request;
-	request.setUrl(tmpURL);
-	request.setRawHeader("X-Cisco-Meraki-API-Key", QByteArray(apiKey.toStdString().c_str(), apiKey.length()));
-	request.setRawHeader("Content-Type", "application/json");
-
-	manager->get(request);
-
-}
-
-void APIHelper::runNetworkQuery(QModelIndex &index) {
-	// return list of networks associated with organization
-	// use index to figure out what to get information for
-	qDebug() << "APIHelper::runNetworkQuery(QModelIndex)";
-
-	int tmpOrgIndex;
-
-	if (index.parent().data() == QVariant::Invalid) {
-		// an organization was selected in the tree view
-		tmpOrgIndex = index.row();
-	}  else {
-		return;
+//	if (queueEventRequests.size() == 0) {
+	if (eventIndex == queueEventRequests.size()-1) {
+		qDebug() << "Running query immediately, eventIndex: " << eventIndex
+				 << "\tqueueEventReq size: " << queueEventRequests.size();
+		runQuery(e);
 	}
 
-
-	// build the URL containing the org ID
-	QString url = networkQueryURL.toString();
-	int i = url.indexOf(QString("[organizationId]"));
-	tmpURL = url.remove(i, QString("[organizationId]").length());
-
-	int index2 = tmpURL.lastIndexOf(QString("//"))+1;
-	tmpURL.insert(index2, parent->orgList.at(tmpOrgIndex)->getOrgID());
-	qDebug() << tmpURL;
-
-
-	// do the query
-	QNetworkRequest request;
-	request.setUrl(tmpURL);
-	request.setRawHeader("X-Cisco-Meraki-API-Key", QByteArray(apiKey.toStdString().c_str(), apiKey.length()));
-	request.setRawHeader("Content-Type", "application/json");
-
-	manager->get(request);
-
-}
-
-void APIHelper::runLicenseQuery(int index) {
-	// get licensing state for org
-	QString url = licenseQueryURL.toString();
-	int i = url.indexOf(QString("[organizationId]"));
-	tmpURL = url.remove(i, QString("[organizationId]").length());
-
-	int index2 = tmpURL.lastIndexOf(QString("//"))+1;
-	tmpURL.insert(index2, parent->orgList.at(index)->getOrgID());
-	qDebug() << tmpURL;
-
-
-	// do the query
-	QNetworkRequest request;
-	request.setUrl(tmpURL);
-	request.setRawHeader("X-Cisco-Meraki-API-Key", QByteArray(apiKey.toStdString().c_str(), apiKey.length()));
-	request.setRawHeader("Content-Type", "application/json");
-
-	manager->get(request);
+//	qDebug() << "Queueing query, eventIndex: " << eventIndex
+//			 << "\tqueueEventReq size: " << queueEventRequests.size();
+//	queueEventRequests.append(e);
 
 }
 
 bool APIHelper::processOrgQuery(QJsonDocument doc) {
 	// call this after querying list of organizations
 	// https://api.meraki.com/api/v0/organizations
-	qDebug() << "APIHelper::processOrgQuery()";
+	qDebug() << "\nAPIHelper::processOrgQuery(...)";
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgQuery(...)";
@@ -216,12 +293,12 @@ bool APIHelper::processOrgQuery(QJsonDocument doc) {
 
 	qDebug() << "ORGS: " << parent->orgList.size();
 
-	// do not do this, what if there are a lot of orgs with a lot of networks
-	for (int i = 0; i < parent->orgList.size(); i++) {
-		runOrgQuery(i);
-	}
+//	// do not do this, what if there are a lot of orgs with a lot of networks
+//	for (int i = 0; i < parent->orgList.size(); i++) {
+//		runQuery(i);
+//	}
 
-	parent->updateUI();
+	parent->updateOrgUI(-1);
 
 	return true;	// everything OK
 
@@ -280,7 +357,8 @@ void APIHelper::processNetworkQuery(QJsonDocument doc) {
 
 	}
 
-	parent->updateUI();
+	parent->updateOrgUI(-1);
+	parent->updateOrgUI(orgIndex);
 
 }
 
@@ -292,36 +370,26 @@ bool APIHelper::processLicenseQuery(QJsonDocument doc, int orgIndex) {
 		return false;
 	}
 
-
+	licensesPerDevice tmpVar;
 	QJsonObject jObj = doc.object();
 	qDebug() << jObj << "\t" << jObj.size() << "\n";
 
-	licensesPerDevice tmpVar;
 
+	// save info for licensing status of organization
+	parent->orgList[orgIndex]->setLicenseExpDate(jObj["expirationDate"].toString());
+	parent->orgList[orgIndex]->setLicenseStatus(jObj["status"].toString());
 
-//		QJsonObject jObj = jArray.at(i).toObject();
-//		tmpVar.netID = jObj["id"].toString();
-//		tmpVar.netName = jObj["name"].toString();
-//		tmpVar.orgID = jObj["organizationId"].toVariant().toString();
-//		tmpVar.netTimezone = jObj["timeZone"].toString();
-//		tmpVar.netType = jObj["type"].toString();
-//		tmpVar.netTags = (jObj["tags"].toString());
+	// get list of licensedDeviceCounts
+	QJsonObject jObjCounts = jObj["licensedDeviceCounts"].toObject();	// makes it easier to work with it
+	parent->orgList[orgIndex]->setLicenseDeviceNum(jObjCounts.keys().size());
 
-//		qDebug() << tmpVar.netID;
-//		qDebug() << tmpVar.netName;
-//		qDebug() << tmpVar.orgID;
-//		qDebug() << tmpVar.netTimezone;
-//		qDebug() << tmpVar.netType;
-//		qDebug() << tmpVar.netTags;
-//		qDebug() << "\n";
+	for (int i = 0; i < jObjCounts.size(); i++) {
+		tmpVar.deviceType = jObjCounts.keys().at(i);
+		tmpVar.count = jObjCounts[jObjCounts.keys().at(i)].toInt();
+		parent->orgList[orgIndex]->setLicensePerDevice(tmpVar, i);
+	}
 
-
-
-
-
-	parent->updateUI();
-
-
+	parent->updateOrgUI(orgIndex);
 
 	return true;		// everything ok
 }
@@ -358,6 +426,18 @@ QString APIHelper::getOrgIDFromURL(QUrl u) {
 //	qDebug() << "i1: " << i1 << "\ti2: " << i2 << "\ttest: " << test;
 
 	return test;
+}
+
+int APIHelper::getEventQueueSize() {
+	return queueEventRequests.size();
+}
+
+eventRequest APIHelper::getNextEvent() {
+	return queueEventRequests.at(0);
+}
+
+int APIHelper::getEventIndex() {
+	return eventIndex;
 }
 
 int APIHelper::findOrg(int orgID) {

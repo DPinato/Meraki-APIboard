@@ -40,9 +40,14 @@ public:
 	~MainWindow();
 
 	QString getAPIkeyFromFile(QString file);
-	void updateUI();		// update the tree view of the organization/network
+	void updateOrgUI(int orgIndex);		// update the tree view of the organization/network
 	void updateNetworkUI(QModelIndex &index);
 
+
+	// functions to show different things in the GUI
+	void displayAdminStuff(int orgIndex);
+	void displayLicenseInfo(int orgIndex);
+	void displayInventory(int orgIndex);
 
 
 
@@ -57,14 +62,19 @@ signals:
 
 private slots:
 	void on_treeView_doubleClicked(const QModelIndex &index);
-	void on_snmpCheck_clicked(bool checked);
 	void on_nonMVPNCheck_clicked(bool checked);
 
+	void on_debugButton_clicked();
+	void on_treeView_clicked(const QModelIndex &index);
+	void on_snmp3Check_clicked(bool checked);
+	void on_refreshOrgsButton_clicked();
+	void on_tabWidget_currentChanged(int index);
 
-private:
+	private:
 	Ui::MainWindow *ui;
 
-	QString apiKey;		// holds the API key being used
+	QString apiKey;			// file holding the API key being used
+	QString urlListFile;	// file holding the list of URLs for the API
 	QNetworkAccessManager *manager;
 
 

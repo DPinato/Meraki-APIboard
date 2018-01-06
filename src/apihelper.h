@@ -15,19 +15,30 @@ class MOrganization;
 #define APIHELPER_H
 
 
+struct eventRequest {
+	// used to maintain a queue for HTTP requests to make
+	int urlListIndex;		// which index in the urlList it corresponds to
+	int orgIndex;			// organization index in orgList
+	int netIndex;			// network index in the orgList object
+	QByteArray data;		// data to use in case of a PUT or POST
+
+	bool responseReceived = false;	// indicates whether a response for this request was received
+	bool responseProcessed = false;	// indicates whether this response was processed
+};
+
+
 class APIHelper {
 public:
 	APIHelper(QString key, MainWindow *p = 0);
 	~APIHelper();
 
+	bool readURLListFromFile(QString urlFile);
+
+	void runQuery(eventRequest e);
 	void processQuery(QNetworkReply *r);
+	void putEventInQueue(eventRequest e);
 
-	void runOrgQuery();
-	void runOrgQuery(int index);	// get all networks for the org at the index
-	void runNetworkQuery(QModelIndex &index);
-	void runLicenseQuery(int index);	// get license info for org
-
-
+	// functions to process data returned from queries
 	bool processOrgQuery(QJsonDocument doc);
 	void processNetworkQuery(QJsonDocument doc);
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
@@ -44,6 +55,9 @@ public:
 	QUrl getOrgQueryURL();
 	QUrl getNetworkQueryURL();
 	QString getOrgIDFromURL(QUrl u);
+	int getEventQueueSize();
+	eventRequest getNextEvent();
+	int getEventIndex();
 
 
 	// utility
@@ -60,9 +74,10 @@ signals:
 
 private:
 	MainWindow *parent;
+	QVector<eventRequest> queueEventRequests;
+	int eventIndex;
 
 	QString apiKey;		// holds the API key being used
-
 	QNetworkAccessManager *manager;
 
 	// TODO: think about a better arrangement for these, read from file?
@@ -71,6 +86,14 @@ private:
 	QUrl licenseQueryURL;
 	QString tmpURL;		// used for comparison with networkQueryURL and more
 
+
+	// read the URLs from file
+	QString baseURL;
+	struct urlRequest {
+		int reqType;	// 1: GET, 2: PUT, 3: POST, 4: DELETE
+		QString url;
+	};
+	QVector<urlRequest> urlList;
 
 };
 
