@@ -25,11 +25,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	qDebug() << urlListFile;
 
 
-	orgQueryURL = QUrl("https://api.meraki.com/api/v0/organizations");
-	networkQueryURL = QUrl("https://api.meraki.com/api/v0/organizations/[organizationId]/networks");
-
 	apiHelpObj = new APIHelper(apiKey, this);
 	apiHelpObj->readURLListFromFile(urlListFile);
+
+	currOrgIndex = -1;
 
 //	apiHelpObj->runQuery(41);	// GET /organizations
 //	apiHelpObj->putEventInQueue(eventRequest{49, 0, -1, 0});	// GET /organizations/[organizationId]/snmp
@@ -91,11 +90,10 @@ void MainWindow::updateOrgUI(int orgIndex) {
 
 
 	// show things in the GUI
+	currOrgIndex = orgIndex;
 	displayAdminStuff(orgIndex);
 	displayLicenseInfo(orgIndex);
 	displayInventory(orgIndex);
-
-
 
 
 }
@@ -143,7 +141,67 @@ void MainWindow::displayAdminStuff(int orgIndex) {
 	ui->networkNameEdit->setText("");
 
 	// show administrators in the table view
+	// columns are <name | email | org_privilege | admin_id | networks | tags>
+	QStandardItemModel *adminTree = new QStandardItemModel(orgList.at(orgIndex)->getAdminListSize(), 4, this);
 
+	// set column headers
+	adminTree->setHeaderData(0, Qt::Horizontal, QString("Name"));
+	adminTree->setHeaderData(1, Qt::Horizontal, QString("E-mail"));
+	adminTree->setHeaderData(2, Qt::Horizontal, QString("Org Privilege"));
+	adminTree->setHeaderData(3, Qt::Horizontal, QString("ID"));
+
+
+	for (int i = 0; i < orgList.at(orgIndex)->getAdminListSize(); i++) {
+		adminStruct tmpAdmin = orgList.at(orgIndex)->getAdmin(i);
+
+		adminTree->setItem(i, 0, new QStandardItem(tmpAdmin.name));
+		adminTree->setItem(i, 1, new QStandardItem(tmpAdmin.email));
+		adminTree->setItem(i, 2, new QStandardItem(tmpAdmin.orgAccess));
+		adminTree->setItem(i, 3, new QStandardItem(tmpAdmin.id));
+
+
+		// display list of networks admin has access to, if this is a network admin
+//		if (orgList.at(orgIndex)->getAdmin(i).nets.size() > 0) {
+			QStandardItemModel *adminTree2 = new QStandardItemModel(orgList.at(orgIndex)->getAdmin(i).nets.size(), 2, this);
+			adminTree2->setHeaderData(0, Qt::Horizontal, QString("Net ID"));
+			adminTree2->setHeaderData(1, Qt::Horizontal, QString("Access"));
+
+			for (int j = 0; j < tmpAdmin.nets.size(); j++) {
+				adminNetPermission tmpPerm = tmpAdmin.nets.at(j);
+				adminTree2->setItem(j, 0, new QStandardItem(tmpPerm.netID));
+				adminTree2->setItem(j, 1, new QStandardItem(tmpPerm.accessLevel));
+			}
+
+			ui->adminsTableView_2->setModel(adminTree2);
+			ui->adminsTableView_2->resizeColumnsToContents();
+			ui->adminsTableView_2->resizeRowsToContents();
+//		}
+
+
+		// display list of tags assigned to administrator
+//		if (orgList.at(orgIndex)->getAdmin(i).tags.size() > 0) {
+			QStandardItemModel *adminTree3 = new QStandardItemModel(orgList.at(orgIndex)->getAdmin(i).tags.size(), 2, this);
+			adminTree3->setHeaderData(0, Qt::Horizontal, QString("Tag"));
+			adminTree3->setHeaderData(1, Qt::Horizontal, QString("Access"));
+
+			for (int j = 0; j < tmpAdmin.tags.size(); j++) {
+				adminTag tmpTag = tmpAdmin.tags.at(j);
+				adminTree3->setItem(j, 0, new QStandardItem(tmpTag.tag));
+				adminTree3->setItem(j, 1, new QStandardItem(tmpTag.adminAccessLevel));
+			}
+
+			ui->adminsTableView_3->setModel(adminTree3);
+			ui->adminsTableView_3->resizeColumnsToContents();
+			ui->adminsTableView_3->resizeRowsToContents();
+//		}
+
+
+
+	}
+
+	ui->adminsTableView->setModel(adminTree);
+	ui->adminsTableView->resizeColumnsToContents();
+	ui->adminsTableView->resizeRowsToContents();
 
 }
 
@@ -165,6 +223,9 @@ void MainWindow::displayLicenseInfo(int orgIndex) {
 }
 
 void MainWindow::displayInventory(int orgIndex) {
+	// show devices in the inventory table
+	QStandardItemModel *inventoryModel = new QStandardItemModel(orgList.size(), 1, this);
+	inventoryModel->setHeaderData(0, Qt::Horizontal, QString(""));
 
 
 
@@ -199,6 +260,11 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 		tmp.netIndex = -1;
 		tmp.urlListIndex = 27;	// get networks in the org
 		apiHelpObj->putEventInQueue(tmp);	// get networks in the org
+
+		tmp.urlListIndex = 0;	// get admins in the org
+		apiHelpObj->putEventInQueue(tmp);
+
+
 //		apiHelpObj->runQuery(27, tmpOrgIndex, tmpNetIndex);	// get networks in the org
 
 		updateOrgUI(tmp.orgIndex);
@@ -257,10 +323,82 @@ void MainWindow::on_refreshOrgsButton_clicked() {
 	tmp.urlListIndex = 41;
 	tmp.orgIndex = -1;
 	tmp.netIndex = -1;
-	apiHelpObj->putEventInQueue(tmp);	// GET /organizations
+	apiHelpObj->putEventInQueue(tmp, true);	// GET /organizations
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index) {
 	qDebug() << "tab: " << index << "\t" << ui->tabWidget->tabText(index);
+
+	switch (index) {
+		case 0: {
+			// Administration tab
+			break;
+		}
+
+		case 1: {
+			// Organization Settings tab
+
+			break;
+		}
+
+		case 2: {
+			// Licensing / Inventory tab
+
+			break;
+		}
+
+	}
+
+}
+
+void MainWindow::on_adminsTableView_clicked(const QModelIndex &index) {
+	// show details of the administrator clicked in the access and tag table views
+	qDebug() << "on_adminsTableView_clicked, row: " << index.row();
+
+	adminStruct tmpAdmin = orgList.at(currOrgIndex)->getAdmin(index.row());
+
+
+	// display list of networks admin has access to, if this is a network admin
+	QStandardItemModel *adminTree2 = new QStandardItemModel(tmpAdmin.nets.size(), 2, this);
+	adminTree2->setHeaderData(0, Qt::Horizontal, QString("Net ID"));
+	adminTree2->setHeaderData(1, Qt::Horizontal, QString("Access"));
+
+	for (int j = 0; j < tmpAdmin.nets.size(); j++) {
+		adminNetPermission tmpPerm = tmpAdmin.nets.at(j);
+		adminTree2->setItem(j, 0, new QStandardItem(tmpPerm.netID));
+		adminTree2->setItem(j, 1, new QStandardItem(tmpPerm.accessLevel));
+	}
+
+	ui->adminsTableView_2->setModel(adminTree2);
+	ui->adminsTableView_2->resizeColumnsToContents();
+	ui->adminsTableView_2->resizeRowsToContents();
+
+
+
+	// display list of tags assigned to administrator
+	QStandardItemModel *adminTree3 = new QStandardItemModel(tmpAdmin.tags.size(), 2, this);
+	adminTree3->setHeaderData(0, Qt::Horizontal, QString("Tag"));
+	adminTree3->setHeaderData(1, Qt::Horizontal, QString("Access"));
+
+	for (int j = 0; j < tmpAdmin.tags.size(); j++) {
+		adminTag tmpTag = tmpAdmin.tags.at(j);
+		adminTree3->setItem(j, 0, new QStandardItem(tmpTag.tag));
+		adminTree3->setItem(j, 1, new QStandardItem(tmpTag.adminAccessLevel));
+	}
+
+	ui->adminsTableView_3->setModel(adminTree3);
+	ui->adminsTableView_3->resizeColumnsToContents();
+	ui->adminsTableView_3->resizeRowsToContents();
+
+
+	// DEBUG
+	qDebug() << tmpAdmin.name;
+	for (int j = 0; j < tmpAdmin.nets.size(); j++) {
+		qDebug() << tmpAdmin.nets.at(j).netID << "\t" << tmpAdmin.nets.at(j).accessLevel;
+	}
+	for (int j = 0; j < tmpAdmin.tags.size(); j++) {
+		qDebug() << tmpAdmin.tags.at(j).tag << "\t" << tmpAdmin.tags.at(j).adminAccessLevel;
+	}
+
 
 }

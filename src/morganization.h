@@ -27,11 +27,33 @@ struct deviceInInventory {
 };
 
 struct nonMerakiVPNPeer {
-	QString peerName;
-	QString peerPublicIP;
-	QVector<QString> privateSubnets;
-	QString secret;
+	QString peerName;			// name of non-Meraki site-to-site VPN peer
+	QString peerPublicIP;		// public IP of peer
+	QVector<QString> privateSubnets;	// private subnets reachable through peer
+	QString secret;				// secret for site-to-site VPN
 };
+
+struct adminNetPermission {
+	QString netID;			// ID of network in which admin has access to
+	QString accessLevel;	// level of access in network
+};
+
+struct adminTag {
+	QString adminAccessLevel;	// access level of administrator to networks with tag "tag"
+	QString tag;				// tag of network
+};
+
+struct adminStruct {
+	QString name;		// name of administrator
+	QString email;		// email address
+	QString id;			// ID of administrator
+	QString orgAccess;	// level of organization permissions, "full" or "none"
+
+	QVector<adminNetPermission> nets;	// networks in which network admin has permissions on
+	QVector<adminTag> tags;				// tags associated with administrator
+};
+
+
 
 class MOrganization {
 	public:
@@ -51,6 +73,8 @@ class MOrganization {
 		void setLicenseExpDate(QString d);
 		void setLicenseDeviceNum(int n);
 		void setLicensePerDevice(licensesPerDevice a, int index);
+		void setAdminsNum(int n);
+		void setAdmin(adminStruct a, int index);
 
 
 		// get
@@ -63,14 +87,15 @@ class MOrganization {
 		QString getLicenseExpireDate();
 		int getLicenseListSize();
 		licensesPerDevice getLicensePerDevice(int index);
+		int getAdminListSize();
+		adminStruct getAdmin(int index);
+
 
 		// debug
 		void showVariables();
 
 
 	private:
-
-
 		QString id;					// organization ID, this number can be really long, store it as string for now
 		QString name;				// organization name
 		QString samlURL;			// SAML URL for organization
@@ -97,6 +122,9 @@ class MOrganization {
 
 		// non-Meraki site-to-site VPN
 
+
+		// administrators
+		QVector<adminStruct> adminList;
 
 };
 

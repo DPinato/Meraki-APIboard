@@ -51,6 +51,14 @@ void MOrganization::setLicensePerDevice(licensesPerDevice a, int index) {
 	licenseList[index] = a;
 }
 
+void MOrganization::setAdminsNum(int n) {
+	adminList.resize(n);
+}
+
+void MOrganization::setAdmin(adminStruct a, int index) {
+	adminList[index] = a;
+}
+
 QString MOrganization::getOrgID() {
 	return id;
 }
@@ -85,6 +93,14 @@ int MOrganization::getLicenseListSize() {
 
 licensesPerDevice MOrganization::getLicensePerDevice(int index) {
 	return licenseList.at(index);
+}
+
+int MOrganization::getAdminListSize() {
+	return adminList.size();
+}
+
+adminStruct MOrganization::getAdmin(int index) {
+	return adminList.at(index);
 }
 
 

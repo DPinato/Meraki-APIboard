@@ -154,6 +154,12 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 	switch (queryIndex) {
 
+		case 0: {
+			// GET /organizations/[organizationId]/admins
+			processOrgAdminsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			break;
+		}
+
 		case 27: {
 			// GET /organizations/[organizationId]/networks
 			processNetworkQuery(jDoc);
@@ -170,72 +176,45 @@ void APIHelper::processQuery(QNetworkReply *r) {
 	}
 
 
-/*
-	QString tmp = orgQueryURL.toString();
-	qDebug() << tmp.right(tmp.length()-tmp.indexOf(QString("/organizations")));
-	qDebug() << r->url().toString().endsWith(
-					tmp.right(tmp.length()-tmp.indexOf(QString("/organizations"))));
-
-	// query 41
-	if (r->url().toString().endsWith(
-			orgQueryURL.toString().right(
-				orgQueryURL.toString().length()-orgQueryURL.toString().indexOf(QString("/organizations"))))) {
-		processOrgQuery(jDoc);
-
-		// get all the information regarding the organizations
-		// 0, 9, 22, 27, (42), 47, 48, 49, 51, 63, 64
-		eventRequest tmp;
-		tmp.urlListIndex = 0;
-		tmp.orgIndex = 0;
-		tmp.netIndex = -1;
-		tmp.data = QByteArray(0);
-
-		putEventInQueue(tmp);	// GET /organizations/[organizationId]/snmp
-
-	}
-
-	if (r->url().toString().endsWith(
-			tmpURL.right(
-				tmpURL.length()-tmpURL.indexOf(QString("/networks"))))) {
-		processNetworkQuery(jDoc);
-	}
-
-	if (r->url().toString().endsWith(
-			tmpURL.right(
-				tmpURL.length()-tmpURL.indexOf(QString("/licenseState"))))) {
-		int id = getOrgIDFromURL(r->url()).toInt();
-		processLicenseQuery(jDoc, findOrg(id));
-	}
-
-*/
-
-
+	// update event queue
 	queueEventRequests[eventIndex].responseProcessed = true;		// update the event in the queue
 	eventIndex++;
 
 }
 
-void APIHelper::putEventInQueue(eventRequest e) {
+void APIHelper::putEventInQueue(eventRequest e, bool force) {
 	// if the queue is empty, run it immediately
 	// otherwise it will be run when it is time
+	qDebug() << "\nAPIHelper::putEventInQueue(...), urlListIndex: " << e.urlListIndex << "\tforce: " << force;
 
 	// if the organization list is empty, do not do anything
-	if (parent->orgList.size() == 0) { return; }
+	if (!force) {
+		if (parent->orgList.size() == 0) { return; }
+	}
 
-
-	queueEventRequests.append(e);
-	qDebug() << "\nAPIHelper::putEventInQueue(...)\t" << eventIndex << "\t" << queueEventRequests.size();
 
 //	if (queueEventRequests.size() == 0) {
-	if (eventIndex == queueEventRequests.size()-1) {
+	if (eventIndex == queueEventRequests.size() || force) {
+		queueEventRequests.append(e);
+
 		qDebug() << "Running query immediately, eventIndex: " << eventIndex
 				 << "\tqueueEventReq size: " << queueEventRequests.size();
 		runQuery(e);
+
+	} else {
+		qDebug() << "Queueing query, eventIndex: " << eventIndex
+				 << "\tqueueEventReq size: " << queueEventRequests.size();
+		queueEventRequests.append(e);
 	}
 
-//	qDebug() << "Queueing query, eventIndex: " << eventIndex
-//			 << "\tqueueEventReq size: " << queueEventRequests.size();
-//	queueEventRequests.append(e);
+
+	// DEBUG
+	for (int i = 0; i < queueEventRequests.size(); i++) {
+		qDebug() << "Event " << i << "\t"
+				 << queueEventRequests.at(i).urlListIndex << "\t"
+				 << queueEventRequests.at(i).orgIndex << "\t"
+				 << queueEventRequests.at(i).netIndex;
+	}
 
 }
 
@@ -254,7 +233,7 @@ bool APIHelper::processOrgQuery(QJsonDocument doc) {
 
 	// get organization data
 	QJsonArray jArray = doc.array();
-	qDebug() << jArray << "\t" << jArray.size();
+//	qDebug() << jArray << "\t" << jArray.size();
 
 
 	parent->orgList.resize(jArray.size());
@@ -315,7 +294,7 @@ void APIHelper::processNetworkQuery(QJsonDocument doc) {
 	int orgIndex = -1;		// used to find in which organization these networks are
 
 	QJsonArray jArray = doc.array();
-	qDebug() << jArray << "\t" << jArray.size() << "\n";
+//	qDebug() << jArray << "\t" << jArray.size() << "\n";
 
 	networkVars tmpNetVar;
 
@@ -328,14 +307,6 @@ void APIHelper::processNetworkQuery(QJsonDocument doc) {
 		tmpNetVar.netTimezone = jObj["timeZone"].toString();
 		tmpNetVar.netType = jObj["type"].toString();
 		tmpNetVar.netTags = (jObj["tags"].toString());
-
-//		qDebug() << tmpNetVar.netID;
-//		qDebug() << tmpNetVar.netName;
-//		qDebug() << tmpNetVar.orgID;
-//		qDebug() << tmpNetVar.netTimezone;
-//		qDebug() << tmpNetVar.netType;
-//		qDebug() << tmpNetVar.netTags;
-//		qDebug() << "\n";
 
 
 		// do this only once for the first network
@@ -394,6 +365,63 @@ bool APIHelper::processLicenseQuery(QJsonDocument doc, int orgIndex) {
 	return true;		// everything ok
 }
 
+bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex) {
+	// process list of administrators in organization obtained through
+	// GET /organizations/[organizationId]/admins
+	qDebug() << "\nAPIHelper::processOrgAdminsQuery(...), orgIndex: " << orgIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgAdminsQuery(...)";
+		return false;
+	}
+
+
+	QJsonArray jArray = doc.array();
+	parent->orgList[orgIndex]->setAdminsNum(jArray.size());
+
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+	for (int i = 0; i < jArray.size(); i++) {
+		adminStruct tmpAdmin;	// this is here since it needs to completely reset at every iteration
+
+		QJsonObject jObj = jArray.at(i).toObject();
+		tmpAdmin.name = jObj["name"].toString();
+		tmpAdmin.email = jObj["email"].toString();
+		tmpAdmin.id = jObj["id"].toString();
+		tmpAdmin.orgAccess = jObj["orgAccess"].toString();
+
+		// get networks admin has access to
+		QJsonArray jNets = jObj["networks"].toArray();
+		for (int j = 0; j < jNets.size(); j++) {
+			adminNetPermission tmpNet;
+			tmpNet.netID = jNets.at(j).toObject()["id"].toString();
+			tmpNet.accessLevel = jNets.at(j).toObject()["access"].toString();
+			tmpAdmin.nets.append(tmpNet);
+		}
+
+
+		// get admin tags
+		QJsonArray jTags = jObj["tags"].toArray();
+		for (int j = 0; j < jTags.size(); j++) {
+			adminTag tmpTag;
+			tmpTag.tag = jTags.at(j).toObject()["tag"].toString();
+			tmpTag.adminAccessLevel = jTags.at(j).toObject()["access"].toString();
+			tmpAdmin.tags.append(tmpTag);
+		}
+
+
+		parent->orgList[orgIndex]->setAdmin(tmpAdmin, i);
+
+	}
+
+
+	parent->displayAdminStuff(orgIndex);
+
+	return true;	// everything went good
+
+}
+
 void APIHelper::setApiKey(QString key) {
 	apiKey = key;
 }
@@ -433,7 +461,7 @@ int APIHelper::getEventQueueSize() {
 }
 
 eventRequest APIHelper::getNextEvent() {
-	return queueEventRequests.at(0);
+	return queueEventRequests.at(eventIndex);
 }
 
 int APIHelper::getEventIndex() {

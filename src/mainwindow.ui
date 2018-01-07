@@ -159,7 +159,7 @@
         <x>10</x>
         <y>100</y>
         <width>631</width>
-        <height>271</height>
+        <height>141</height>
        </rect>
       </property>
      </widget>
@@ -174,6 +174,26 @@
       </property>
       <property name="text">
        <string>Administrators</string>
+      </property>
+     </widget>
+     <widget class="QTableView" name="adminsTableView_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>250</y>
+        <width>311</width>
+        <height>141</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QTableView" name="adminsTableView_3">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>250</y>
+        <width>311</width>
+        <height>141</height>
+       </rect>
       </property>
      </widget>
     </widget>

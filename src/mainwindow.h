@@ -69,8 +69,9 @@ private slots:
 	void on_snmp3Check_clicked(bool checked);
 	void on_refreshOrgsButton_clicked();
 	void on_tabWidget_currentChanged(int index);
+	void on_adminsTableView_clicked(const QModelIndex &index);
 
-	private:
+private:
 	Ui::MainWindow *ui;
 
 	QString apiKey;			// file holding the API key being used
@@ -80,13 +81,7 @@ private slots:
 
 	APIHelper *apiHelpObj;
 
-	// keep them here for now, these will most likely have to be in a separate class
-	QUrl orgQueryURL;
-	QUrl networkQueryURL;
-	QString tmpNetURL;		// used for comparison with networkQueryURL
-
-
-
+	int currOrgIndex;	// index of organization currently shown in the GUI
 
 //	QVector<double> orgIDs;	// org IDs can be quite long, 15+ digits
 //	QVector<QString> orgName;

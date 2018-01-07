@@ -36,12 +36,13 @@ public:
 
 	void runQuery(eventRequest e);
 	void processQuery(QNetworkReply *r);
-	void putEventInQueue(eventRequest e);
+	void putEventInQueue(eventRequest e, bool force = false);
 
 	// functions to process data returned from queries
 	bool processOrgQuery(QJsonDocument doc);
 	void processNetworkQuery(QJsonDocument doc);
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
+	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex);
 
 
 	// set
