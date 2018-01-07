@@ -67,6 +67,22 @@ void MOrganization::setOrgInventoryDevice(deviceInInventory a, int index) {
 	orgInventory[index] = a;
 }
 
+void MOrganization::setOrgSNMPSettings(orgSNMP s) {
+	snmpSettings = s;
+}
+
+void MOrganization::setOrgVPNPeerNum(int n) {
+	nonMerakiVPNs.resize(n);
+}
+
+void MOrganization::setOrgVPNPeer(nonMerakiVPNPeer p, int index) {
+	nonMerakiVPNs[index] = p;
+}
+
+
+
+
+
 QString MOrganization::getOrgID() {
 	return id;
 }
@@ -117,6 +133,18 @@ int MOrganization::getOrgInventorySize() {
 
 deviceInInventory MOrganization::getOrgInventoryDevice(int index) {
 	return orgInventory.at(index);
+}
+
+orgSNMP MOrganization::getOrgSNMPSettings() {
+	return snmpSettings;
+}
+
+int MOrganization::getOrgVPNPeerNum() {
+	return nonMerakiVPNs.size();
+}
+
+nonMerakiVPNPeer MOrganization::getOrgVPNPeer(int index) {
+	return nonMerakiVPNs.at(index);
 }
 
 

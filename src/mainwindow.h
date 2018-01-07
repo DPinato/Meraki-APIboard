@@ -48,6 +48,8 @@ public:
 	void displayAdminStuff(int orgIndex);
 	void displayLicenseInfo(int orgIndex);
 	void displayInventory(int orgIndex);
+	void displayOrgSNMP(int orgIndex);
+	void displayOrgVPN(int orgIndex);
 
 
 
@@ -70,6 +72,10 @@ private slots:
 	void on_refreshOrgsButton_clicked();
 	void on_tabWidget_currentChanged(int index);
 	void on_adminsTableView_clicked(const QModelIndex &index);
+	void on_nonMVPNPeersMenu_currentIndexChanged(int index);
+	void on_nonMVPNSecretCheck_clicked(bool checked);
+	void on_snmpAuthPassCheck_clicked(bool checked);
+	void on_snmpPrivPassCheck_clicked(bool checked);
 
 private:
 	Ui::MainWindow *ui;

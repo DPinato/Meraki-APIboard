@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>900</width>
-    <height>565</height>
+    <height>564</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,7 +50,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -143,8 +143,8 @@
      <widget class="QPushButton" name="debugButton">
       <property name="geometry">
        <rect>
-        <x>300</x>
-        <y>420</y>
+        <x>210</x>
+        <y>430</y>
         <width>91</width>
         <height>31</height>
        </rect>
@@ -153,48 +153,58 @@
        <string>DEBUG</string>
       </property>
      </widget>
-     <widget class="QTableView" name="adminsTableView">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>100</y>
-        <width>631</width>
-        <height>141</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_26">
+     <widget class="QTabWidget" name="adminTabWidget">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>80</y>
-        <width>81</width>
-        <height>16</height>
+        <width>631</width>
+        <height>341</height>
        </rect>
       </property>
-      <property name="text">
-       <string>Administrators</string>
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-     </widget>
-     <widget class="QTableView" name="adminsTableView_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>250</y>
-        <width>311</width>
-        <height>141</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QTableView" name="adminsTableView_3">
-      <property name="geometry">
-       <rect>
-        <x>330</x>
-        <y>250</y>
-        <width>311</width>
-        <height>141</height>
-       </rect>
-      </property>
+      <widget class="QWidget" name="tab_27">
+       <attribute name="title">
+        <string>Administrators</string>
+       </attribute>
+       <widget class="QTableView" name="adminsTableView_3">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>160</y>
+          <width>301</width>
+          <height>141</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QTableView" name="adminsTableView_2">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>160</y>
+          <width>301</width>
+          <height>141</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QTableView" name="adminsTableView">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>611</width>
+          <height>141</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_28">
+       <attribute name="title">
+        <string>SAML</string>
+       </attribute>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_17">
@@ -205,7 +215,7 @@
       <property name="geometry">
        <rect>
         <x>170</x>
-        <y>200</y>
+        <y>280</y>
         <width>161</width>
         <height>21</height>
        </rect>
@@ -224,7 +234,7 @@
       <property name="geometry">
        <rect>
         <x>360</x>
-        <y>70</y>
+        <y>140</y>
         <width>231</width>
         <height>21</height>
        </rect>
@@ -243,7 +253,7 @@
       <property name="geometry">
        <rect>
         <x>600</x>
-        <y>70</y>
+        <y>140</y>
         <width>51</width>
         <height>21</height>
        </rect>
@@ -256,7 +266,7 @@
       <property name="geometry">
        <rect>
         <x>360</x>
-        <y>40</y>
+        <y>110</y>
         <width>231</width>
         <height>21</height>
        </rect>
@@ -275,7 +285,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>40</y>
+        <y>80</y>
         <width>111</width>
         <height>21</height>
        </rect>
@@ -300,8 +310,8 @@
      <widget class="QLabel" name="label_18">
       <property name="geometry">
        <rect>
-        <x>350</x>
-        <y>230</y>
+        <x>80</x>
+        <y>310</y>
         <width>91</width>
         <height>21</height>
        </rect>
@@ -314,7 +324,7 @@
       <property name="geometry">
        <rect>
         <x>400</x>
-        <y>170</y>
+        <y>250</y>
         <width>101</width>
         <height>21</height>
        </rect>
@@ -330,7 +340,7 @@
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>200</y>
+        <y>280</y>
         <width>61</width>
         <height>21</height>
        </rect>
@@ -343,7 +353,7 @@
       <property name="geometry">
        <rect>
         <x>170</x>
-        <y>170</y>
+        <y>250</y>
         <width>161</width>
         <height>21</height>
        </rect>
@@ -353,7 +363,7 @@
       <property name="geometry">
        <rect>
         <x>130</x>
-        <y>40</y>
+        <y>80</y>
         <width>51</width>
         <height>21</height>
        </rect>
@@ -373,17 +383,28 @@
       <property name="geometry">
        <rect>
         <x>130</x>
-        <y>70</y>
-        <width>131</width>
-        <height>51</height>
+        <y>110</y>
+        <width>111</width>
+        <height>61</height>
        </rect>
+      </property>
+      <property name="html">
+       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
         <x>280</x>
-        <y>40</y>
+        <y>110</y>
         <width>81</width>
         <height>21</height>
        </rect>
@@ -396,7 +417,7 @@
       <property name="geometry">
        <rect>
         <x>400</x>
-        <y>200</y>
+        <y>280</y>
         <width>191</width>
         <height>21</height>
        </rect>
@@ -415,7 +436,7 @@
       <property name="geometry">
        <rect>
         <x>600</x>
-        <y>40</y>
+        <y>110</y>
         <width>51</width>
         <height>21</height>
        </rect>
@@ -428,7 +449,7 @@
       <property name="geometry">
        <rect>
         <x>280</x>
-        <y>70</y>
+        <y>140</y>
         <width>81</width>
         <height>21</height>
        </rect>
@@ -441,7 +462,7 @@
       <property name="geometry">
        <rect>
         <x>600</x>
-        <y>200</y>
+        <y>280</y>
         <width>51</width>
         <height>21</height>
        </rect>
@@ -454,7 +475,7 @@
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>70</y>
+        <y>110</y>
         <width>101</width>
         <height>21</height>
        </rect>
@@ -467,7 +488,7 @@
       <property name="geometry">
        <rect>
         <x>350</x>
-        <y>200</y>
+        <y>280</y>
         <width>41</width>
         <height>21</height>
        </rect>
@@ -480,7 +501,7 @@
       <property name="geometry">
        <rect>
         <x>350</x>
-        <y>170</y>
+        <y>250</y>
         <width>51</width>
         <height>21</height>
        </rect>
@@ -492,18 +513,29 @@
      <widget class="QTextBrowser" name="nonMVPNSubnetBrowser">
       <property name="geometry">
        <rect>
-        <x>440</x>
-        <y>230</y>
-        <width>211</width>
+        <x>170</x>
+        <y>320</y>
+        <width>111</width>
         <height>61</height>
        </rect>
+      </property>
+      <property name="html">
+       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;aaa.bbb.ccc.ddd&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="nonMVPNCheck">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>170</y>
+        <y>250</y>
         <width>161</width>
         <height>21</height>
        </rect>
@@ -516,8 +548,8 @@
       <property name="geometry">
        <rect>
         <x>190</x>
-        <y>40</y>
-        <width>51</width>
+        <y>80</y>
+        <width>71</width>
         <height>21</height>
        </rect>
       </property>
@@ -531,6 +563,140 @@
         <string>AES128</string>
        </property>
       </item>
+     </widget>
+     <widget class="QLabel" name="label_26">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>10</y>
+        <width>61</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Hostname:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="snmpHostnameLabel">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>10</y>
+        <width>171</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&lt;hostname_label&gt;</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_40">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>80</y>
+        <width>41</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>User:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_41">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>10</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Port:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="snmpPortLabel">
+      <property name="geometry">
+       <rect>
+        <x>430</x>
+        <y>10</y>
+        <width>51</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&lt;port&gt;</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="snmpUserLabel">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>80</y>
+        <width>131</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&lt;user&gt;</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="snmpCommStringLabel">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>40</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&lt;string&gt;</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_42">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>40</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Community string:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_43">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>320</y>
+        <width>41</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Tags:</string>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="nonMVPNTagsBrowser">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>320</y>
+        <width>201</width>
+        <height>61</height>
+       </rect>
+      </property>
+      <property name="html">
+       <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;tag1, tag2, tag3, tag4&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_15">
@@ -750,7 +916,7 @@
       <x>10</x>
       <y>33</y>
       <width>211</width>
-      <height>471</height>
+      <height>470</height>
      </rect>
     </property>
    </widget>

@@ -184,7 +184,17 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 49: {
+			// GET /organizations/[organizationId]/snmp
+			processOrgSNMPQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			break;
+		}
 
+		case 51: {
+			// GET /organizations/[organizationId]/thirdPartyVPNPeers
+			processOrgVPNQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			break;
+		}
 
 	}
 
@@ -482,6 +492,102 @@ bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
 	parent->displayInventory(orgIndex);
 
 	return true;	// everything went well
+
+}
+
+bool APIHelper::processOrgSNMPQuery(QJsonDocument doc, int orgIndex) {
+	qDebug() << "\nAPIHelper::processOrgSNMPQuery(...), orgIndex: " << orgIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgSNMPQuery(...)";
+		return false;
+	}
+
+
+	QJsonObject jObj = doc.object();
+	qDebug() << jObj << "\t" << jObj.size();
+
+	orgSNMP tmpSNMP;
+
+	tmpSNMP.snmp2cOrgEnabled = jObj["v2cEnabled"].toBool();
+	tmpSNMP.hostname = jObj["hostname"].toString();			// always returned
+	tmpSNMP.port = QString::number(jObj["port"].toInt());
+	tmpSNMP.snmpAuthMode = jObj["v3AuthMode"].toString();
+	tmpSNMP.snmpPrivMode = jObj["v3PrivMode"].toString();
+
+	if (tmpSNMP.snmp2cOrgEnabled) {
+		// stuff returned only if SNMPv2c is enabled
+		tmpSNMP.v2CommString = jObj["v2CommunityString"].toString();
+	}
+
+	tmpSNMP.snmp3OrgEnabled = jObj["v3Enabled"].toBool();
+	if (tmpSNMP.snmp3OrgEnabled) {
+		// stuff returned only if SNMPv3 is enabled
+		tmpSNMP.v3User = jObj["v3User"].toString();
+	}
+
+	// for some reason peerIps are not returned as an array
+	// they are returned no matter what the settings
+	QString tmp = jObj["peerIps"].toString();
+	int h1 = 0;
+
+	do {
+		h1 = tmp.indexOf(';', 0);
+		tmpSNMP.snmpPeerIPs.append(tmp.left(h1));
+		tmp.remove(0, h1+1);
+
+	} while (tmp.indexOf(';', 0) != -1);
+
+	tmpSNMP.snmpPeerIPs.append(tmp);
+
+	parent->orgList.at(orgIndex)->setOrgSNMPSettings(tmpSNMP);
+	parent->displayOrgSNMP(orgIndex);
+
+	return true;	// everything went ok
+
+}
+
+bool APIHelper::processOrgVPNQuery(QJsonDocument doc, int orgIndex) {
+	qDebug() << "\nAPIHelper::processOrgVPNQuery(...), orgIndex: " << orgIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgVPNQuery(...)";
+		return false;
+	}
+
+
+	QJsonArray jArray = doc.array();
+	parent->orgList[orgIndex]->setOrgVPNPeerNum(jArray.size());
+
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+	for (int i = 0; i < jArray.size(); i++) {
+		nonMerakiVPNPeer tmpVPN;
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		tmpVPN.peerName = jObj["name"].toString();
+		tmpVPN.peerPublicIP = jObj["publicIp"].toString();
+		tmpVPN.secret = jObj["secret"].toString();
+
+		QJsonArray jArr1 = jObj["privateSubnets"].toArray();
+		for (int j = 0; j < jArr1.size(); j++) {
+			tmpVPN.privateSubnets.append(jArr1.at(j).toString());
+		}
+
+		QJsonArray jArr2 = jObj["tags"].toArray();
+		for (int j = 0; j < jArr2.size(); j++) {
+			tmpVPN.tags.append(jArr2.at(j).toString());
+		}
+
+		parent->orgList.at(orgIndex)->setOrgVPNPeer(tmpVPN, i);
+
+	}
+
+	parent->displayOrgVPN(orgIndex);
+
+	return true;	// everything went ok
+
 
 }
 

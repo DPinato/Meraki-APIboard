@@ -44,6 +44,8 @@ public:
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
+	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
+	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
 
 
 	// set

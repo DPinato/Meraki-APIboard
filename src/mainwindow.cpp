@@ -265,6 +265,76 @@ void MainWindow::displayInventory(int orgIndex) {
 
 }
 
+void MainWindow::displayOrgSNMP(int orgIndex) {
+	// display SNMP configuration in the GUI
+	// some parameters are only returned if the appropriate version of SNMP is enabled
+	orgSNMP tmpSNMP = orgList.at(orgIndex)->getOrgSNMPSettings();
+
+
+	// stuff that is always returned
+	ui->snmpHostnameLabel->setText(tmpSNMP.hostname);
+	ui->snmpPortLabel->setText(tmpSNMP.port);
+
+	int index = 0;
+	if (tmpSNMP.snmpAuthMode == "MD5") { index = 0; }
+	if (tmpSNMP.snmpAuthMode == "SHA") { index = 1; }
+	ui->snmpAuthMenu->setCurrentIndex(index);
+
+	if (tmpSNMP.snmpPrivMode == "DES") { index = 0; }
+	if (tmpSNMP.snmpPrivMode == "AES128") { index = 1; }
+	ui->snmpPrivMenu->setCurrentIndex(index);
+
+	QString tmpStr;
+	for (int i = 0; i < tmpSNMP.snmpPeerIPs.size(); i++) {
+		tmpStr.append(tmpSNMP.snmpPeerIPs.at(i)).append("\n");
+	}
+	ui->snmpPeerIPListBrowser->setText(tmpStr);
+
+
+	// SNMPv2c stuff
+	ui->snmp2cCheck->setChecked(tmpSNMP.snmp2cOrgEnabled);
+	if (tmpSNMP.snmp2cOrgEnabled) {
+		ui->snmpCommStringLabel->setText(tmpSNMP.v2CommString);
+	} else {
+		ui->snmpCommStringLabel->setText("");
+	}
+
+
+	// SNMPv3 stuff
+	ui->snmp3Check->setChecked(tmpSNMP.snmp3OrgEnabled);
+	on_snmp3Check_clicked(tmpSNMP.snmp3OrgEnabled);
+	if (tmpSNMP.snmp3OrgEnabled) {
+		ui->snmpUserLabel->setText(tmpSNMP.v3User);
+		ui->snmpAuthPassEdit->setText("");
+		ui->snmpPrivPassEdit->setText("");
+	} else {
+		ui->snmpUserLabel->setText("");
+	}
+
+
+}
+
+void MainWindow::displayOrgVPN(int orgIndex) {
+	// display configuration for non-Meraki site-to-site VPN peers
+	if (orgList.at(orgIndex)->getOrgVPNPeerNum() > 0) {
+		// there are non-Meraki site-to-site VPN peers, show them
+		ui->nonMVPNCheck->setChecked(true);
+		on_nonMVPNCheck_clicked(true);
+
+		for (int i = 0; i < orgList.at(orgIndex)->getOrgVPNPeerNum(); i++) {
+			ui->nonMVPNPeersMenu->insertItem(i, orgList.at(orgIndex)->getOrgVPNPeer(i).peerName);
+		}
+
+//		on_nonMVPNPeersMenu_currentIndexChanged(0);		// show the first item and update all the GUI
+
+	} else {
+		ui->nonMVPNCheck->setChecked(false);
+		on_nonMVPNCheck_clicked(false);
+		ui->nonMVPNPeersMenu->clear();
+	}
+
+}
+
 
 
 
@@ -321,6 +391,7 @@ void MainWindow::on_nonMVPNCheck_clicked(bool checked) {
 	ui->nonMVPNSecretEdit->setEnabled(checked);
 	ui->nonMVPNSecretCheck->setEnabled(checked);
 	ui->nonMVPNSubnetBrowser->setEnabled(checked);
+	ui->nonMVPNTagsBrowser->setEnabled(checked);
 
 }
 
@@ -373,6 +444,12 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 
 		case 1: {
 			// Organization Settings tab
+			tmp.urlListIndex = 49;	// GET /organizations/[organizationId]/snmp
+			apiHelpObj->putEventInQueue(tmp);
+
+			tmp.urlListIndex = 51;	// GET /organizations/[organizationId]/thirdPartyVPNPeers
+			apiHelpObj->putEventInQueue(tmp);
+
 
 			break;
 		}
@@ -382,10 +459,8 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 			tmp.urlListIndex = 47;	// GET /organizations/[organizationId]/licenseState
 			apiHelpObj->putEventInQueue(tmp);
 
-			tmp.urlListIndex = 48;
+			tmp.urlListIndex = 48;	// GET /organizations/[organizationId]/inventory
 			apiHelpObj->putEventInQueue(tmp);
-
-
 			break;
 		}
 
@@ -459,4 +534,53 @@ void MainWindow::on_adminsTableView_clicked(const QModelIndex &index) {
 	}
 
 
+}
+
+void MainWindow::on_nonMVPNPeersMenu_currentIndexChanged(int index) {
+	// show data from the appropriate VPN peer
+	nonMerakiVPNPeer tmpPeer = orgList.at(currOrgIndex)->getOrgVPNPeer(index);
+
+	ui->nonMVPNPeerNameEdit->setText(tmpPeer.peerName);
+	ui->nonMVPNPeerIPEdit->setText(tmpPeer.peerPublicIP);
+	ui->nonMVPNSecretEdit->setText(tmpPeer.secret);
+
+	// private subnets
+	QString tmpStr;
+	for (int i = 0; i < tmpPeer.privateSubnets.size(); i++) {
+		tmpStr.append(tmpPeer.privateSubnets.at(i)).append("\n");
+	}
+	ui->nonMVPNSubnetBrowser->setText(tmpStr);
+
+	// tags
+	tmpStr = "";
+	for (int i = 0; i < tmpPeer.tags.size()-1; i++) {
+		tmpStr.append(tmpPeer.tags.at(i)).append(", ");
+	}
+	tmpStr.append(tmpPeer.tags.at(tmpPeer.tags.size()-1));
+	ui->nonMVPNTagsBrowser->setText(tmpStr);
+
+}
+
+void MainWindow::on_nonMVPNSecretCheck_clicked(bool checked) {
+	if (checked) {
+		ui->nonMVPNSecretEdit->setEchoMode(QLineEdit::Normal);
+	} else {
+		ui->nonMVPNSecretEdit->setEchoMode(QLineEdit::Password);
+	}
+}
+
+void MainWindow::on_snmpAuthPassCheck_clicked(bool checked) {
+	if (checked) {
+		ui->snmpAuthPassEdit->setEchoMode(QLineEdit::Normal);
+	} else {
+		ui->snmpAuthPassEdit->setEchoMode(QLineEdit::Password);
+	}
+}
+
+void MainWindow::on_snmpPrivPassCheck_clicked(bool checked) {
+	if (checked) {
+		ui->snmpPrivPassEdit->setEchoMode(QLineEdit::Normal);
+	} else {
+		ui->snmpPrivPassEdit->setEchoMode(QLineEdit::Password);
+	}
 }

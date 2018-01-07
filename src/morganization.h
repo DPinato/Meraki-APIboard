@@ -31,6 +31,7 @@ struct nonMerakiVPNPeer {
 	QString peerPublicIP;		// public IP of peer
 	QVector<QString> privateSubnets;	// private subnets reachable through peer
 	QString secret;				// secret for site-to-site VPN
+	QVector<QString> tags;		// tags assigned to this VPN
 };
 
 struct adminNetPermission {
@@ -53,6 +54,22 @@ struct adminStruct {
 	QVector<adminNetPermission> nets;		// networks in which network admin has permissions on
 	QVector<adminTag> tags;					// tags associated with administrator
 	QVector<adminNetPermission> cNets;		// level of permissions for camera-only administrators
+};
+
+struct orgSNMP {
+	bool snmp2cOrgEnabled;			// true of SNMP v2c is enabled for the organization
+	bool snmp3OrgEnabled;			// true of SNMP v3 is enabled for the organization
+	QString snmpAuthMode;			// 0: MD5, 1: SHA1
+	QString snmpPrivMode;			// 0: DES, 1: AES128
+	QString snmpAuthPass;			// authentication password, only when updating settings
+	QString snmpPrivPass;			// privacy password, only when updating settings
+	QVector<QString> snmpPeerIPs;	// allowed peer IPs
+
+	QString hostname;		// hostname for SNMP
+	QString port;			// port number for SNMP
+
+	QString v2CommString;	// community string when using SNMPv2
+	QString v3User;			// user when using SNMPv3
 };
 
 
@@ -79,6 +96,9 @@ class MOrganization {
 		void setAdmin(adminStruct a, int index);
 		void setOrgInventorySize(int n);
 		void setOrgInventoryDevice(deviceInInventory a, int index);
+		void setOrgSNMPSettings(orgSNMP s);
+		void setOrgVPNPeerNum(int n);
+		void setOrgVPNPeer(nonMerakiVPNPeer p, int index);
 
 
 		// get
@@ -95,6 +115,9 @@ class MOrganization {
 		adminStruct getAdmin(int index);
 		int getOrgInventorySize();
 		deviceInInventory getOrgInventoryDevice(int index);
+		orgSNMP getOrgSNMPSettings();
+		int getOrgVPNPeerNum();
+		nonMerakiVPNPeer getOrgVPNPeer(int index);
 
 
 		// debug
@@ -118,16 +141,10 @@ class MOrganization {
 		QVector<deviceInInventory> orgInventory;	// organization inventory
 
 		// organization SNMP
-		bool snmp2cOrgEnabled;	// true of SNMP v2c is enabled for the organization
-		bool snmp3OrgEnabled;	// true of SNMP v3 is enabled for the organization
-		int snmpAuthMode;			// 0: MD5, 1: SHA1
-		int snmpPrivMode;			// 0: DES, 1: AES128
-		QString snmpAuthPass;		// authentication password
-		QString snmpPrivPass;		// privacy password
-		QStringList snmpPeerIPs;	// allowed peer IPs
+		orgSNMP snmpSettings;
 
 		// non-Meraki site-to-site VPN
-
+		QVector<nonMerakiVPNPeer> nonMerakiVPNs;	// holds list of non-Meraki site-to-site VPN peers
 
 		// administrators
 		QVector<adminStruct> adminList;
