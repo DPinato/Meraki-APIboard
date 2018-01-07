@@ -172,6 +172,19 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 47: {
+			// GET /organizations/[organizationId]/licenseState
+			processLicenseQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			break;
+		}
+
+		case 48: {
+			// GET /organizations/[organizationId]/inventory
+			processOrgInventoryQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			break;
+		}
+
+
 
 	}
 
@@ -334,10 +347,10 @@ void APIHelper::processNetworkQuery(QJsonDocument doc) {
 }
 
 bool APIHelper::processLicenseQuery(QJsonDocument doc, int orgIndex) {
-	qDebug() << "\nAPIHelper::processLicenseQuery()";
+	qDebug() << "\nAPIHelper::processLicenseQuery(...), orgIndex: " << orgIndex;
 
 	if (doc.isNull()) {
-		qDebug() << "JSON IS NOT VALID";
+		qDebug() << "JSON IS NOT VALID, APIHelper::processLicenseQuery(...)";
 		return false;
 	}
 
@@ -360,7 +373,8 @@ bool APIHelper::processLicenseQuery(QJsonDocument doc, int orgIndex) {
 		parent->orgList[orgIndex]->setLicensePerDevice(tmpVar, i);
 	}
 
-	parent->updateOrgUI(orgIndex);
+//	parent->updateOrgUI(orgIndex);
+	parent->displayLicenseInfo(orgIndex);
 
 	return true;		// everything ok
 }
@@ -384,8 +398,8 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex) {
 
 	for (int i = 0; i < jArray.size(); i++) {
 		adminStruct tmpAdmin;	// this is here since it needs to completely reset at every iteration
-
 		QJsonObject jObj = jArray.at(i).toObject();
+
 		tmpAdmin.name = jObj["name"].toString();
 		tmpAdmin.email = jObj["email"].toString();
 		tmpAdmin.id = jObj["id"].toString();
@@ -411,6 +425,17 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex) {
 		}
 
 
+		// check if admin has camera-level permissions
+		QJsonArray jCamera = jObj["camera"].toArray();
+		for (int j = 0; j < jCamera.size(); j++) {
+			adminNetPermission tmpCamera;
+			tmpCamera.netID = jCamera.at(j).toObject()["id"].toString();
+			tmpCamera.accessLevel = jCamera.at(j).toObject()["access"].toString();
+			tmpCamera.networkType = jCamera.at(j).toObject()["network_type"].toString();
+			tmpAdmin.cNets.append(tmpCamera);
+		}
+
+
 		parent->orgList[orgIndex]->setAdmin(tmpAdmin, i);
 
 	}
@@ -418,7 +443,45 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex) {
 
 	parent->displayAdminStuff(orgIndex);
 
-	return true;	// everything went good
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
+	// process inventory for an organization
+	// GET /organizations/[organizationId]/inventory
+	qDebug() << "\nAPIHelper::processOrgInventoryQuery(...), orgIndex: " << orgIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgInventoryQuery(...)";
+		return false;
+	}
+
+
+	QJsonArray jArray = doc.array();
+	parent->orgList[orgIndex]->setOrgInventorySize(jArray.size());
+
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+	for (int i = 0; i < jArray.size(); i++) {
+		deviceInInventory tmpDevice;
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		tmpDevice.claimedAt = jObj["claimedAt"].toString();
+		tmpDevice.mac = jObj["mac"].toString();
+		tmpDevice.model = jObj["model"].toString();
+		tmpDevice.netID = jObj["networkId"].toString();
+		tmpDevice.publicIP = jObj["publicIp"].toString();
+		tmpDevice.serial = jObj["serial"].toString();
+
+		parent->orgList[orgIndex]->setOrgInventoryDevice(tmpDevice, i);
+
+	}
+
+	parent->displayInventory(orgIndex);
+
+	return true;	// everything went well
 
 }
 

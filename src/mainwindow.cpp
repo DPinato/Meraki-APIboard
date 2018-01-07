@@ -90,6 +90,9 @@ void MainWindow::updateOrgUI(int orgIndex) {
 
 
 	// show things in the GUI
+	ui->orgNameEdit->setText(orgList.at(orgIndex)->getOrgName());
+	ui->networkNameEdit->setText("");
+
 	currOrgIndex = orgIndex;
 	displayAdminStuff(orgIndex);
 	displayLicenseInfo(orgIndex);
@@ -136,10 +139,6 @@ void MainWindow::updateNetworkUI(QModelIndex &index) {
 }
 
 void MainWindow::displayAdminStuff(int orgIndex) {
-	// show stuff in the "Administration" tab
-	ui->orgNameEdit->setText(orgList.at(orgIndex)->getOrgName());
-	ui->networkNameEdit->setText("");
-
 	// show administrators in the table view
 	// columns are <name | email | org_privilege | admin_id | networks | tags>
 	QStandardItemModel *adminTree = new QStandardItemModel(orgList.at(orgIndex)->getAdminListSize(), 4, this);
@@ -161,25 +160,38 @@ void MainWindow::displayAdminStuff(int orgIndex) {
 
 
 		// display list of networks admin has access to, if this is a network admin
-//		if (orgList.at(orgIndex)->getAdmin(i).nets.size() > 0) {
+		// also display privileges of camera-only administrators
 			QStandardItemModel *adminTree2 = new QStandardItemModel(orgList.at(orgIndex)->getAdmin(i).nets.size(), 2, this);
 			adminTree2->setHeaderData(0, Qt::Horizontal, QString("Net ID"));
 			adminTree2->setHeaderData(1, Qt::Horizontal, QString("Access"));
 
-			for (int j = 0; j < tmpAdmin.nets.size(); j++) {
+			int j = 0;	// I think that a network admin can be a network admin and camera-only admin in different networks
+			for (j = 0; j < tmpAdmin.nets.size(); j++) {
 				adminNetPermission tmpPerm = tmpAdmin.nets.at(j);
 				adminTree2->setItem(j, 0, new QStandardItem(tmpPerm.netID));
 				adminTree2->setItem(j, 1, new QStandardItem(tmpPerm.accessLevel));
 			}
 
+			// for camera-only admins
+			if (tmpAdmin.cNets.size() > 0) {
+				adminTree2->setColumnCount(3);
+				adminTree2->setHeaderData(2, Qt::Horizontal, QString("network_type"));
+
+				for (j = j; j < tmpAdmin.cNets.size(); j++) {
+					adminNetPermission tmpCPerm = tmpAdmin.cNets.at(j);
+					adminTree2->setItem(j, 0, new QStandardItem(tmpCPerm.netID));
+					adminTree2->setItem(j, 1, new QStandardItem(tmpCPerm.accessLevel));
+					adminTree2->setItem(j, 2, new QStandardItem(tmpCPerm.networkType));
+				}
+			}
+
+
 			ui->adminsTableView_2->setModel(adminTree2);
 			ui->adminsTableView_2->resizeColumnsToContents();
 			ui->adminsTableView_2->resizeRowsToContents();
-//		}
 
 
 		// display list of tags assigned to administrator
-//		if (orgList.at(orgIndex)->getAdmin(i).tags.size() > 0) {
 			QStandardItemModel *adminTree3 = new QStandardItemModel(orgList.at(orgIndex)->getAdmin(i).tags.size(), 2, this);
 			adminTree3->setHeaderData(0, Qt::Horizontal, QString("Tag"));
 			adminTree3->setHeaderData(1, Qt::Horizontal, QString("Access"));
@@ -193,8 +205,6 @@ void MainWindow::displayAdminStuff(int orgIndex) {
 			ui->adminsTableView_3->setModel(adminTree3);
 			ui->adminsTableView_3->resizeColumnsToContents();
 			ui->adminsTableView_3->resizeRowsToContents();
-//		}
-
 
 
 	}
@@ -224,11 +234,34 @@ void MainWindow::displayLicenseInfo(int orgIndex) {
 
 void MainWindow::displayInventory(int orgIndex) {
 	// show devices in the inventory table
-	QStandardItemModel *inventoryModel = new QStandardItemModel(orgList.size(), 1, this);
-	inventoryModel->setHeaderData(0, Qt::Horizontal, QString(""));
+	QStandardItemModel *inventoryModel = new QStandardItemModel(orgList.at(orgIndex)->getOrgInventorySize(), 6, this);
+
+	// columns are <model | mac | serial | publicIp | claimedAt | networkId>
+	inventoryModel->setHeaderData(0, Qt::Horizontal, QString("model"));
+	inventoryModel->setHeaderData(1, Qt::Horizontal, QString("mac"));
+	inventoryModel->setHeaderData(2, Qt::Horizontal, QString("serial"));
+	inventoryModel->setHeaderData(3, Qt::Horizontal, QString("publicIp"));
+	inventoryModel->setHeaderData(4, Qt::Horizontal, QString("claimedAt"));
+	inventoryModel->setHeaderData(5, Qt::Horizontal, QString("networkId"));
 
 
+	// show stuff
+	for (int i = 0; i < orgList.at(orgIndex)->getOrgInventorySize(); i++) {
+		deviceInInventory tmpDevice = orgList.at(orgIndex)->getOrgInventoryDevice(i);
 
+		inventoryModel->setItem(i, 0, new QStandardItem(tmpDevice.model));
+		inventoryModel->setItem(i, 1, new QStandardItem(tmpDevice.mac));
+		inventoryModel->setItem(i, 2, new QStandardItem(tmpDevice.serial));
+		inventoryModel->setItem(i, 3, new QStandardItem(tmpDevice.publicIP));
+		inventoryModel->setItem(i, 4, new QStandardItem(tmpDevice.claimedAt));
+		inventoryModel->setItem(i, 5, new QStandardItem(tmpDevice.netID));
+
+	}
+
+
+	ui->orgInventoryView->setModel(inventoryModel);
+	ui->orgInventoryView->resizeColumnsToContents();
+	ui->orgInventoryView->resizeRowsToContents();
 
 }
 
@@ -327,7 +360,10 @@ void MainWindow::on_refreshOrgsButton_clicked() {
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index) {
+	// run the appropriate queries to show things in the GUI
 	qDebug() << "tab: " << index << "\t" << ui->tabWidget->tabText(index);
+	eventRequest tmp;
+	tmp.orgIndex = currOrgIndex;
 
 	switch (index) {
 		case 0: {
@@ -343,6 +379,12 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 
 		case 2: {
 			// Licensing / Inventory tab
+			tmp.urlListIndex = 47;	// GET /organizations/[organizationId]/licenseState
+			apiHelpObj->putEventInQueue(tmp);
+
+			tmp.urlListIndex = 48;
+			apiHelpObj->putEventInQueue(tmp);
+
 
 			break;
 		}
@@ -359,15 +401,31 @@ void MainWindow::on_adminsTableView_clicked(const QModelIndex &index) {
 
 
 	// display list of networks admin has access to, if this is a network admin
+	// also display privileges of camera-only administrators
 	QStandardItemModel *adminTree2 = new QStandardItemModel(tmpAdmin.nets.size(), 2, this);
 	adminTree2->setHeaderData(0, Qt::Horizontal, QString("Net ID"));
 	adminTree2->setHeaderData(1, Qt::Horizontal, QString("Access"));
 
+	int j = 0;
 	for (int j = 0; j < tmpAdmin.nets.size(); j++) {
 		adminNetPermission tmpPerm = tmpAdmin.nets.at(j);
 		adminTree2->setItem(j, 0, new QStandardItem(tmpPerm.netID));
 		adminTree2->setItem(j, 1, new QStandardItem(tmpPerm.accessLevel));
 	}
+
+	// for camera-only admins
+	if (tmpAdmin.cNets.size() > 0) {
+		adminTree2->setColumnCount(3);
+		adminTree2->setHeaderData(2, Qt::Horizontal, QString("network_type"));
+
+		for (j = j; j < tmpAdmin.cNets.size(); j++) {
+			adminNetPermission tmpCPerm = tmpAdmin.cNets.at(j);
+			adminTree2->setItem(j, 0, new QStandardItem(tmpCPerm.netID));
+			adminTree2->setItem(j, 1, new QStandardItem(tmpCPerm.accessLevel));
+			adminTree2->setItem(j, 2, new QStandardItem(tmpCPerm.networkType));
+		}
+	}
+
 
 	ui->adminsTableView_2->setModel(adminTree2);
 	ui->adminsTableView_2->resizeColumnsToContents();

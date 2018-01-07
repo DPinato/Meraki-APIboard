@@ -20,7 +20,7 @@ struct eventRequest {
 	int urlListIndex;		// which index in the urlList it corresponds to
 	int orgIndex;			// organization index in orgList
 	int netIndex;			// network index in the orgList object
-	QByteArray data;		// data to use in case of a PUT or POST
+	QByteArray data = 0;	// data to use in case of a PUT or POST
 
 	bool responseReceived = false;	// indicates whether a response for this request was received
 	bool responseProcessed = false;	// indicates whether this response was processed
@@ -43,6 +43,7 @@ public:
 	void processNetworkQuery(QJsonDocument doc);
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex);
+	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
 
 
 	// set

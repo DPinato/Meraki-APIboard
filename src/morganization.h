@@ -36,6 +36,7 @@ struct nonMerakiVPNPeer {
 struct adminNetPermission {
 	QString netID;			// ID of network in which admin has access to
 	QString accessLevel;	// level of access in network
+	QString networkType;	// an admin that has access only to all cameras in the org will get this fiels
 };
 
 struct adminTag {
@@ -49,8 +50,9 @@ struct adminStruct {
 	QString id;			// ID of administrator
 	QString orgAccess;	// level of organization permissions, "full" or "none"
 
-	QVector<adminNetPermission> nets;	// networks in which network admin has permissions on
-	QVector<adminTag> tags;				// tags associated with administrator
+	QVector<adminNetPermission> nets;		// networks in which network admin has permissions on
+	QVector<adminTag> tags;					// tags associated with administrator
+	QVector<adminNetPermission> cNets;		// level of permissions for camera-only administrators
 };
 
 
@@ -75,6 +77,8 @@ class MOrganization {
 		void setLicensePerDevice(licensesPerDevice a, int index);
 		void setAdminsNum(int n);
 		void setAdmin(adminStruct a, int index);
+		void setOrgInventorySize(int n);
+		void setOrgInventoryDevice(deviceInInventory a, int index);
 
 
 		// get
@@ -89,6 +93,8 @@ class MOrganization {
 		licensesPerDevice getLicensePerDevice(int index);
 		int getAdminListSize();
 		adminStruct getAdmin(int index);
+		int getOrgInventorySize();
+		deviceInInventory getOrgInventoryDevice(int index);
 
 
 		// debug

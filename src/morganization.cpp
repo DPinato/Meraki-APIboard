@@ -59,6 +59,14 @@ void MOrganization::setAdmin(adminStruct a, int index) {
 	adminList[index] = a;
 }
 
+void MOrganization::setOrgInventorySize(int n) {
+	orgInventory.resize(n);
+}
+
+void MOrganization::setOrgInventoryDevice(deviceInInventory a, int index) {
+	orgInventory[index] = a;
+}
+
 QString MOrganization::getOrgID() {
 	return id;
 }
@@ -101,6 +109,14 @@ int MOrganization::getAdminListSize() {
 
 adminStruct MOrganization::getAdmin(int index) {
 	return adminList.at(index);
+}
+
+int MOrganization::getOrgInventorySize() {
+	return orgInventory.size();
+}
+
+deviceInInventory MOrganization::getOrgInventoryDevice(int index) {
+	return orgInventory.at(index);
 }
 
 
