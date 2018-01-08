@@ -1,0 +1,22 @@
+API Notes:
+
+
+
+============== Administration
+- List the organizations that the user has privileges on
+- Return an organization
+- Update an organization
+- Create a new organization
+- Create a new organization by cloning the addressed organization
+- Claim a device, license key, or order into an organization. When claiming by order, all devices and licenses in the order will be claimed; licenses will be added to the organization and devices will be placed in the organization's inventory. These three types of claims are mutually exclusive and cannot be performed in one request.
+- Return the license state for an organization
+- Return the inventory for an organization
+- Return the SNMP settings for an organization
+- Update the SNMP settings for an organization
+- Return the third party VPN peers for an organization
+- Update the third party VPN peers for an organization
+
+
+
+============== MX
+

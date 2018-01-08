@@ -1,0 +1,128 @@
+﻿baseURL https://api.meraki.com/api/v0/
+
+# request_type URL
+GET /organizations/[organizationId]/admins
+POST /organizations/[organizationId]/admins
+PUT /organizations/[organizationId]/admins/[id]
+DELETE /organizations/[organizationId]/admins/[id]
+
+GET /devices/[serial]/clients
+GET /networks/[networkId]/clients/[client_mac]/policy
+PUT /networks/[networkId]/clients/[mac]/policy
+GET /networks/[networkId]/clients/[mac]/splashAuthorizationStatus
+PUT /networks/[networkId]/clients/[mac]/splashAuthorizationStatus
+
+GET /organizations/[organizationId]/configTemplates
+DELETE /organizations/[organizationId]/configTemplates/[id]
+
+GET /networks/[networkId]/devices
+GET /networks/[networkId]/devices/[serial]
+GET /networks/[networkId]/devices/[serial]/uplink
+PUT /networks/[networkId]/devices/[serial]
+POST /networks/[networkId]/devices/claim
+POST /networks/[networkId]/devices/[serial]/remove
+GET /networks/[networkId]/devices/[serial]/lldp_cdp
+
+GET /networks/[networkId]/cellularFirewallRules
+PUT /networks/[networkId]/cellularFirewallRules
+
+GET /networks/[networkId]/l3FirewallRules
+PUT /networks/[networkId]/l3FirewallRules
+
+GET /organizations/[organizationId]/vpnFirewallRules
+PUT /organizations/[organizationId]/vpnFirewallRules
+
+GET /networks/[networkId]/ssids/[number]/l3FirewallRules
+PUT /networks/[networkId]/ssids/[number]/l3FirewallRules
+
+GET /networks/[networkId]/groupPolicies
+
+GET /organizations/[organizationId]/networks
+GET /networks/[networkId]
+PUT /networks/[networkId]
+POST /organizations/[organizationId]/networks
+DELETE /networks/[networkId]
+POST /networks/[networkId]/bind
+POST /networks/[networkId]/unbind
+GET /networks/[networkId]/siteToSiteVpn
+PUT /networks/[networkId]/siteToSiteVpn
+GET /networks/[networkId]/traffic
+GET /networks/[networkId]/accessPolicies
+GET /networks/[networkId]/airMarshal
+GET /networks/[networkId]/bluetoothSettings
+PUT /networks/[networkId]/bluetoothSettings
+
+GET /organizations
+GET /organizations/[organizationId]
+PUT /organizations/[organizationId]
+POST /organizations
+POST /organizations/[organizationId]/clone
+POST /organizations/[organizationId]/claim
+GET /organizations/[organizationId]/licenseState
+GET /organizations/[organizationId]/inventory
+GET /organizations/[organizationId]/snmp
+PUT /organizations/[organizationId]/snmp
+GET /organizations/[organizationId]/thirdPartyVPNPeers
+PUT /organizations/[organizationId]/thirdPartyVPNPeers
+
+GET /networks/[networkId]/phoneAssignments
+GET /networks/[networkId]/phoneAssignments/[serial]
+PUT /networks/[networkId]/phoneAssignments/[serial]
+DELETE /networks/[networkId]/phoneAssignments/[serial]
+
+GET /networks/[networkId]/phoneContacts
+POST /networks/[networkId]/phoneContacts
+PUT /networks/[networkId]/phoneContacts/[contactId]
+DELETE /networks/[networkId]/phoneContacts/[contactId]
+
+GET /networks/[networkId]/phoneNumbers
+GET /networks/[networkId]/phoneNumbers/available
+
+GET /organizations/[organizationId]/samlRoles
+GET /organizations/[organizationId]/samlRoles/[id]
+PUT /organizations/[organizationId]/samlRoles/[id]
+POST /organizations/[organizationId]/samlRoles
+DELETE /organizations/[organizationId]/samlRoles/[id]
+
+POST /networks/[networkId]/sm/profile/clarity
+PUT /networks/[networkId]/sm/profile/clarity/[profileId]
+POST /networks/[networkId]/sm/profile/clarity/[profileId]
+GET /networks/[networkId]/sm/profile/clarity/[profileId]
+DELETE /networks/[networkId]/sm/profile/clarity/[profileId]
+POST /networks/[networkId]/sm/profile/umbrella
+PUT /networks/[networkId]/sm/profile/umbrella/[profileId]
+POST /networks/[networkId]/sm/profile/umbrella/[profileId]
+GET /networks/[networkId]/sm/profile/umbrella/[profileId]
+DELETE /networks/[networkId]/sm/profile/umbrella/[profileId]
+POST /networks/[networkId]/sm/app/polaris
+PUT /networks/[networkId]/sm/app/polaris/[appId]
+GET /networks/[networkId]/sm/app/polaris
+DELETE /networks/[networkId]/sm/app/polaris/[appId]
+GET /networks/[networkId]/sm/devices
+PUT /networks/[networkId]/sm/devices/tags
+PUT /networks/[networkId]/sm/device/fields
+PUT /networks/[networkId]/sm/devices/lock
+PUT /networks/[networkId]/sm/device/wipe
+PUT /networks/[networkId]/sm/devices/checkin
+PUT /networks/[networkId]/sm/devices/move
+GET /networks/[networkId]/sm/profiles
+
+GET /networks/[networkId]/ssids
+GET /networks/[networkId]/ssids/[number]
+PUT /networks/[networkId]/ssids/[number]
+
+GET /devices/[serial]/switchPorts
+GET /devices/[serial]/switchPorts/[number]
+PUT /devices/[serial]/switchPorts/[number]
+
+GET /networks/[networkId]/staticRoutes
+GET /networks/[networkId]/staticRoutes/[srId]
+PUT /networks/[networkId]/staticRoutes/[srId]
+POST /networks/[networkId]/staticRoutes
+DELETE /networks/[networkId]/staticRoutes/[srId]
+
+GET /networks/[networkId]/vlans
+GET /networks/[networkId]/vlans/[vlanId]
+PUT /networks/[networkId]/vlans/[vlanId]
+POST /networks/[networkId]/vlans
+DELETE /networks/[networkId]/vlans/[id]
