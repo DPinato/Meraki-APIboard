@@ -67,6 +67,14 @@ void MOrganization::setOrgInventoryDevice(deviceInInventory a, int index) {
 	orgInventory[index] = a;
 }
 
+void MOrganization::setSwitchPortNum(int devIndex, int n) {
+	orgInventory[devIndex].ports.resize(n);
+}
+
+void MOrganization::setSwitchPort(int devIndex, switchPort s, int index) {
+	orgInventory[devIndex].ports[index] = s;
+}
+
 void MOrganization::setOrgSNMPSettings(orgSNMP s) {
 	snmpSettings = s;
 }
@@ -135,6 +143,28 @@ deviceInInventory MOrganization::getOrgInventoryDevice(int index) {
 	return orgInventory.at(index);
 }
 
+deviceInInventory MOrganization::getOrgDeviceFromSerial(QString serial) {
+	// use the serial number to find a particular device in the org inventory
+	// return a null deviceInInventory if no device was found
+	for (int i = 0; i < orgInventory.size(); i++) {
+		if (orgInventory.at(i).serial == serial) {
+			return orgInventory.at(i);
+		}
+	}
+
+	// no device was found
+	return deviceInInventory{"-1","-1","-1","-1","-1","-1"};
+
+}
+
+int MOrganization::getSwitchPortNum(int devIndex) {
+	return orgInventory.at(devIndex).ports.size();
+}
+
+switchPort MOrganization::getSwitchport(int devIndex, int index) {
+	return orgInventory.at(devIndex).ports.at(index);
+}
+
 orgSNMP MOrganization::getOrgSNMPSettings() {
 	return snmpSettings;
 }
@@ -145,6 +175,20 @@ int MOrganization::getOrgVPNPeerNum() {
 
 nonMerakiVPNPeer MOrganization::getOrgVPNPeer(int index) {
 	return nonMerakiVPNs.at(index);
+}
+
+int MOrganization::getIndexOfInventoryDevice(QString serial) {
+	// given the serial number of a device, returns the index of it in the inventory vector
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < orgInventory.size(); i++) {
+		if (orgInventory.at(i).serial == serial) {
+			return i;
+		}
+	}
+
+	// no device was found
+	return -1;
+
 }
 
 

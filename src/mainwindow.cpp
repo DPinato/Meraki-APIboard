@@ -30,10 +30,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	currOrgIndex = -1;
 
-//	apiHelpObj->runQuery(41);	// GET /organizations
-//	apiHelpObj->putEventInQueue(eventRequest{49, 0, -1, 0});	// GET /organizations/[organizationId]/snmp
 
-//	updateUI(-1);		// show the networks in the tree
+
+	on_refreshOrgsButton_clicked();
+
+
 
 }
 
@@ -321,17 +322,147 @@ void MainWindow::displayOrgVPN(int orgIndex) {
 		ui->nonMVPNCheck->setChecked(true);
 		on_nonMVPNCheck_clicked(true);
 
-		for (int i = 0; i < orgList.at(orgIndex)->getOrgVPNPeerNum(); i++) {
-			ui->nonMVPNPeersMenu->insertItem(i, orgList.at(orgIndex)->getOrgVPNPeer(i).peerName);
-		}
+		qDebug() << orgList.at(orgIndex)->getOrgVPNPeerNum()
+				 << "\t" << ui->nonMVPNPeersMenu->count();
 
-//		on_nonMVPNPeersMenu_currentIndexChanged(0);		// show the first item and update all the GUI
+		ui->nonMVPNPeersMenu->clear();	// remove all the items from QComboBox
+
+		// TODO: for some reason this makes QComboBox go out of bounds
+//		for (int i = 0; i < orgList.at(orgIndex)->getOrgVPNPeerNum(); i++) {
+//			qDebug() << "i: " << i;
+//			ui->nonMVPNPeersMenu->addItem(orgList.at(orgIndex)->getOrgVPNPeer(i).peerName);
+//		}
+
+
+		on_nonMVPNPeersMenu_currentIndexChanged(0);		// show the first item and update all the GUI
+
 
 	} else {
 		ui->nonMVPNCheck->setChecked(false);
 		on_nonMVPNCheck_clicked(false);
 		ui->nonMVPNPeersMenu->clear();
+
 	}
+
+}
+
+void MainWindow::displayMSInfo(int orgIndex, int netIndex) {
+	// show switches in the MS GUI tab
+	// if netIndex is -1, show all the switches in the organization
+	// otherwise only show switches in that network
+	qDebug() << "\nMainWindow::displayMSInfo, orgIndex: " << orgIndex << "\tnetIndex: " << netIndex;
+
+	// count switches
+	int count = 0;
+
+	for (int i = 0; i < orgList.at(orgIndex)->getOrgInventorySize(); i++) {
+		deviceInInventory tmp = orgList.at(orgIndex)->getOrgInventoryDevice(i);
+
+		if (tmp.model.contains("MS")) {
+			if (netIndex != -1 && orgList.at(orgIndex)->getNetwork(netIndex).netID == tmp.netID) {
+				// check if the MS is in the appropriate network
+				// the first condition will also avoid getting the element at index -1
+				count++;
+			} else if (netIndex == -1) {
+				count++;
+			}
+		}
+	}
+
+	qDebug() << "count: " << count;
+	if (count == 0) { return; }
+
+
+	msListModel = new QStandardItemModel(count, 5, this);
+
+	// columns are | MAC | Model | Serial | public IP | network |
+	msListModel->setHeaderData(0, Qt::Horizontal, QString("MAC"));
+	msListModel->setHeaderData(1, Qt::Horizontal, QString("Model"));
+	msListModel->setHeaderData(2, Qt::Horizontal, QString("Serial"));
+	msListModel->setHeaderData(3, Qt::Horizontal, QString("Public IP"));
+	msListModel->setHeaderData(4, Qt::Horizontal, QString("Network"));
+
+
+	// show stuff
+	count = 0;
+	for (int i = 0; i < orgList.at(orgIndex)->getOrgInventorySize(); i++) {
+		deviceInInventory tmp = orgList.at(orgIndex)->getOrgInventoryDevice(i);
+
+		if (tmp.model.contains("MS")) {
+			if (netIndex != -1 && orgList.at(orgIndex)->getNetwork(netIndex).netID == tmp.netID) {
+				msListModel->setItem(count, 0, new QStandardItem(tmp.mac));
+				msListModel->setItem(count, 1, new QStandardItem(tmp.model));
+				msListModel->setItem(count, 2, new QStandardItem(tmp.serial));
+				msListModel->setItem(count, 3, new QStandardItem(tmp.publicIP));
+				msListModel->setItem(count, 4, new QStandardItem(tmp.netID));
+				count++;
+
+			} else if (netIndex == -1) {
+				msListModel->setItem(count, 0, new QStandardItem(tmp.mac));
+				msListModel->setItem(count, 1, new QStandardItem(tmp.model));
+				msListModel->setItem(count, 2, new QStandardItem(tmp.serial));
+				msListModel->setItem(count, 3, new QStandardItem(tmp.publicIP));
+				msListModel->setItem(count, 4, new QStandardItem(tmp.netID));
+				count++;
+
+			}
+		}
+	}
+
+	ui->msSwitchesTable->setModel(msListModel);
+	ui->msSwitchesTable->resizeColumnsToContents();
+	ui->msSwitchesTable->resizeRowsToContents();
+
+}
+
+void MainWindow::displayMSPort(int devIndex, int orgIndex) {
+	// show switch port status of the device at devIndex
+	qDebug() << "\nMainWindow::displayMSPort, orgIndex: " << orgIndex << "\tdevIndex: " << devIndex;
+
+	int portCount = orgList.at(orgIndex)->getOrgInventoryDevice(devIndex).ports.size();
+	msPortListModel = new QStandardItemModel(portCount, 13, this);
+
+	// columns are | MAC | Model | Serial | public IP | network |
+	msPortListModel->setHeaderData(0, Qt::Horizontal, QString("number"));
+	msPortListModel->setHeaderData(1, Qt::Horizontal, QString("name"));
+	msPortListModel->setHeaderData(2, Qt::Horizontal, QString("tags"));
+	msPortListModel->setHeaderData(3, Qt::Horizontal, QString("enabled"));
+	msPortListModel->setHeaderData(4, Qt::Horizontal, QString("poeEnabled"));
+	msPortListModel->setHeaderData(5, Qt::Horizontal, QString("type"));
+	msPortListModel->setHeaderData(6, Qt::Horizontal, QString("vlan"));
+	msPortListModel->setHeaderData(7, Qt::Horizontal, QString("voiceVlan"));
+	msPortListModel->setHeaderData(8, Qt::Horizontal, QString("allowedVlans"));
+	msPortListModel->setHeaderData(9, Qt::Horizontal, QString("isolationEnabled"));
+	msPortListModel->setHeaderData(10, Qt::Horizontal, QString("rstpEnabled"));
+	msPortListModel->setHeaderData(11, Qt::Horizontal, QString("stpGuard"));
+	msPortListModel->setHeaderData(12, Qt::Horizontal, QString("accessPolicyNumber"));
+
+	// | number | name | tags | enabled | poeEnabled | type | vlan | voiceVlan | allowedVlans | isolationEnabled |
+	// | rstpEnabled | stpGuard | accessPolicyNumber
+	for (int i = 0; i < portCount; i++) {
+		deviceInInventory tmpDevice = orgList.at(orgIndex)->getOrgInventoryDevice(devIndex);
+
+		msPortListModel->setItem(i, 0, new QStandardItem(tmpDevice.ports.at(i).number));
+		msPortListModel->setItem(i, 1, new QStandardItem(tmpDevice.ports.at(i).name));
+		msPortListModel->setItem(i, 2, new QStandardItem(tmpDevice.ports.at(i).tags));
+		msPortListModel->setItem(i, 3, new QStandardItem(tmpDevice.ports.at(i).enabled));
+		msPortListModel->setItem(i, 4, new QStandardItem(tmpDevice.ports.at(i).poeEnabled));
+		msPortListModel->setItem(i, 5, new QStandardItem(tmpDevice.ports.at(i).type));
+		msPortListModel->setItem(i, 6, new QStandardItem(tmpDevice.ports.at(i).nativeVlan));
+		msPortListModel->setItem(i, 7, new QStandardItem(tmpDevice.ports.at(i).voiceVlan));
+		msPortListModel->setItem(i, 8, new QStandardItem(tmpDevice.ports.at(i).allowedVLANs));
+		msPortListModel->setItem(i, 9, new QStandardItem(tmpDevice.ports.at(i).isolationEnabled));
+		msPortListModel->setItem(i, 10, new QStandardItem(tmpDevice.ports.at(i).rstpEnabled));
+		msPortListModel->setItem(i, 11, new QStandardItem(tmpDevice.ports.at(i).stpGuard));
+		msPortListModel->setItem(i, 12, new QStandardItem(tmpDevice.ports.at(i).accessPolicyNumber));
+
+	}
+
+
+	ui->msSwitchPortsTable->setModel(msPortListModel);
+	ui->msSwitchPortsTable->resizeColumnsToContents();
+	ui->msSwitchPortsTable->resizeRowsToContents();
+
 
 }
 
@@ -363,9 +494,6 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 		tmp.netIndex = -1;
 		tmp.urlListIndex = 27;	// get networks in the org
 		apiHelpObj->putEventInQueue(tmp);	// get networks in the org
-
-		tmp.urlListIndex = 0;	// get admins in the org
-		apiHelpObj->putEventInQueue(tmp);
 
 
 //		apiHelpObj->runQuery(27, tmpOrgIndex, tmpNetIndex);	// get networks in the org
@@ -439,6 +567,9 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 	switch (index) {
 		case 0: {
 			// Administration tab
+			tmp.urlListIndex = 0;	// GET /organizations/[organizationId]/admins
+			apiHelpObj->putEventInQueue(tmp);
+
 			break;
 		}
 
@@ -462,6 +593,22 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 			tmp.urlListIndex = 48;	// GET /organizations/[organizationId]/inventory
 			apiHelpObj->putEventInQueue(tmp);
 			break;
+		}
+
+		case 3: {
+			// MS tab, show switches in the inventory
+			if (orgList.at(currOrgIndex)->getOrgInventorySize() == 0) {
+				// org inventory is empty, fetch it
+				tmp.urlListIndex = 48;	// GET /organizations/[organizationId]/inventory
+				apiHelpObj->putEventInQueue(tmp);
+			}
+
+			displayMSInfo(currOrgIndex);
+
+
+
+
+
 		}
 
 	}
@@ -583,4 +730,22 @@ void MainWindow::on_snmpPrivPassCheck_clicked(bool checked) {
 	} else {
 		ui->snmpPrivPassEdit->setEchoMode(QLineEdit::Password);
 	}
+}
+
+void MainWindow::on_msSwitchesTable_clicked(const QModelIndex &index) {
+	// display switch port information of the appropriate switch
+	qDebug() << "\nMainWindow::on_msSwitchesTable_clicked(), row: " << index.row();
+	qDebug() << msListModel->item(index.row(), 2)->text();
+
+
+	deviceInInventory tmpDev = orgList.at(currOrgIndex)->getOrgDeviceFromSerial(msListModel->item(index.row(), 2)->text());
+
+	// run query to get info for switch ports
+	eventRequest tmp;
+	tmp.orgIndex = currOrgIndex;
+	tmp.urlListIndex = 93;	// GET /devices/[serial]/switchPorts
+	tmp.deviceSerial = tmpDev.serial;
+	apiHelpObj->putEventInQueue(tmp);
+
+
 }

@@ -17,10 +17,11 @@ class MOrganization;
 
 struct eventRequest {
 	// used to maintain a queue for HTTP requests to make
-	int urlListIndex;		// which index in the urlList it corresponds to
-	int orgIndex;			// organization index in orgList
-	int netIndex;			// network index in the orgList object
-	QByteArray data = 0;	// data to use in case of a PUT or POST
+	int urlListIndex;			// which index in the urlList it corresponds to
+	int orgIndex;				// organization index in orgList
+	int netIndex;				// network index in the orgList object
+	QString deviceSerial = "";	// in case the query is specific to a particular device, i.e. a switch
+	QByteArray data = 0;		// data to use in case of a PUT or POST
 
 	bool responseReceived = false;	// indicates whether a response for this request was received
 	bool responseProcessed = false;	// indicates whether this response was processed
@@ -46,6 +47,7 @@ public:
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
+	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 
 
 	// set

@@ -50,6 +50,8 @@ public:
 	void displayInventory(int orgIndex);
 	void displayOrgSNMP(int orgIndex);
 	void displayOrgVPN(int orgIndex);
+	void displayMSInfo(int orgIndex, int netIndex = -1);
+	void displayMSPort(int devIndex, int orgIndex);
 
 
 
@@ -77,7 +79,9 @@ private slots:
 	void on_snmpAuthPassCheck_clicked(bool checked);
 	void on_snmpPrivPassCheck_clicked(bool checked);
 
-private:
+	void on_msSwitchesTable_clicked(const QModelIndex &index);
+
+	private:
 	Ui::MainWindow *ui;
 
 	QString apiKey;			// file holding the API key being used
@@ -93,6 +97,10 @@ private:
 //	QVector<QString> orgName;
 //	QVector<QString> samlURL;
 //	QVector<QList<QString>> samlURLs;
+
+	// TODO: every time the display functions are called, these are initialised again, fix this
+	QStandardItemModel *msListModel;		// to show list of switches
+	QStandardItemModel *msPortListModel;	// to show list of ports of a particular switch
 
 
 };

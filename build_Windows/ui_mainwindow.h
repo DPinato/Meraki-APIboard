@@ -101,8 +101,15 @@ public:
     QLineEdit *orgNameEdit_2;
     QPushButton *nonMVPNAddPeerButton_3;
     QPushButton *refreshOrgsButton_2;
-    QWidget *tab_2;
+    QLabel *label_44;
+    QTextBrowser *missingLicensesBrowser;
     QWidget *tab_3;
+    QLabel *label_45;
+    QLineEdit *msNetworkEdit;
+    QTableView *msSwitchesTable;
+    QTableView *msSwitchPortsTable;
+    QPushButton *msRefreshButton;
+    QWidget *tab_2;
     QWidget *tab_4;
     QWidget *tab_5;
     QWidget *tab_6;
@@ -136,7 +143,7 @@ public:
         tab->setObjectName(QStringLiteral("tab"));
         label_2 = new QLabel(tab);
         label_2->setObjectName(QStringLiteral("label_2"));
-        label_2->setGeometry(QRect(10, 10, 101, 16));
+        label_2->setGeometry(QRect(10, 10, 101, 21));
         orgNameEdit = new QLineEdit(tab);
         orgNameEdit->setObjectName(QStringLiteral("orgNameEdit"));
         orgNameEdit->setGeometry(QRect(120, 10, 191, 21));
@@ -149,7 +156,7 @@ public:
         adSnapshotButton->setGeometry(QRect(110, 430, 91, 31));
         label_19 = new QLabel(tab);
         label_19->setObjectName(QStringLiteral("label_19"));
-        label_19->setGeometry(QRect(10, 40, 101, 16));
+        label_19->setGeometry(QRect(10, 40, 101, 21));
         networkNameEdit = new QLineEdit(tab);
         networkNameEdit->setObjectName(QStringLiteral("networkNameEdit"));
         networkNameEdit->setGeometry(QRect(120, 40, 191, 21));
@@ -300,7 +307,7 @@ public:
         label_4->setGeometry(QRect(10, 40, 81, 21));
         licenseDevicesBrowser = new QTextBrowser(tab_15);
         licenseDevicesBrowser->setObjectName(QStringLiteral("licenseDevicesBrowser"));
-        licenseDevicesBrowser->setGeometry(QRect(300, 10, 121, 101));
+        licenseDevicesBrowser->setGeometry(QRect(300, 10, 101, 101));
         label_5 = new QLabel(tab_15);
         label_5->setObjectName(QStringLiteral("label_5"));
         label_5->setGeometry(QRect(10, 110, 121, 16));
@@ -333,13 +340,35 @@ public:
         refreshOrgsButton_2 = new QPushButton(tab_15);
         refreshOrgsButton_2->setObjectName(QStringLiteral("refreshOrgsButton_2"));
         refreshOrgsButton_2->setGeometry(QRect(230, 10, 51, 21));
+        label_44 = new QLabel(tab_15);
+        label_44->setObjectName(QStringLiteral("label_44"));
+        label_44->setGeometry(QRect(440, 10, 81, 21));
+        missingLicensesBrowser = new QTextBrowser(tab_15);
+        missingLicensesBrowser->setObjectName(QStringLiteral("missingLicensesBrowser"));
+        missingLicensesBrowser->setGeometry(QRect(530, 10, 101, 101));
         tabWidget->addTab(tab_15, QString());
+        tab_3 = new QWidget();
+        tab_3->setObjectName(QStringLiteral("tab_3"));
+        label_45 = new QLabel(tab_3);
+        label_45->setObjectName(QStringLiteral("label_45"));
+        label_45->setGeometry(QRect(10, 10, 51, 21));
+        msNetworkEdit = new QLineEdit(tab_3);
+        msNetworkEdit->setObjectName(QStringLiteral("msNetworkEdit"));
+        msNetworkEdit->setGeometry(QRect(60, 10, 191, 21));
+        msNetworkEdit->setMaxLength(30);
+        msSwitchesTable = new QTableView(tab_3);
+        msSwitchesTable->setObjectName(QStringLiteral("msSwitchesTable"));
+        msSwitchesTable->setGeometry(QRect(10, 40, 631, 141));
+        msSwitchPortsTable = new QTableView(tab_3);
+        msSwitchPortsTable->setObjectName(QStringLiteral("msSwitchPortsTable"));
+        msSwitchPortsTable->setGeometry(QRect(10, 190, 631, 221));
+        msRefreshButton = new QPushButton(tab_3);
+        msRefreshButton->setObjectName(QStringLiteral("msRefreshButton"));
+        msRefreshButton->setGeometry(QRect(590, 10, 51, 21));
+        tabWidget->addTab(tab_3, QString());
         tab_2 = new QWidget();
         tab_2->setObjectName(QStringLiteral("tab_2"));
         tabWidget->addTab(tab_2, QString());
-        tab_3 = new QWidget();
-        tab_3->setObjectName(QStringLiteral("tab_3"));
-        tabWidget->addTab(tab_3, QString());
         tab_4 = new QWidget();
         tab_4->setObjectName(QStringLiteral("tab_4"));
         tabWidget->addTab(tab_4, QString());
@@ -382,7 +411,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(3);
         adminTabWidget->setCurrentIndex(0);
 
 
@@ -477,9 +506,13 @@ public:
         orgNameEdit_2->setPlaceholderText(QApplication::translate("MainWindow", "New organization name", nullptr));
         nonMVPNAddPeerButton_3->setText(QApplication::translate("MainWindow", "Clone", nullptr));
         refreshOrgsButton_2->setText(QApplication::translate("MainWindow", "Refresh", nullptr));
+        label_44->setText(QApplication::translate("MainWindow", "Missing licenses:", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_15), QApplication::translate("MainWindow", "Licensing / Inventory", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "MX", nullptr));
+        label_45->setText(QApplication::translate("MainWindow", "Network", nullptr));
+        msNetworkEdit->setText(QApplication::translate("MainWindow", "123456789012345678901234567890", nullptr));
+        msRefreshButton->setText(QApplication::translate("MainWindow", "Refresh", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_3), QApplication::translate("MainWindow", "MS", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("MainWindow", "MX", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_4), QApplication::translate("MainWindow", "MR", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_5), QApplication::translate("MainWindow", "MV", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_6), QApplication::translate("MainWindow", "MC", nullptr));

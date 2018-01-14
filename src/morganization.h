@@ -17,6 +17,22 @@ struct licensesPerDevice {
 	int count;				// licenses available for the device type
 };
 
+struct switchPort {
+	int number;
+	QString name;
+	QString tags;			// tags assigned to port, returned as a single string, not as an array
+	bool enabled;
+	bool poeEnabled;
+	QString type;
+	int nativeVlan;
+	int voiceVlan;
+	QString allowedVLANs;	// allowed VLANs, returned as a single string, not as an array
+	bool isolationEnabled;
+	bool rstpEnabled;
+	QString stpGuard;
+	QString accessPolicyNumber;		// what is this? maybe when a port is set to Access
+};
+
 struct deviceInInventory {
 	QString mac;			// MAC address of device
 	QString serial;			// serial number of device
@@ -24,6 +40,8 @@ struct deviceInInventory {
 	QString model;			// device model
 	QString claimedAt;		// when the device was claimed
 	QString publicIP;		// public IP address of device
+
+	QVector<switchPort> ports;	// contains info regarding ports of a switch (in case device is a switch)
 };
 
 struct nonMerakiVPNPeer {
@@ -96,6 +114,9 @@ class MOrganization {
 		void setAdmin(adminStruct a, int index);
 		void setOrgInventorySize(int n);
 		void setOrgInventoryDevice(deviceInInventory a, int index);
+		void setSwitchPortNum(int devIndex, int n);
+		void setSwitchPort(int devIndex, switchPort s, int index);
+
 		void setOrgSNMPSettings(orgSNMP s);
 		void setOrgVPNPeerNum(int n);
 		void setOrgVPNPeer(nonMerakiVPNPeer p, int index);
@@ -115,9 +136,17 @@ class MOrganization {
 		adminStruct getAdmin(int index);
 		int getOrgInventorySize();
 		deviceInInventory getOrgInventoryDevice(int index);
+		deviceInInventory getOrgDeviceFromSerial(QString serial);
+		int getSwitchPortNum(int devIndex);
+		switchPort getSwitchport(int devIndex, int index);
 		orgSNMP getOrgSNMPSettings();
 		int getOrgVPNPeerNum();
 		nonMerakiVPNPeer getOrgVPNPeer(int index);
+
+
+		// functions to help navigating lists and vectors
+		int getIndexOfInventoryDevice(QString serial);
+
 
 
 		// debug

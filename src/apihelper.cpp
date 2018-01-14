@@ -87,17 +87,16 @@ void APIHelper::runQuery(eventRequest e) {
 	// data is needed for POST and PUT
 	// this function can only be used for queries that need org ID and network ID, no others
 	qDebug() << "\nAPIHelper::runQuery(), queryID: " << e.urlListIndex;
-	QString queryURL;
+	QString queryURL = urlList.at(e.urlListIndex).url;
 
+
+	// prepare the right part of the URL
 	if (e.orgIndex != -1) {
 		// put the organization ID in the URL
-		queryURL = urlList.at(e.urlListIndex).url;
 		qDebug() << queryURL.indexOf(QString("[organizationId]"));
 		queryURL = queryURL.replace(queryURL.indexOf(QString("[organizationId]"))
 									, QString("[organizationId]").length()
 									, parent->orgList.at(e.orgIndex)->getOrgID());
-
-		queryURL.insert(0, baseURL);
 	}
 
 	if (e.netIndex != -1) {
@@ -105,9 +104,24 @@ void APIHelper::runQuery(eventRequest e) {
 
 	}
 
-	if (e.orgIndex == -1 && e.netIndex == -1) {
-		queryURL = QString(baseURL.left(baseURL.length()-1) + urlList.at(e.urlListIndex).url);
+	if (e.deviceSerial != "") {
+		// put the device serial number in the URL
+		qDebug() << queryURL.indexOf(QString("[serial]"));
+		queryURL = queryURL.replace(queryURL.indexOf(QString("[serial]"))
+									, QString("[serial]").length()
+									, e.deviceSerial);
+
 	}
+
+	if (e.orgIndex == -1 && e.netIndex == -1) {
+		// these kinds of queries will return info for multiple organizations at once, i.e. queryID 41
+//		queryURL = QString(baseURL.left(baseURL.length()-1) + urlList.at(e.urlListIndex).url);
+	}
+
+
+	// insert the beginning of the URL
+	// note that this will have 2 /, QUrl does not seem to care though
+	queryURL.insert(0, baseURL);
 
 	qDebug() << queryURL;
 
@@ -196,6 +210,13 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 93: {
+			// GET /devices/[serial]/switchPorts
+			processSwitchPortQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+								   , queueEventRequests.at(eventIndex).deviceSerial);
+			break;
+		}
+
 	}
 
 
@@ -234,9 +255,9 @@ void APIHelper::putEventInQueue(eventRequest e, bool force) {
 	// DEBUG
 	for (int i = 0; i < queueEventRequests.size(); i++) {
 		qDebug() << "Event " << i << "\t"
-				 << queueEventRequests.at(i).urlListIndex << "\t"
-				 << queueEventRequests.at(i).orgIndex << "\t"
-				 << queueEventRequests.at(i).netIndex;
+				 << queueEventRequests.at(i).urlListIndex
+				 << "\torg: " << queueEventRequests.at(i).orgIndex
+				 << "\tnet: " << queueEventRequests.at(i).netIndex;
 	}
 
 }
@@ -588,6 +609,64 @@ bool APIHelper::processOrgVPNQuery(QJsonDocument doc, int orgIndex) {
 
 	return true;	// everything went ok
 
+}
+
+bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial) {
+	qDebug() << "\nAPIHelper::processSwitchPortQuery(...), orgIndex: "
+			 << orgIndex << "\tdevSerial" << devSerial;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgVPNQuery(...)";
+		return false;
+	}
+
+
+	QJsonArray jArray = doc.array();
+	parent->orgList[orgIndex]->setOrgVPNPeerNum(jArray.size());
+
+	qDebug() << jArray << "\t" << jArray.size();
+
+	// get the index of the device in the organization inventory
+	deviceInInventory tmpDevice = parent->orgList.at(orgIndex)->getOrgDeviceFromSerial(devSerial);
+	int devIndex = parent->orgList.at(orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
+	parent->orgList.at(orgIndex)->setSwitchPortNum(devIndex, jArray.size());
+
+
+	if (devIndex == -1) {
+		qDebug() << "Could not find " << devSerial << " in orgIndex " << orgIndex;
+		return false;
+	}
+
+	qDebug() << devSerial << " is at index: " << devIndex;
+
+	// get switch ports info in the appropriate organization device
+	for (int i = 0; i < jArray.size(); i++) {
+		switchPort tmpPort;
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		tmpPort.number = jObj["number"].toInt();
+		tmpPort.name = jObj["name"].toString();
+		tmpPort.tags = jObj["tags"].toString();
+		tmpPort.enabled = jObj["enabled"].toBool();
+		tmpPort.poeEnabled = jObj["poeEnabled"].toBool();
+		tmpPort.type = jObj["type"].toString();
+		tmpPort.nativeVlan = jObj["vlan"].toInt();
+		tmpPort.voiceVlan = jObj["voiceVlan"].toInt();
+		tmpPort.allowedVLANs = jObj["allowedVlans"].toString();
+		tmpPort.isolationEnabled = jObj["isolationEnabled"].toBool();
+		tmpPort.rstpEnabled = jObj["rstpEnabled"].toBool();
+		tmpPort.stpGuard = jObj["stpGuard"].toString();
+		tmpPort.accessPolicyNumber = jObj["accessPolicyNumber"].toString();
+
+		parent->orgList.at(orgIndex)->setSwitchPort(devIndex, tmpPort, i);
+
+	}
+
+
+	// display things in the table
+	parent->displayMSPort(devIndex, orgIndex);
+
+	return true;	// everything went ok
 
 }
 

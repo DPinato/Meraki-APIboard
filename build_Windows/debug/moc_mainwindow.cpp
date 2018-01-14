@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[19];
-    char stringdata0[388];
+    QByteArrayData data[20];
+    char stringdata0[415];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -49,7 +49,8 @@ QT_MOC_LITERAL(14, 233, 26), // "on_adminsTableView_clicked"
 QT_MOC_LITERAL(15, 260, 39), // "on_nonMVPNPeersMenu_currentIn..."
 QT_MOC_LITERAL(16, 300, 29), // "on_nonMVPNSecretCheck_clicked"
 QT_MOC_LITERAL(17, 330, 28), // "on_snmpAuthPassCheck_clicked"
-QT_MOC_LITERAL(18, 359, 28) // "on_snmpPrivPassCheck_clicked"
+QT_MOC_LITERAL(18, 359, 28), // "on_snmpPrivPassCheck_clicked"
+QT_MOC_LITERAL(19, 388, 26) // "on_msSwitchesTable_clicked"
 
     },
     "MainWindow\0replyFinished\0\0QNetworkReply*\0"
@@ -63,7 +64,8 @@ QT_MOC_LITERAL(18, 359, 28) // "on_snmpPrivPassCheck_clicked"
     "on_nonMVPNPeersMenu_currentIndexChanged\0"
     "on_nonMVPNSecretCheck_clicked\0"
     "on_snmpAuthPassCheck_clicked\0"
-    "on_snmpPrivPassCheck_clicked"
+    "on_snmpPrivPassCheck_clicked\0"
+    "on_msSwitchesTable_clicked"
 };
 #undef QT_MOC_LITERAL
 
@@ -73,7 +75,7 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      13,   14, // methods
+      14,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -81,19 +83,20 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,   79,    2, 0x0a /* Public */,
-       5,    1,   82,    2, 0x08 /* Private */,
-       7,    1,   85,    2, 0x08 /* Private */,
-       9,    0,   88,    2, 0x08 /* Private */,
-      10,    1,   89,    2, 0x08 /* Private */,
-      11,    1,   92,    2, 0x08 /* Private */,
-      12,    0,   95,    2, 0x08 /* Private */,
-      13,    1,   96,    2, 0x08 /* Private */,
-      14,    1,   99,    2, 0x08 /* Private */,
-      15,    1,  102,    2, 0x08 /* Private */,
-      16,    1,  105,    2, 0x08 /* Private */,
-      17,    1,  108,    2, 0x08 /* Private */,
-      18,    1,  111,    2, 0x08 /* Private */,
+       1,    1,   84,    2, 0x0a /* Public */,
+       5,    1,   87,    2, 0x08 /* Private */,
+       7,    1,   90,    2, 0x08 /* Private */,
+       9,    0,   93,    2, 0x08 /* Private */,
+      10,    1,   94,    2, 0x08 /* Private */,
+      11,    1,   97,    2, 0x08 /* Private */,
+      12,    0,  100,    2, 0x08 /* Private */,
+      13,    1,  101,    2, 0x08 /* Private */,
+      14,    1,  104,    2, 0x08 /* Private */,
+      15,    1,  107,    2, 0x08 /* Private */,
+      16,    1,  110,    2, 0x08 /* Private */,
+      17,    1,  113,    2, 0x08 /* Private */,
+      18,    1,  116,    2, 0x08 /* Private */,
+      19,    1,  119,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
@@ -109,6 +112,7 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void, QMetaType::Bool,    8,
     QMetaType::Void, QMetaType::Bool,    8,
     QMetaType::Void, QMetaType::Bool,    8,
+    QMetaType::Void, QMetaType::QModelIndex,    6,
 
        0        // eod
 };
@@ -132,6 +136,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 10: _t->on_nonMVPNSecretCheck_clicked((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 11: _t->on_snmpAuthPassCheck_clicked((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 12: _t->on_snmpPrivPassCheck_clicked((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 13: _t->on_msSwitchesTable_clicked((*reinterpret_cast< const QModelIndex(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -173,13 +178,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 13)
+        if (_id < 14)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 13;
+        _id -= 14;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 13)
+        if (_id < 14)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 13;
+        _id -= 14;
     }
     return _id;
 }
