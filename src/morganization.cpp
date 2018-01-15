@@ -75,6 +75,14 @@ void MOrganization::setSwitchPort(int devIndex, switchPort s, int index) {
 	orgInventory[devIndex].ports[index] = s;
 }
 
+void MOrganization::setMXL3RulesNum(int devIndex, int n) {
+	orgInventory[devIndex].rules.resize(n);
+}
+
+void MOrganization::setMXL3Rule(int devIndex, mxL3Firewall s, int index) {
+	orgInventory[devIndex].rules[index] = s;
+}
+
 void MOrganization::setOrgSNMPSettings(orgSNMP s) {
 	snmpSettings = s;
 }
@@ -165,6 +173,14 @@ switchPort MOrganization::getSwitchport(int devIndex, int index) {
 	return orgInventory.at(devIndex).ports.at(index);
 }
 
+int MOrganization::getMXL3RulesNum(int devIndex) {
+	return orgInventory.at(devIndex).rules.size();
+}
+
+mxL3Firewall MOrganization::getMXL3Rule(int devIndex, int index) {
+	return orgInventory.at(devIndex).rules.at(index);
+}
+
 orgSNMP MOrganization::getOrgSNMPSettings() {
 	return snmpSettings;
 }
@@ -189,6 +205,19 @@ int MOrganization::getIndexOfInventoryDevice(QString serial) {
 	// no device was found
 	return -1;
 
+}
+
+int MOrganization::getIndexOfNetwork(QString netID) {
+	// given the full network ID, i.e. N_584905001604768550, return the index of it in the organization
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < netList.size(); i++) {
+		if (netList.at(i).netID == netID) {
+			return i;
+		}
+	}
+
+	// no network was found
+	return -1;
 }
 
 

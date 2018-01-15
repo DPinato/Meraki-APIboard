@@ -52,6 +52,8 @@ public:
 	void displayOrgVPN(int orgIndex);
 	void displayMSInfo(int orgIndex, int netIndex = -1);
 	void displayMSPort(int devIndex, int orgIndex);
+	void displayMXInfo(int orgIndex, int netIndex = -1);
+	void displayMXL3Rules(int devIndex, int orgIndex);
 
 
 
@@ -67,7 +69,6 @@ signals:
 private slots:
 	void on_treeView_doubleClicked(const QModelIndex &index);
 	void on_nonMVPNCheck_clicked(bool checked);
-
 	void on_debugButton_clicked();
 	void on_treeView_clicked(const QModelIndex &index);
 	void on_snmp3Check_clicked(bool checked);
@@ -78,10 +79,11 @@ private slots:
 	void on_nonMVPNSecretCheck_clicked(bool checked);
 	void on_snmpAuthPassCheck_clicked(bool checked);
 	void on_snmpPrivPassCheck_clicked(bool checked);
-
 	void on_msSwitchesTable_clicked(const QModelIndex &index);
+	void on_mxDeviceTable_clicked(const QModelIndex &index);
 
-	private:
+
+private:
 	Ui::MainWindow *ui;
 
 	QString apiKey;			// file holding the API key being used
@@ -99,9 +101,10 @@ private slots:
 //	QVector<QList<QString>> samlURLs;
 
 	// TODO: every time the display functions are called, these are initialised again, fix this
-	QStandardItemModel *msListModel;		// to show list of switches
-	QStandardItemModel *msPortListModel;	// to show list of ports of a particular switch
-
+	QStandardItemModel *msListModel;		// show list of switches
+	QStandardItemModel *msPortListModel;	// show list of ports of a particular switch
+	QStandardItemModel *mxListModel;		// show list of MXs
+	QStandardItemModel *mxL3RulesModel;		// show list of L3 firewall rules for MX
 
 };
 

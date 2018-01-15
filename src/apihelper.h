@@ -19,7 +19,7 @@ struct eventRequest {
 	// used to maintain a queue for HTTP requests to make
 	int urlListIndex;			// which index in the urlList it corresponds to
 	int orgIndex;				// organization index in orgList
-	int netIndex;				// network index in the orgList object
+	int netIndex = -1;				// network index in the orgList object
 	QString deviceSerial = "";	// in case the query is specific to a particular device, i.e. a switch
 	QByteArray data = 0;		// data to use in case of a PUT or POST
 
@@ -48,6 +48,7 @@ public:
 	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
 	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial);
+	bool processMXL3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 
 
 	// set

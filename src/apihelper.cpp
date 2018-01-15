@@ -87,6 +87,7 @@ void APIHelper::runQuery(eventRequest e) {
 	// data is needed for POST and PUT
 	// this function can only be used for queries that need org ID and network ID, no others
 	qDebug() << "\nAPIHelper::runQuery(), queryID: " << e.urlListIndex;
+	qDebug() << "orgID: " << e.orgIndex << "\tnetID: " << e.netIndex;
 	QString queryURL = urlList.at(e.urlListIndex).url;
 
 
@@ -101,7 +102,10 @@ void APIHelper::runQuery(eventRequest e) {
 
 	if (e.netIndex != -1) {
 		// put network ID in the URL
-
+		qDebug() << queryURL.indexOf(QString("[networkId]"));
+		queryURL = queryURL.replace(queryURL.indexOf(QString("[networkId]"))
+									, QString("[networkId]").length()
+									, parent->orgList.at(e.orgIndex)->getNetwork(e.netIndex).netID);
 	}
 
 	if (e.deviceSerial != "") {
@@ -171,6 +175,13 @@ void APIHelper::processQuery(QNetworkReply *r) {
 		case 0: {
 			// GET /organizations/[organizationId]/admins
 			processOrgAdminsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			break;
+		}
+
+		case 20: {
+			// GET /networks/[networkId]/l3FirewallRules
+			processMXL3FirewallQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									 , queueEventRequests.at(eventIndex).deviceSerial);
 			break;
 		}
 
@@ -622,9 +633,8 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString 
 
 
 	QJsonArray jArray = doc.array();
-	parent->orgList[orgIndex]->setOrgVPNPeerNum(jArray.size());
-
 	qDebug() << jArray << "\t" << jArray.size();
+
 
 	// get the index of the device in the organization inventory
 	deviceInInventory tmpDevice = parent->orgList.at(orgIndex)->getOrgDeviceFromSerial(devSerial);
@@ -663,8 +673,51 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString 
 	}
 
 
-	// display things in the table
-	parent->displayMSPort(devIndex, orgIndex);
+	parent->displayMSPort(devIndex, orgIndex);	// display things in the table
+
+	return true;	// everything went ok
+
+}
+
+bool APIHelper::processMXL3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial) {
+	qDebug() << "\nAPIHelper::processMXL3FirewallQuery(...), orgIndex: "
+			 << orgIndex << "\tdevSerial" << devSerial;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processMXL3FirewallQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+	// get the index of the device in the organization inventory
+	deviceInInventory tmpDevice = parent->orgList.at(orgIndex)->getOrgDeviceFromSerial(devSerial);
+	int devIndex = parent->orgList.at(orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
+	parent->orgList.at(orgIndex)->setMXL3RulesNum(devIndex, jArray.size());
+
+
+	// get MX L3 firewall rule info in the appropriate organization device
+	for (int i = 0; i < jArray.size(); i++) {
+		mxL3Firewall tmpRule;
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		tmpRule.comment = jObj["comment"].toString();
+		tmpRule.policy = jObj["policy"].toString();
+		tmpRule.protocol = jObj["protocol"].toString();
+		tmpRule.srcPort = jObj["srcPort"].toString();
+		tmpRule.srcCidr = jObj["srcCidr"].toString();
+		tmpRule.destPort = jObj["destPort"].toString();
+		tmpRule.destCidr = jObj["destCidr"].toString();
+		tmpRule.syslogEnabled = jObj["syslogEnabled"].toBool();
+
+		parent->orgList.at(orgIndex)->setMXL3Rule(devIndex, tmpRule, i);
+
+	}
+
+
+	parent->displayMXL3Rules(devIndex, orgIndex);	// display things in the table
 
 	return true;	// everything went ok
 

@@ -352,8 +352,7 @@ void MainWindow::displayMSInfo(int orgIndex, int netIndex) {
 	// otherwise only show switches in that network
 	qDebug() << "\nMainWindow::displayMSInfo, orgIndex: " << orgIndex << "\tnetIndex: " << netIndex;
 
-	// count switches
-	int count = 0;
+	int count = 0;	// count switches
 
 	for (int i = 0; i < orgList.at(orgIndex)->getOrgInventorySize(); i++) {
 		deviceInInventory tmp = orgList.at(orgIndex)->getOrgInventoryDevice(i);
@@ -422,7 +421,8 @@ void MainWindow::displayMSPort(int devIndex, int orgIndex) {
 	int portCount = orgList.at(orgIndex)->getOrgInventoryDevice(devIndex).ports.size();
 	msPortListModel = new QStandardItemModel(portCount, 13, this);
 
-	// columns are | MAC | Model | Serial | public IP | network |
+	// columns are | number | name | tags | enabled | poeEnabled | type | vlan | voiceVlan | allowedVlans |
+	// | isolationEnabled | rstpEnabled | stpGuard | accessPolicyNumber
 	msPortListModel->setHeaderData(0, Qt::Horizontal, QString("number"));
 	msPortListModel->setHeaderData(1, Qt::Horizontal, QString("name"));
 	msPortListModel->setHeaderData(2, Qt::Horizontal, QString("tags"));
@@ -437,22 +437,21 @@ void MainWindow::displayMSPort(int devIndex, int orgIndex) {
 	msPortListModel->setHeaderData(11, Qt::Horizontal, QString("stpGuard"));
 	msPortListModel->setHeaderData(12, Qt::Horizontal, QString("accessPolicyNumber"));
 
-	// | number | name | tags | enabled | poeEnabled | type | vlan | voiceVlan | allowedVlans | isolationEnabled |
-	// | rstpEnabled | stpGuard | accessPolicyNumber
+	// show port info
 	for (int i = 0; i < portCount; i++) {
 		deviceInInventory tmpDevice = orgList.at(orgIndex)->getOrgInventoryDevice(devIndex);
 
-		msPortListModel->setItem(i, 0, new QStandardItem(tmpDevice.ports.at(i).number));
+		msPortListModel->setItem(i, 0, new QStandardItem(QString::number(tmpDevice.ports.at(i).number)));
 		msPortListModel->setItem(i, 1, new QStandardItem(tmpDevice.ports.at(i).name));
 		msPortListModel->setItem(i, 2, new QStandardItem(tmpDevice.ports.at(i).tags));
-		msPortListModel->setItem(i, 3, new QStandardItem(tmpDevice.ports.at(i).enabled));
-		msPortListModel->setItem(i, 4, new QStandardItem(tmpDevice.ports.at(i).poeEnabled));
+		msPortListModel->setItem(i, 3, new QStandardItem(QString::number(tmpDevice.ports.at(i).enabled)));
+		msPortListModel->setItem(i, 4, new QStandardItem(QString::number(tmpDevice.ports.at(i).poeEnabled)));
 		msPortListModel->setItem(i, 5, new QStandardItem(tmpDevice.ports.at(i).type));
-		msPortListModel->setItem(i, 6, new QStandardItem(tmpDevice.ports.at(i).nativeVlan));
-		msPortListModel->setItem(i, 7, new QStandardItem(tmpDevice.ports.at(i).voiceVlan));
+		msPortListModel->setItem(i, 6, new QStandardItem(QString::number(tmpDevice.ports.at(i).nativeVlan)));
+		msPortListModel->setItem(i, 7, new QStandardItem(QString::number(tmpDevice.ports.at(i).voiceVlan)));
 		msPortListModel->setItem(i, 8, new QStandardItem(tmpDevice.ports.at(i).allowedVLANs));
-		msPortListModel->setItem(i, 9, new QStandardItem(tmpDevice.ports.at(i).isolationEnabled));
-		msPortListModel->setItem(i, 10, new QStandardItem(tmpDevice.ports.at(i).rstpEnabled));
+		msPortListModel->setItem(i, 9, new QStandardItem(QString::number(tmpDevice.ports.at(i).isolationEnabled)));
+		msPortListModel->setItem(i, 10, new QStandardItem(QString::number(tmpDevice.ports.at(i).rstpEnabled)));
 		msPortListModel->setItem(i, 11, new QStandardItem(tmpDevice.ports.at(i).stpGuard));
 		msPortListModel->setItem(i, 12, new QStandardItem(tmpDevice.ports.at(i).accessPolicyNumber));
 
@@ -463,6 +462,112 @@ void MainWindow::displayMSPort(int devIndex, int orgIndex) {
 	ui->msSwitchPortsTable->resizeColumnsToContents();
 	ui->msSwitchPortsTable->resizeRowsToContents();
 
+}
+
+void MainWindow::displayMXInfo(int orgIndex, int netIndex) {
+	// show MXs in the organization, if a netIndex is selected, only show MXs in that network
+	qDebug() << "\nMainWindow::displayMXInfo, orgIndex: " << orgIndex << "\tnetIndex: " << netIndex;
+
+
+	int count = 0;	// count MXs
+
+	for (int i = 0; i < orgList.at(orgIndex)->getOrgInventorySize(); i++) {
+		deviceInInventory tmp = orgList.at(orgIndex)->getOrgInventoryDevice(i);
+
+		if (tmp.model.contains("MX")) {
+			if (netIndex != -1 && orgList.at(orgIndex)->getNetwork(netIndex).netID == tmp.netID) {
+				// check if the MS is in the appropriate network
+				// the first condition will also avoid getting the element at index -1
+				count++;
+			} else if (netIndex == -1) {
+				count++;
+			}
+		}
+	}
+
+	qDebug() << "count: " << count;
+	if (count == 0) { return; }
+
+
+	mxListModel = new QStandardItemModel(count, 5, this);
+
+	// columns are | MAC | Model | Serial | public IP | network |
+	mxListModel->setHeaderData(0, Qt::Horizontal, QString("MAC"));
+	mxListModel->setHeaderData(1, Qt::Horizontal, QString("Model"));
+	mxListModel->setHeaderData(2, Qt::Horizontal, QString("Serial"));
+	mxListModel->setHeaderData(3, Qt::Horizontal, QString("Public IP"));
+	mxListModel->setHeaderData(4, Qt::Horizontal, QString("Network"));
+
+
+	// show stuff
+	count = 0;
+	for (int i = 0; i < orgList.at(orgIndex)->getOrgInventorySize(); i++) {
+		deviceInInventory tmp = orgList.at(orgIndex)->getOrgInventoryDevice(i);
+
+		if (tmp.model.contains("MX")) {
+			if (netIndex != -1 && orgList.at(orgIndex)->getNetwork(netIndex).netID == tmp.netID) {
+				mxListModel->setItem(count, 0, new QStandardItem(tmp.mac));
+				mxListModel->setItem(count, 1, new QStandardItem(tmp.model));
+				mxListModel->setItem(count, 2, new QStandardItem(tmp.serial));
+				mxListModel->setItem(count, 3, new QStandardItem(tmp.publicIP));
+				mxListModel->setItem(count, 4, new QStandardItem(tmp.netID));
+				count++;
+
+			} else if (netIndex == -1) {
+				mxListModel->setItem(count, 0, new QStandardItem(tmp.mac));
+				mxListModel->setItem(count, 1, new QStandardItem(tmp.model));
+				mxListModel->setItem(count, 2, new QStandardItem(tmp.serial));
+				mxListModel->setItem(count, 3, new QStandardItem(tmp.publicIP));
+				mxListModel->setItem(count, 4, new QStandardItem(tmp.netID));
+				count++;
+
+			}
+		}
+	}
+
+
+	ui->mxDeviceTable->setModel(mxListModel);
+	ui->mxDeviceTable->resizeColumnsToContents();
+	ui->mxDeviceTable->resizeRowsToContents();
+
+
+}
+
+void MainWindow::displayMXL3Rules(int devIndex, int orgIndex) {
+	// show L3 firewall rules of this MX
+	qDebug() << "\nMainWindow::displayMXL3Rules, orgIndex: " << orgIndex << "\tdevIndex: " << devIndex;
+
+	int rulesCount = orgList.at(orgIndex)->getOrgInventoryDevice(devIndex).rules.size();
+	mxL3RulesModel = new QStandardItemModel(rulesCount, 8, this);
+
+	// columns are | policy | protocol | srcCidr | srcPort | dstCidr | dstPort | syslogEnabled | comment |
+	mxL3RulesModel->setHeaderData(0, Qt::Horizontal, QString("policy"));
+	mxL3RulesModel->setHeaderData(1, Qt::Horizontal, QString("protocol"));
+	mxL3RulesModel->setHeaderData(2, Qt::Horizontal, QString("srcCidr"));
+	mxL3RulesModel->setHeaderData(3, Qt::Horizontal, QString("srcPort"));
+	mxL3RulesModel->setHeaderData(4, Qt::Horizontal, QString("destCidr"));
+	mxL3RulesModel->setHeaderData(5, Qt::Horizontal, QString("destPort"));
+	mxL3RulesModel->setHeaderData(6, Qt::Horizontal, QString("syslogEnabled"));
+	mxL3RulesModel->setHeaderData(7, Qt::Horizontal, QString("comment"));
+
+	// show rule info
+	for (int i = 0; i < rulesCount; i++) {
+		deviceInInventory tmpDevice = orgList.at(orgIndex)->getOrgInventoryDevice(devIndex);
+
+		mxL3RulesModel->setItem(i, 0, new QStandardItem(tmpDevice.rules.at(i).policy));
+		mxL3RulesModel->setItem(i, 1, new QStandardItem(tmpDevice.rules.at(i).protocol));
+		mxL3RulesModel->setItem(i, 2, new QStandardItem(tmpDevice.rules.at(i).srcCidr));
+		mxL3RulesModel->setItem(i, 3, new QStandardItem(tmpDevice.rules.at(i).srcPort));
+		mxL3RulesModel->setItem(i, 4, new QStandardItem(tmpDevice.rules.at(i).destCidr));
+		mxL3RulesModel->setItem(i, 5, new QStandardItem(tmpDevice.rules.at(i).destPort));
+		mxL3RulesModel->setItem(i, 6, new QStandardItem(QString::number(tmpDevice.rules.at(i).syslogEnabled)));
+		mxL3RulesModel->setItem(i, 7, new QStandardItem(tmpDevice.rules.at(i).comment));
+
+	}
+
+	ui->mxL3FirewallTable->setModel(mxL3RulesModel);
+	ui->mxL3FirewallTable->resizeColumnsToContents();
+	ui->mxL3FirewallTable->resizeRowsToContents();
 
 }
 
@@ -604,11 +709,19 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 			}
 
 			displayMSInfo(currOrgIndex);
+			break;
+		}
 
+		case 4: {
+			// MX tab, show MXs in inventory and MX L3 firewall rules
+			if (orgList.at(currOrgIndex)->getOrgInventorySize() == 0) {
+				// org inventory is empty, fetch it
+				tmp.urlListIndex = 48;	// GET /organizations/[organizationId]/inventory
+				apiHelpObj->putEventInQueue(tmp);
+			}
 
-
-
-
+			displayMXInfo(currOrgIndex);
+			break;
 		}
 
 	}
@@ -747,5 +860,21 @@ void MainWindow::on_msSwitchesTable_clicked(const QModelIndex &index) {
 	tmp.deviceSerial = tmpDev.serial;
 	apiHelpObj->putEventInQueue(tmp);
 
+
+}
+
+void MainWindow::on_mxDeviceTable_clicked(const QModelIndex &index) {
+	qDebug() << "\nMainWindow::on_mxDeviceTable_clicked(), row: " << index.row();
+	qDebug() << mxListModel->item(index.row(), 2)->text();
+
+	deviceInInventory tmpDev = orgList.at(currOrgIndex)->getOrgDeviceFromSerial(mxListModel->item(index.row(), 2)->text());
+
+	// run query to get L3 firewall rule for this MX
+	eventRequest tmp;
+	tmp.orgIndex = currOrgIndex;
+	tmp.urlListIndex = 20;	// GET /networks/[networkId]/l3FirewallRules
+	tmp.netIndex = orgList.at(currOrgIndex)->getIndexOfNetwork(tmpDev.netID);
+	tmp.deviceSerial = tmpDev.serial;
+	apiHelpObj->putEventInQueue(tmp);
 
 }

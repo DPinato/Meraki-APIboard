@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
-    <height>564</height>
+    <width>1084</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,8 +45,8 @@
      <rect>
       <x>230</x>
       <y>3</y>
-      <width>656</width>
-      <height>501</height>
+      <width>841</width>
+      <height>551</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -85,32 +85,6 @@
        <number>30</number>
       </property>
      </widget>
-     <widget class="QPushButton" name="adPushUpdatesButton">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>430</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Push Updates</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="adSnapshotButton">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>430</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Take Snapshot</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_19">
       <property name="geometry">
        <rect>
@@ -140,26 +114,13 @@
        <number>30</number>
       </property>
      </widget>
-     <widget class="QPushButton" name="debugButton">
-      <property name="geometry">
-       <rect>
-        <x>210</x>
-        <y>430</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>DEBUG</string>
-      </property>
-     </widget>
      <widget class="QTabWidget" name="adminTabWidget">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>80</y>
-        <width>631</width>
-        <height>341</height>
+        <width>821</width>
+        <height>431</height>
        </rect>
       </property>
       <property name="currentIndex">
@@ -173,7 +134,7 @@
         <property name="geometry">
          <rect>
           <x>320</x>
-          <y>160</y>
+          <y>250</y>
           <width>301</width>
           <height>141</height>
          </rect>
@@ -183,7 +144,7 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>160</y>
+          <y>250</y>
           <width>301</width>
           <height>141</height>
          </rect>
@@ -194,8 +155,8 @@
          <rect>
           <x>10</x>
           <y>10</y>
-          <width>611</width>
-          <height>141</height>
+          <width>801</width>
+          <height>231</height>
          </rect>
         </property>
        </widget>
@@ -707,7 +668,7 @@ p, li { white-space: pre-wrap; }
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>40</y>
+        <y>70</y>
         <width>121</width>
         <height>21</height>
        </rect>
@@ -720,7 +681,7 @@ p, li { white-space: pre-wrap; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>40</y>
+        <y>70</y>
         <width>81</width>
         <height>21</height>
        </rect>
@@ -734,7 +695,7 @@ p, li { white-space: pre-wrap; }
        <rect>
         <x>300</x>
         <y>10</y>
-        <width>101</width>
+        <width>121</width>
         <height>101</height>
        </rect>
       </property>
@@ -788,7 +749,7 @@ p, li { white-space: pre-wrap; }
       <property name="geometry">
        <rect>
         <x>100</x>
-        <y>10</y>
+        <y>40</y>
         <width>121</width>
         <height>21</height>
        </rect>
@@ -801,7 +762,7 @@ p, li { white-space: pre-wrap; }
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>10</y>
+        <y>40</y>
         <width>91</width>
         <height>21</height>
        </rect>
@@ -815,7 +776,7 @@ p, li { white-space: pre-wrap; }
        <rect>
         <x>10</x>
         <y>130</y>
-        <width>631</width>
+        <width>811</width>
         <height>201</height>
        </rect>
       </property>
@@ -868,7 +829,7 @@ p, li { white-space: pre-wrap; }
      <widget class="QPushButton" name="refreshOrgsButton_2">
       <property name="geometry">
        <rect>
-        <x>230</x>
+        <x>10</x>
         <y>10</y>
         <width>51</width>
         <height>21</height>
@@ -899,6 +860,19 @@ p, li { white-space: pre-wrap; }
         <width>101</width>
         <height>101</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_46">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>10</y>
+        <width>81</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Current licenses:</string>
       </property>
      </widget>
     </widget>
@@ -940,7 +914,7 @@ p, li { white-space: pre-wrap; }
        <rect>
         <x>10</x>
         <y>40</y>
-        <width>631</width>
+        <width>821</width>
         <height>141</height>
        </rect>
       </property>
@@ -950,8 +924,8 @@ p, li { white-space: pre-wrap; }
        <rect>
         <x>10</x>
         <y>190</y>
-        <width>631</width>
-        <height>221</height>
+        <width>821</width>
+        <height>321</height>
        </rect>
       </property>
      </widget>
@@ -973,6 +947,81 @@ p, li { white-space: pre-wrap; }
      <attribute name="title">
       <string>MX</string>
      </attribute>
+     <widget class="QTableView" name="mxDeviceTable">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>821</width>
+        <height>141</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="mxRefreshButton">
+      <property name="geometry">
+       <rect>
+        <x>590</x>
+        <y>10</y>
+        <width>51</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Refresh</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="mxNetworkEdit">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>10</y>
+        <width>191</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>123456789012345678901234567890</string>
+      </property>
+      <property name="maxLength">
+       <number>30</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_47">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>51</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Network</string>
+      </property>
+     </widget>
+     <widget class="QTableView" name="mxL3FirewallTable">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>220</y>
+        <width>821</width>
+        <height>291</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_48">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>200</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>L3 Firewall Rules</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_4">
      <attribute name="title">
@@ -1001,8 +1050,47 @@ p, li { white-space: pre-wrap; }
       <x>10</x>
       <y>33</y>
       <width>211</width>
-      <height>470</height>
+      <height>521</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="debugButton">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>560</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>DEBUG</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="adSnapshotButton">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>560</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Take Snapshot</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="adPushUpdatesButton">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>560</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Push Updates</string>
     </property>
    </widget>
   </widget>
@@ -1011,7 +1099,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>900</width>
+     <width>1084</width>
      <height>20</height>
     </rect>
    </property>

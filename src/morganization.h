@@ -33,6 +33,17 @@ struct switchPort {
 	QString accessPolicyNumber;		// what is this? maybe when a port is set to Access
 };
 
+struct mxL3Firewall {
+	QString comment;		// comment for rule
+	QString policy;			// allow or deny
+	QString protocol;		// TCP, UDP, ICMP or Any
+	QString destPort;		// L4 destination port
+	QString destCidr;		// destination subnet
+	QString srcPort;		// L4 source port
+	QString srcCidr;		// source subnet (needs to be either a local or Meraki VPN subnet)
+	bool syslogEnabled;		// Syslog logging enabled
+};
+
 struct deviceInInventory {
 	QString mac;			// MAC address of device
 	QString serial;			// serial number of device
@@ -41,7 +52,8 @@ struct deviceInInventory {
 	QString claimedAt;		// when the device was claimed
 	QString publicIP;		// public IP address of device
 
-	QVector<switchPort> ports;	// contains info regarding ports of a switch (in case device is a switch)
+	QVector<switchPort> ports;		// info about switch ports (in case device is an MS)
+	QVector<mxL3Firewall> rules;	// info about L3 firewall rules (in case device is an MX)
 };
 
 struct nonMerakiVPNPeer {
@@ -116,6 +128,8 @@ class MOrganization {
 		void setOrgInventoryDevice(deviceInInventory a, int index);
 		void setSwitchPortNum(int devIndex, int n);
 		void setSwitchPort(int devIndex, switchPort s, int index);
+		void setMXL3RulesNum(int devIndex, int n);
+		void setMXL3Rule(int devIndex, mxL3Firewall s, int index);
 
 		void setOrgSNMPSettings(orgSNMP s);
 		void setOrgVPNPeerNum(int n);
@@ -139,6 +153,9 @@ class MOrganization {
 		deviceInInventory getOrgDeviceFromSerial(QString serial);
 		int getSwitchPortNum(int devIndex);
 		switchPort getSwitchport(int devIndex, int index);
+		int getMXL3RulesNum(int devIndex);
+		mxL3Firewall getMXL3Rule(int devIndex, int index);
+
 		orgSNMP getOrgSNMPSettings();
 		int getOrgVPNPeerNum();
 		nonMerakiVPNPeer getOrgVPNPeer(int index);
@@ -146,7 +163,7 @@ class MOrganization {
 
 		// functions to help navigating lists and vectors
 		int getIndexOfInventoryDevice(QString serial);
-
+		int getIndexOfNetwork(QString netID);
 
 
 		// debug
@@ -158,8 +175,7 @@ class MOrganization {
 		QString name;				// organization name
 		QString samlURL;			// SAML URL for organization
 		QVector<QString> samlURLs;	// SAML URLs for organization, not implemented yet
-
-		QVector<networkVars> netList;	// list of network associated with this organization
+		QVector<networkVars> netList;	// list of networks associated with this organization
 
 		// licensing state
 		QString licStatus;			// state of the licensing for the org
