@@ -666,6 +666,13 @@ void MainWindow::on_refreshOrgsButton_clicked() {
 void MainWindow::on_tabWidget_currentChanged(int index) {
 	// run the appropriate queries to show things in the GUI
 	qDebug() << "tab: " << index << "\t" << ui->tabWidget->tabText(index);
+
+	if (currOrgIndex == -1) {
+		// this happens usually if the program has just started, or something bad has happened
+		qDebug() << "currOrgIndex: " << currOrgIndex;
+		return;
+	}
+
 	eventRequest tmp;
 	tmp.orgIndex = currOrgIndex;
 

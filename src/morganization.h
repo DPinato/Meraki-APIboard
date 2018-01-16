@@ -102,6 +102,62 @@ struct orgSNMP {
 	QString v3User;			// user when using SNMPv3
 };
 
+struct smDevice {
+	// default fields
+	QString id;
+	QString name;
+	QVector<QString> tags;
+	QString ssid;
+	QString wifiMac;
+	QString osName;
+	QString systemModel;
+	QString uuid;
+	QString serialNumber;
+
+	// optional fields
+	QString ip;
+	QString systemType;
+	long int availableDeviceCapacity;
+	QString kioskAppName;
+	QString biosVersion;
+	long int lastConnected;
+	long int missingAppsCount;
+	QString userSuppliedAddress;
+	QString location;
+	QString lastUser;
+	QString publicIp;
+	QString phoneNumber;
+	QString diskInfoJson;
+	long int deviceCapacity;
+	bool isManaged;
+	bool hadMdm;
+	bool isSupervised;
+	QString meid;
+	QString imei;
+	QString iccid;
+	QString simCarrierNetwork;
+	long int cellularDataUsed;
+	bool isHotspotEnabled;
+	long int createdAt;
+	QString batteryEstCharge;
+	bool quarantined;
+	QString avName;
+	QString avRunning;
+	QString asName;
+	QString fwName;
+	bool isRooted;
+	bool loginRequired;		// ?
+	bool screenLockEnabled;	// ?
+	QString screenLockDelay;
+	bool autoLoginDisabled;
+	bool hasMdm;
+	bool hasDesktopAgent;
+	bool diskEncryptionEnabled;
+	QString hardwareEncryptionCaps;
+	bool passCodeLock;
+
+};
+
 
 
 class MOrganization {
