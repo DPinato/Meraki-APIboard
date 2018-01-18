@@ -11,12 +11,7 @@ APIHelper::APIHelper(QString key, MainWindow *p) {
 
 	// TODO: think about a better arrangement for these, read from file?
 	baseURL = QString("");
-	orgQueryURL = QUrl("https://api.meraki.com/api/v0/organizations");
-	networkQueryURL = QUrl("https://api.meraki.com/api/v0/organizations/[organizationId]/networks");
-	licenseQueryURL = QUrl("https://api.meraki.com/api/v0/organizations/[organizationId]/licenseState");
-
 	tmpURL = networkQueryURL.toString();
-
 
 }
 
@@ -218,6 +213,13 @@ void APIHelper::processQuery(QNetworkReply *r) {
 		case 51: {
 			// GET /organizations/[organizationId]/thirdPartyVPNPeers
 			processOrgVPNQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			break;
+		}
+
+		case 82: {
+			// GET /networks/[networkId]/sm/devices
+			processSMDevicesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+								  , queueEventRequests.at(eventIndex).netIndex);
 			break;
 		}
 
@@ -718,6 +720,94 @@ bool APIHelper::processMXL3FirewallQuery(QJsonDocument doc, int orgIndex, QStrin
 
 
 	parent->displayMXL3Rules(devIndex, orgIndex);	// display things in the table
+
+	return true;	// everything went ok
+
+}
+
+bool APIHelper::processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+	qDebug() << "\nAPIHelper::processSMDevicesQuery(...), orgIndex: "
+			 << orgIndex << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processSMDevicesQuery(...)";
+		return false;
+	}
+
+	// for some reason, the reply contains an array called devices[]
+	QJsonArray jArray = doc.object()["devices"].toArray();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	parent->orgList.at(orgIndex)->setSMDevicesNum(netIndex, jArray.size());
+
+	for (int i = 0; i < jArray.size(); i++) {
+		smDevice tmpSMDevice;
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		// default fields
+		tmpSMDevice.id = jObj["id"].toString();
+		tmpSMDevice.name = jObj["name"].toString();
+
+		QJsonArray tmpJArray = jObj["tags"].toArray();
+		for (int j = 0; j < tmpJArray.size(); j++) {
+			tmpSMDevice.tags.append(tmpJArray.at(j).toString());
+		}
+
+		tmpSMDevice.ssid = jObj["ssid"].toString();
+		tmpSMDevice.wifiMac = jObj["wifiMac"].toString();
+		tmpSMDevice.osName = jObj["osName"].toString();
+		tmpSMDevice.systemModel = jObj["systemModel"].toString();
+		tmpSMDevice.uuid = jObj["uuid"].toString();
+		tmpSMDevice.serialNumber = jObj["serialNumber"].toString();
+
+
+		// optional fields
+		tmpSMDevice.ip = jObj["ip"].toString();
+		tmpSMDevice.systemType = jObj["systemType"].toString();
+		tmpSMDevice.availableDeviceCapacity = jObj["availableDeviceCapacity"].toDouble();
+		tmpSMDevice.kioskAppName = jObj["kioskAppName"].toString();
+		tmpSMDevice.biosVersion = jObj["biosVersion"].toString();
+		tmpSMDevice.lastConnected = jObj["lastConnected"].toDouble();
+		tmpSMDevice.missingAppsCount = jObj["missingAppsCount"].toDouble();
+		tmpSMDevice.userSuppliedAddress = jObj["userSuppliedAddress"].toString();
+		tmpSMDevice.location = jObj["location"].toString();
+		tmpSMDevice.lastUser = jObj["lastUser"].toString();
+		tmpSMDevice.publicIp = jObj["publicIp"].toString();
+		tmpSMDevice.phoneNumber = jObj["phoneNumber"].toString();
+		tmpSMDevice.diskInfoJson = jObj["diskInfoJson"].toString();
+		tmpSMDevice.deviceCapacity = jObj["deviceCapacity"].toDouble();
+		tmpSMDevice.isManaged = jObj["isManaged"].toBool();
+		tmpSMDevice.hadMdm = jObj["hadMdm"].toBool();
+		tmpSMDevice.isSupervised = jObj["isSupervised"].toBool();
+		tmpSMDevice.meid = jObj["meid"].toString();
+		tmpSMDevice.imei = jObj["imei"].toString();
+		tmpSMDevice.iccid = jObj["iccid"].toString();
+		tmpSMDevice.simCarrierNetwork = jObj["simCarrierNetwork"].toString();
+		tmpSMDevice.cellularDataUsed = jObj["cellularDataUsed"].toDouble();
+		tmpSMDevice.isHotspotEnabled = jObj["isHotspotEnabled"].toBool();
+		tmpSMDevice.createdAt = jObj["createdAt"].toDouble();
+		tmpSMDevice.batteryEstCharge = jObj["batteryEstCharge"].toString();
+		tmpSMDevice.quarantined = jObj["quarantined"].toBool();
+		tmpSMDevice.avName = jObj["avName"].toString();
+		tmpSMDevice.avRunning = jObj["avRunning"].toString();
+		tmpSMDevice.asName = jObj["asName"].toString();
+		tmpSMDevice.fwName = jObj["fwName"].toString();
+		tmpSMDevice.isRooted = jObj["isRooted"].toBool();
+		tmpSMDevice.loginRequired = jObj["loginRequired"].toBool();
+		tmpSMDevice.screenLockEnabled = jObj["screenLockEnabled"].toBool();
+		tmpSMDevice.screenLockDelay = jObj["screenLockDelay"].toString();
+		tmpSMDevice.autoLoginDisabled = jObj["autoLoginDisabled"].toBool();
+		tmpSMDevice.hasMdm = jObj["hasMdm"].toBool();
+		tmpSMDevice.hasDesktopAgent = jObj["hasDesktopAgent"].toBool();
+		tmpSMDevice.diskEncryptionEnabled = jObj["diskEncryptionEnabled"].toBool();
+		tmpSMDevice.hardwareEncryptionCaps = jObj["hardwareEncryptionCaps"].toString();
+		tmpSMDevice.passCodeLock = jObj["passCodeLock"].toBool();
+
+		parent->orgList.at(orgIndex)->setSMDevice(netIndex, tmpSMDevice, i);
+
+	}
+
+	parent->displaySMDevices(orgIndex);
 
 	return true;	// everything went ok
 

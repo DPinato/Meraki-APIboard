@@ -95,6 +95,14 @@ void MOrganization::setOrgVPNPeer(nonMerakiVPNPeer p, int index) {
 	nonMerakiVPNs[index] = p;
 }
 
+void MOrganization::setSMDevicesNum(int netIndex, int n) {
+	netList[netIndex].smDevices.resize(n);
+}
+
+void MOrganization::setSMDevice(int netIndex, smDevice s, int index) {
+	netList[netIndex].smDevices[index] = s;
+}
+
 
 
 
@@ -191,6 +199,14 @@ int MOrganization::getOrgVPNPeerNum() {
 
 nonMerakiVPNPeer MOrganization::getOrgVPNPeer(int index) {
 	return nonMerakiVPNs.at(index);
+}
+
+int MOrganization::getSMDevicesNum(int netIndex) {
+	return netList.at(netIndex).smDevices.size();
+}
+
+smDevice MOrganization::getSMDevice(int netIndex, int index) {
+	return netList.at(netIndex).smDevices.at(index);
 }
 
 int MOrganization::getIndexOfInventoryDevice(QString serial) {

@@ -54,6 +54,7 @@ public:
 	void displayMSPort(int devIndex, int orgIndex);
 	void displayMXInfo(int orgIndex, int netIndex = -1);
 	void displayMXL3Rules(int devIndex, int orgIndex);
+	void displaySMDevices(int orgIndex, int netIndex = -1);
 
 
 
@@ -105,6 +106,7 @@ private:
 	QStandardItemModel *msPortListModel;	// show list of ports of a particular switch
 	QStandardItemModel *mxListModel;		// show list of MXs
 	QStandardItemModel *mxL3RulesModel;		// show list of L3 firewall rules for MX
+	QStandardItemModel *smDeviceListModel;	// show list of SM devices
 
 };
 

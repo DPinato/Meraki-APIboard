@@ -3,6 +3,62 @@
 
 #include "mainwindow.h"
 
+
+struct smDevice {
+	// default fields
+	QString id;
+	QString name;
+	QVector<QString> tags;
+	QString ssid;
+	QString wifiMac;
+	QString osName;
+	QString systemModel;
+	QString uuid;
+	QString serialNumber;
+
+	// optional fields
+	QString ip;
+	QString systemType;
+	double availableDeviceCapacity;
+	QString kioskAppName;
+	QString biosVersion;
+	double lastConnected;
+	double missingAppsCount;
+	QString userSuppliedAddress;
+	QString location;
+	QString lastUser;
+	QString publicIp;
+	QString phoneNumber;
+	QString diskInfoJson;
+	double deviceCapacity;
+	bool isManaged;
+	bool hadMdm;
+	bool isSupervised;
+	QString meid;
+	QString imei;
+	QString iccid;
+	QString simCarrierNetwork;
+	double cellularDataUsed;
+	bool isHotspotEnabled;
+	double createdAt;
+	QString batteryEstCharge;
+	bool quarantined;
+	QString avName;
+	QString avRunning;
+	QString asName;
+	QString fwName;
+	bool isRooted;
+	bool loginRequired;		// ?
+	bool screenLockEnabled;	// ?
+	QString screenLockDelay;
+	bool autoLoginDisabled;
+	bool hasMdm;
+	bool hasDesktopAgent;
+	bool diskEncryptionEnabled;
+	QString hardwareEncryptionCaps;
+	bool passCodeLock;
+};
+
 struct networkVars {
 	QString netID;			// network ID
 	QString orgID;			// ID of parent organization
@@ -10,6 +66,8 @@ struct networkVars {
 	QString netName;		// name of network
 	QString netTimezone;	// timezone given to network
 	QString netTags;		// tags assigned to network, these are returned as a single string
+
+	QVector<smDevice> smDevices;	// if SM network, put SM devices here
 };
 
 struct licensesPerDevice {
@@ -102,63 +160,6 @@ struct orgSNMP {
 	QString v3User;			// user when using SNMPv3
 };
 
-struct smDevice {
-	// default fields
-	QString id;
-	QString name;
-	QVector<QString> tags;
-	QString ssid;
-	QString wifiMac;
-	QString osName;
-	QString systemModel;
-	QString uuid;
-	QString serialNumber;
-
-	// optional fields
-	QString ip;
-	QString systemType;
-	long int availableDeviceCapacity;
-	QString kioskAppName;
-	QString biosVersion;
-	long int lastConnected;
-	long int missingAppsCount;
-	QString userSuppliedAddress;
-	QString location;
-	QString lastUser;
-	QString publicIp;
-	QString phoneNumber;
-	QString diskInfoJson;
-	long int deviceCapacity;
-	bool isManaged;
-	bool hadMdm;
-	bool isSupervised;
-	QString meid;
-	QString imei;
-	QString iccid;
-	QString simCarrierNetwork;
-	long int cellularDataUsed;
-	bool isHotspotEnabled;
-	long int createdAt;
-	QString batteryEstCharge;
-	bool quarantined;
-	QString avName;
-	QString avRunning;
-	QString asName;
-	QString fwName;
-	bool isRooted;
-	bool loginRequired;		// ?
-	bool screenLockEnabled;	// ?
-	QString screenLockDelay;
-	bool autoLoginDisabled;
-	bool hasMdm;
-	bool hasDesktopAgent;
-	bool diskEncryptionEnabled;
-	QString hardwareEncryptionCaps;
-	bool passCodeLock;
-
-};
-
-
 
 class MOrganization {
 	public:
@@ -186,10 +187,11 @@ class MOrganization {
 		void setSwitchPort(int devIndex, switchPort s, int index);
 		void setMXL3RulesNum(int devIndex, int n);
 		void setMXL3Rule(int devIndex, mxL3Firewall s, int index);
-
 		void setOrgSNMPSettings(orgSNMP s);
 		void setOrgVPNPeerNum(int n);
 		void setOrgVPNPeer(nonMerakiVPNPeer p, int index);
+		void setSMDevicesNum(int netIndex, int n);
+		void setSMDevice(int netIndex, smDevice s, int index);
 
 
 		// get
@@ -211,10 +213,11 @@ class MOrganization {
 		switchPort getSwitchport(int devIndex, int index);
 		int getMXL3RulesNum(int devIndex);
 		mxL3Firewall getMXL3Rule(int devIndex, int index);
-
 		orgSNMP getOrgSNMPSettings();
 		int getOrgVPNPeerNum();
 		nonMerakiVPNPeer getOrgVPNPeer(int index);
+		int getSMDevicesNum(int netIndex);
+		smDevice getSMDevice(int netIndex, int index);
 
 
 		// functions to help navigating lists and vectors

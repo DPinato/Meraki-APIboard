@@ -17,11 +17,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	// I am doing this so I do not have to leave my API key in this code
 
-//	apiKey = getAPIkeyFromFile(QString("/home/davide/Desktop/apikey.txt"));
-	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
+//	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
+	apiKey = getAPIkeyFromFile(QString("C:\\Users\\Davide\\Documents\\meraki_api_key.txt"));
 	qDebug() << apiKey;
 
-	urlListFile = QString("D:\\Programming\\Qt\\Meraki-APIboard\\URL_list.txt");
+//	urlListFile = QString("D:\\Programming\\Qt\\Meraki-APIboard\\URL_list.txt");
+	urlListFile = QString("C:\\Users\\Davide\\Documents\\Meraki-APIboard\\URL_list.txt");
 	qDebug() << urlListFile;
 
 
@@ -468,7 +469,6 @@ void MainWindow::displayMXInfo(int orgIndex, int netIndex) {
 	// show MXs in the organization, if a netIndex is selected, only show MXs in that network
 	qDebug() << "\nMainWindow::displayMXInfo, orgIndex: " << orgIndex << "\tnetIndex: " << netIndex;
 
-
 	int count = 0;	// count MXs
 
 	for (int i = 0; i < orgList.at(orgIndex)->getOrgInventorySize(); i++) {
@@ -571,6 +571,244 @@ void MainWindow::displayMXL3Rules(int devIndex, int orgIndex) {
 
 }
 
+void MainWindow::displaySMDevices(int orgIndex, int netIndex) {
+	// show SM devices in the organization
+	// if a netIndex is selected, only show SM devices in that network
+	qDebug() << "\nMainWindow::displaySMDevices, orgIndex: " << orgIndex << "\tnetIndex: " << netIndex;
+
+	int count = 0;	// count devices that need to be shown
+
+	// if netIndex is -1, go through all the combined or systems manager network
+	// in the organization
+	if (netIndex == -1) {
+		for (int i = 0; i < orgList.at(orgIndex)->getNetworksNum(); i++) {
+			if (orgList.at(orgIndex)->getNetwork(i).netType == "systems manager"
+					|| orgList.at(orgIndex)->getNetwork(i).netType == "combined") {
+				count += orgList.at(orgIndex)->getNetwork(i).smDevices.size();
+
+			}
+		}
+
+	} else {
+		// only get device count in the particular network
+		count = orgList.at(orgIndex)->getNetwork(netIndex).smDevices.size();
+	}
+
+	qDebug() << "count: " << count;
+	if (count == 0) { return; }
+
+	smDeviceListModel = new QStandardItemModel(count, 49, this);
+
+
+	// columns are | id | name | tags | ssid | wifiMac | osName | systemModel | uuid |
+	// | serialNumber | ip | systemType | availableDeviceCapacity | kioskAppName |
+	// | biosVersion | lastConnected | missingAppsCount | userSuppliedAddress |
+	// | location | lastUser | publicIp | phoneNumber | diskInfoJson | deviceCapacity |
+	// | isManaged | hadMdm | isSupervised | meid | imei | iccid | simCarrierNetwork |
+	// | cellularDataUsed | isHotspotEnabled | createdAt | batteryEstCharge | quarantined |
+	// | avName | avRunning | asName | fwName | isRooted | loginRequired | screenLockEnabled |
+	// | autoLoginDisabled | hasMdm | hasDesktopAgent | diskEncryptionEnabled |
+	// | hardwareEncryptionCaps | passCodeLock
+	// 49 columns, I missed one above, the full list is in the smDevice struct, wow
+	smDeviceListModel->setHeaderData(0, Qt::Horizontal, QString("id"));
+	smDeviceListModel->setHeaderData(1, Qt::Horizontal, QString("name"));
+	smDeviceListModel->setHeaderData(2, Qt::Horizontal, QString("tags"));
+	smDeviceListModel->setHeaderData(3, Qt::Horizontal, QString("ssid"));
+	smDeviceListModel->setHeaderData(4, Qt::Horizontal, QString("wifiMac"));
+	smDeviceListModel->setHeaderData(5, Qt::Horizontal, QString("osName"));
+	smDeviceListModel->setHeaderData(6, Qt::Horizontal, QString("systemModel"));
+	smDeviceListModel->setHeaderData(7, Qt::Horizontal, QString("uuid"));
+	smDeviceListModel->setHeaderData(8, Qt::Horizontal, QString("serialNumber"));
+	smDeviceListModel->setHeaderData(9, Qt::Horizontal, QString("ip"));
+	smDeviceListModel->setHeaderData(10, Qt::Horizontal, QString("systemType"));
+	smDeviceListModel->setHeaderData(11, Qt::Horizontal, QString("availableDeviceCapacity"));
+	smDeviceListModel->setHeaderData(12, Qt::Horizontal, QString("kioskAppName"));
+	smDeviceListModel->setHeaderData(13, Qt::Horizontal, QString("biosVersion"));
+	smDeviceListModel->setHeaderData(14, Qt::Horizontal, QString("lastConnected"));
+	smDeviceListModel->setHeaderData(15, Qt::Horizontal, QString("missingAppsCount"));
+	smDeviceListModel->setHeaderData(16, Qt::Horizontal, QString("userSuppliedAddress"));
+	smDeviceListModel->setHeaderData(17, Qt::Horizontal, QString("location"));
+	smDeviceListModel->setHeaderData(18, Qt::Horizontal, QString("lastUser"));
+	smDeviceListModel->setHeaderData(19, Qt::Horizontal, QString("publicIp"));
+	smDeviceListModel->setHeaderData(20, Qt::Horizontal, QString("phoneNumber"));
+	smDeviceListModel->setHeaderData(21, Qt::Horizontal, QString("diskInfoJson"));
+	smDeviceListModel->setHeaderData(22, Qt::Horizontal, QString("deviceCapacity"));
+	smDeviceListModel->setHeaderData(23, Qt::Horizontal, QString("isManaged"));
+	smDeviceListModel->setHeaderData(24, Qt::Horizontal, QString("hadMdm"));
+	smDeviceListModel->setHeaderData(25, Qt::Horizontal, QString("isSupervised"));
+	smDeviceListModel->setHeaderData(26, Qt::Horizontal, QString("meid"));
+	smDeviceListModel->setHeaderData(27, Qt::Horizontal, QString("imei"));
+	smDeviceListModel->setHeaderData(28, Qt::Horizontal, QString("iccid"));
+	smDeviceListModel->setHeaderData(29, Qt::Horizontal, QString("simCarrierNetwork"));
+	smDeviceListModel->setHeaderData(30, Qt::Horizontal, QString("cellularDataUsed"));
+	smDeviceListModel->setHeaderData(31, Qt::Horizontal, QString("isHotspotEnabled"));
+	smDeviceListModel->setHeaderData(32, Qt::Horizontal, QString("createdAt"));
+	smDeviceListModel->setHeaderData(33, Qt::Horizontal, QString("batteryEstCharge"));
+	smDeviceListModel->setHeaderData(34, Qt::Horizontal, QString("quarantined"));
+	smDeviceListModel->setHeaderData(35, Qt::Horizontal, QString("avName"));
+	smDeviceListModel->setHeaderData(36, Qt::Horizontal, QString("avRunning"));
+	smDeviceListModel->setHeaderData(37, Qt::Horizontal, QString("asName"));
+	smDeviceListModel->setHeaderData(38, Qt::Horizontal, QString("fwName"));
+	smDeviceListModel->setHeaderData(39, Qt::Horizontal, QString("isRooted"));
+	smDeviceListModel->setHeaderData(40, Qt::Horizontal, QString("loginRequired"));
+	smDeviceListModel->setHeaderData(41, Qt::Horizontal, QString("screenLockEnabled"));
+	smDeviceListModel->setHeaderData(42, Qt::Horizontal, QString("screenLockDelay"));
+	smDeviceListModel->setHeaderData(43, Qt::Horizontal, QString("autoLoginDisabled"));
+	smDeviceListModel->setHeaderData(44, Qt::Horizontal, QString("hasMdm"));
+	smDeviceListModel->setHeaderData(45, Qt::Horizontal, QString("hasDesktopAgent"));
+	smDeviceListModel->setHeaderData(46, Qt::Horizontal, QString("diskEncryptionEnabled"));
+	smDeviceListModel->setHeaderData(47, Qt::Horizontal, QString("hardwareEncryptionCaps"));
+	smDeviceListModel->setHeaderData(48, Qt::Horizontal, QString("passCodeLock"));
+
+
+	// show SM devices
+	count = 0;
+	if (netIndex == -1) {
+		for (int i = 0; i < orgList.at(orgIndex)->getNetworksNum(); i++) {
+			if (orgList.at(orgIndex)->getNetwork(i).netType == "systems manager"
+					|| orgList.at(orgIndex)->getNetwork(i).netType == "combined") {
+
+				for (int j = 0; j < orgList.at(orgIndex)->getNetwork(i).smDevices.size(); j++) {
+					// go through every SM device in the network
+					smDevice tmpSMDevice = orgList.at(orgIndex)->getNetwork(i).smDevices.at(j);
+
+					smDeviceListModel->setItem(count, 0, new QStandardItem(tmpSMDevice.id));
+					smDeviceListModel->setItem(count, 1, new QStandardItem(tmpSMDevice.name));
+
+					QString tmpTags;
+					for (int t = 0; t < tmpSMDevice.tags.size(); t++) {
+						tmpTags.append(tmpSMDevice.tags.at(t));
+						if (t < tmpSMDevice.tags.size()-1) { tmpTags.append(", ");}
+					}
+					smDeviceListModel->setItem(count, 2, new QStandardItem(tmpTags));
+
+					smDeviceListModel->setItem(count, 3, new QStandardItem(tmpSMDevice.ssid));
+					smDeviceListModel->setItem(count, 4, new QStandardItem(tmpSMDevice.wifiMac));
+					smDeviceListModel->setItem(count, 5, new QStandardItem(tmpSMDevice.osName));
+					smDeviceListModel->setItem(count, 6, new QStandardItem(tmpSMDevice.systemModel));
+					smDeviceListModel->setItem(count, 7, new QStandardItem(tmpSMDevice.uuid));
+					smDeviceListModel->setItem(count, 8, new QStandardItem(tmpSMDevice.serialNumber));
+					smDeviceListModel->setItem(count, 9, new QStandardItem(tmpSMDevice.ip));
+					smDeviceListModel->setItem(count, 10, new QStandardItem(tmpSMDevice.systemType));
+					smDeviceListModel->setItem(count, 11, new QStandardItem(QString::number(tmpSMDevice.availableDeviceCapacity)));
+					smDeviceListModel->setItem(count, 12, new QStandardItem(tmpSMDevice.kioskAppName));
+					smDeviceListModel->setItem(count, 13, new QStandardItem(tmpSMDevice.biosVersion));
+					smDeviceListModel->setItem(count, 14, new QStandardItem(QString::number(tmpSMDevice.lastConnected)));
+					smDeviceListModel->setItem(count, 15, new QStandardItem(QString::number(tmpSMDevice.missingAppsCount)));
+					smDeviceListModel->setItem(count, 16, new QStandardItem(tmpSMDevice.userSuppliedAddress));
+					smDeviceListModel->setItem(count, 17, new QStandardItem(tmpSMDevice.location));
+					smDeviceListModel->setItem(count, 18, new QStandardItem(tmpSMDevice.lastUser));
+					smDeviceListModel->setItem(count, 19, new QStandardItem(tmpSMDevice.publicIp));
+					smDeviceListModel->setItem(count, 20, new QStandardItem(tmpSMDevice.phoneNumber));
+					smDeviceListModel->setItem(count, 21, new QStandardItem(tmpSMDevice.diskInfoJson));
+					smDeviceListModel->setItem(count, 22, new QStandardItem(QString::number(tmpSMDevice.deviceCapacity)));
+					smDeviceListModel->setItem(count, 23, new QStandardItem(QString::number(tmpSMDevice.isManaged)));
+					smDeviceListModel->setItem(count, 24, new QStandardItem(QString::number(tmpSMDevice.hadMdm)));
+					smDeviceListModel->setItem(count, 25, new QStandardItem(QString::number(tmpSMDevice.isSupervised)));
+					smDeviceListModel->setItem(count, 26, new QStandardItem(tmpSMDevice.meid));
+					smDeviceListModel->setItem(count, 27, new QStandardItem(tmpSMDevice.imei));
+					smDeviceListModel->setItem(count, 28, new QStandardItem(tmpSMDevice.iccid));
+					smDeviceListModel->setItem(count, 29, new QStandardItem(tmpSMDevice.simCarrierNetwork));
+					smDeviceListModel->setItem(count, 30, new QStandardItem(QString::number(tmpSMDevice.cellularDataUsed)));
+					smDeviceListModel->setItem(count, 31, new QStandardItem(QString::number(tmpSMDevice.isHotspotEnabled)));
+					smDeviceListModel->setItem(count, 32, new QStandardItem(QString::number(tmpSMDevice.createdAt)));
+					smDeviceListModel->setItem(count, 33, new QStandardItem(tmpSMDevice.batteryEstCharge));
+					smDeviceListModel->setItem(count, 34, new QStandardItem(QString::number(tmpSMDevice.quarantined)));
+					smDeviceListModel->setItem(count, 35, new QStandardItem(tmpSMDevice.avName));
+					smDeviceListModel->setItem(count, 36, new QStandardItem(tmpSMDevice.avRunning));
+					smDeviceListModel->setItem(count, 37, new QStandardItem(tmpSMDevice.asName));
+					smDeviceListModel->setItem(count, 38, new QStandardItem(tmpSMDevice.fwName));
+					smDeviceListModel->setItem(count, 39, new QStandardItem(QString::number(tmpSMDevice.isRooted)));
+					smDeviceListModel->setItem(count, 40, new QStandardItem(QString::number(tmpSMDevice.loginRequired)));
+					smDeviceListModel->setItem(count, 41, new QStandardItem(QString::number(tmpSMDevice.screenLockEnabled)));
+					smDeviceListModel->setItem(count, 42, new QStandardItem(tmpSMDevice.screenLockDelay));
+					smDeviceListModel->setItem(count, 43, new QStandardItem(QString::number(tmpSMDevice.autoLoginDisabled)));
+					smDeviceListModel->setItem(count, 44, new QStandardItem(QString::number(tmpSMDevice.hasMdm)));
+					smDeviceListModel->setItem(count, 45, new QStandardItem(QString::number(tmpSMDevice.hasDesktopAgent)));
+					smDeviceListModel->setItem(count, 46, new QStandardItem(QString::number(tmpSMDevice.diskEncryptionEnabled)));
+					smDeviceListModel->setItem(count, 47, new QStandardItem(tmpSMDevice.hardwareEncryptionCaps));
+					smDeviceListModel->setItem(count, 48, new QStandardItem(QString::number(tmpSMDevice.passCodeLock)));
+
+					count++;
+
+				}
+			}
+		}
+
+	} else {
+		// only show SM devices for the particular network
+		for (int j = 0; j < orgList.at(orgIndex)->getNetwork(netIndex).smDevices.size(); j++) {
+			// go through every SM device in the network
+			smDevice tmpSMDevice = orgList.at(orgIndex)->getNetwork(netIndex).smDevices.at(j);
+
+			smDeviceListModel->setItem(count, 0, new QStandardItem(tmpSMDevice.id));
+			smDeviceListModel->setItem(count, 1, new QStandardItem(tmpSMDevice.name));
+
+			QString tmpTags;
+			for (int t = 0; t < tmpSMDevice.tags.size(); t++) {
+				tmpTags.append(tmpSMDevice.tags.at(t));
+				if (t < tmpSMDevice.tags.size()-1) { tmpTags.append(", ");}
+			}
+			smDeviceListModel->setItem(count, 2, new QStandardItem(tmpTags));
+			smDeviceListModel->setItem(count, 3, new QStandardItem(tmpSMDevice.ssid));
+			smDeviceListModel->setItem(count, 4, new QStandardItem(tmpSMDevice.wifiMac));
+			smDeviceListModel->setItem(count, 5, new QStandardItem(tmpSMDevice.osName));
+			smDeviceListModel->setItem(count, 6, new QStandardItem(tmpSMDevice.systemModel));
+			smDeviceListModel->setItem(count, 7, new QStandardItem(tmpSMDevice.uuid));
+			smDeviceListModel->setItem(count, 8, new QStandardItem(tmpSMDevice.serialNumber));
+			smDeviceListModel->setItem(count, 9, new QStandardItem(tmpSMDevice.ip));
+			smDeviceListModel->setItem(count, 10, new QStandardItem(tmpSMDevice.systemType));
+			smDeviceListModel->setItem(count, 11, new QStandardItem(QString::number(tmpSMDevice.availableDeviceCapacity)));
+			smDeviceListModel->setItem(count, 12, new QStandardItem(tmpSMDevice.kioskAppName));
+			smDeviceListModel->setItem(count, 13, new QStandardItem(tmpSMDevice.biosVersion));
+			smDeviceListModel->setItem(count, 14, new QStandardItem(QString::number(tmpSMDevice.lastConnected)));
+			smDeviceListModel->setItem(count, 15, new QStandardItem(QString::number(tmpSMDevice.missingAppsCount)));
+			smDeviceListModel->setItem(count, 16, new QStandardItem(tmpSMDevice.userSuppliedAddress));
+			smDeviceListModel->setItem(count, 17, new QStandardItem(tmpSMDevice.location));
+			smDeviceListModel->setItem(count, 18, new QStandardItem(tmpSMDevice.lastUser));
+			smDeviceListModel->setItem(count, 19, new QStandardItem(tmpSMDevice.publicIp));
+			smDeviceListModel->setItem(count, 20, new QStandardItem(tmpSMDevice.phoneNumber));
+			smDeviceListModel->setItem(count, 21, new QStandardItem(tmpSMDevice.diskInfoJson));
+			smDeviceListModel->setItem(count, 22, new QStandardItem(QString::number(tmpSMDevice.deviceCapacity)));
+			smDeviceListModel->setItem(count, 23, new QStandardItem(QString::number(tmpSMDevice.isManaged)));
+			smDeviceListModel->setItem(count, 24, new QStandardItem(QString::number(tmpSMDevice.hadMdm)));
+			smDeviceListModel->setItem(count, 25, new QStandardItem(QString::number(tmpSMDevice.isSupervised)));
+			smDeviceListModel->setItem(count, 26, new QStandardItem(tmpSMDevice.meid));
+			smDeviceListModel->setItem(count, 27, new QStandardItem(tmpSMDevice.imei));
+			smDeviceListModel->setItem(count, 28, new QStandardItem(tmpSMDevice.iccid));
+			smDeviceListModel->setItem(count, 29, new QStandardItem(tmpSMDevice.simCarrierNetwork));
+			smDeviceListModel->setItem(count, 30, new QStandardItem(QString::number(tmpSMDevice.cellularDataUsed)));
+			smDeviceListModel->setItem(count, 31, new QStandardItem(QString::number(tmpSMDevice.isHotspotEnabled)));
+			smDeviceListModel->setItem(count, 32, new QStandardItem(QString::number(tmpSMDevice.createdAt)));
+			smDeviceListModel->setItem(count, 33, new QStandardItem(tmpSMDevice.batteryEstCharge));
+			smDeviceListModel->setItem(count, 34, new QStandardItem(QString::number(tmpSMDevice.quarantined)));
+			smDeviceListModel->setItem(count, 35, new QStandardItem(tmpSMDevice.avName));
+			smDeviceListModel->setItem(count, 36, new QStandardItem(tmpSMDevice.avRunning));
+			smDeviceListModel->setItem(count, 37, new QStandardItem(tmpSMDevice.asName));
+			smDeviceListModel->setItem(count, 38, new QStandardItem(tmpSMDevice.fwName));
+			smDeviceListModel->setItem(count, 39, new QStandardItem(QString::number(tmpSMDevice.isRooted)));
+			smDeviceListModel->setItem(count, 40, new QStandardItem(QString::number(tmpSMDevice.loginRequired)));
+			smDeviceListModel->setItem(count, 41, new QStandardItem(QString::number(tmpSMDevice.screenLockEnabled)));
+			smDeviceListModel->setItem(count, 42, new QStandardItem(tmpSMDevice.screenLockDelay));
+			smDeviceListModel->setItem(count, 43, new QStandardItem(QString::number(tmpSMDevice.autoLoginDisabled)));
+			smDeviceListModel->setItem(count, 44, new QStandardItem(QString::number(tmpSMDevice.hasMdm)));
+			smDeviceListModel->setItem(count, 45, new QStandardItem(QString::number(tmpSMDevice.hasDesktopAgent)));
+			smDeviceListModel->setItem(count, 46, new QStandardItem(QString::number(tmpSMDevice.diskEncryptionEnabled)));
+			smDeviceListModel->setItem(count, 47, new QStandardItem(tmpSMDevice.hardwareEncryptionCaps));
+			smDeviceListModel->setItem(count, 48, new QStandardItem(QString::number(tmpSMDevice.passCodeLock)));
+
+			count++;
+
+		}
+	}
+
+
+	ui->smDevicesTable->setModel(smDeviceListModel);
+	ui->smDevicesTable->resizeColumnsToContents();
+	ui->smDevicesTable->resizeRowsToContents();
+
+}
+
 
 
 
@@ -609,7 +847,7 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 		// a network was selected in the tree view
 		tmp.orgIndex = index.parent().row();
 		tmp.netIndex = index.row();
-		updateNetworkUI(QModelIndex(index));
+//		updateNetworkUI(QModelIndex(index));
 	}
 
 
@@ -728,6 +966,29 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 			}
 
 			displayMXInfo(currOrgIndex);
+			break;
+		}
+
+		case 8: {
+			// SM tab, show full list of SM devices
+			if (orgList.at(currOrgIndex)->getOrgInventorySize() == 0) {
+				// org inventory is empty, fetch it
+				tmp.urlListIndex = 48;	// GET /organizations/[organizationId]/inventory
+				apiHelpObj->putEventInQueue(tmp);
+			}
+
+			// get SM devices in the network/org
+			// only check "systems manager" and "combined" network types
+			for (int i = 0; i < orgList.at(currOrgIndex)->getNetworksNum(); i++) {
+				if (orgList.at(currOrgIndex)->getNetwork(i).netType == "systems manager"
+						|| orgList.at(currOrgIndex)->getNetwork(i).netType == "combined") {
+					tmp.urlListIndex = 82;	// GET /networks/[networkId]/sm/devices
+					tmp.netIndex = i;
+					apiHelpObj->putEventInQueue(tmp);
+				}
+			}
+
+			displaySMDevices(currOrgIndex);
 			break;
 		}
 
