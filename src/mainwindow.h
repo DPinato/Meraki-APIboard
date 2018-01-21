@@ -40,6 +40,8 @@ public:
 	~MainWindow();
 
 	QString getAPIkeyFromFile(QString file);
+	void prepareModelObj();
+	void prepareColumnHeaders();
 	void updateOrgUI(int orgIndex);		// update the tree view of the organization/network
 	void updateNetworkUI(QModelIndex &index);
 
@@ -96,12 +98,9 @@ private:
 
 	int currOrgIndex;	// index of organization currently shown in the GUI
 
-//	QVector<double> orgIDs;	// org IDs can be quite long, 15+ digits
-//	QVector<QString> orgName;
-//	QVector<QString> samlURL;
-//	QVector<QList<QString>> samlURLs;
-
-	// TODO: every time the display functions are called, these are initialised again, fix this
+	// these objects are used to show list of things in the GUI
+	QStandardItemModel *adminListModel[3];		// list of org administrators
+	QStandardItemModel *inventoryModel;		// org inventory
 	QStandardItemModel *msListModel;		// show list of switches
 	QStandardItemModel *msPortListModel;	// show list of ports of a particular switch
 	QStandardItemModel *mxListModel;		// show list of MXs

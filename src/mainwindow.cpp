@@ -13,15 +13,16 @@ MainWindow::MainWindow(QWidget *parent) :
 	on_snmp3Check_clicked(false);
 	ui->nonMVPNCheck->setChecked(false);
 	on_nonMVPNCheck_clicked(false);
+	prepareModelObj();			// initialise QStandardItemModel objects
+	prepareColumnHeaders();		// show columns headers for table views in the GUI
 
 
 	// I am doing this so I do not have to leave my API key in this code
-
-//	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
+	//	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
 	apiKey = getAPIkeyFromFile(QString("C:\\Users\\Davide\\Documents\\meraki_api_key.txt"));
 	qDebug() << apiKey;
 
-//	urlListFile = QString("D:\\Programming\\Qt\\Meraki-APIboard\\URL_list.txt");
+	//	urlListFile = QString("D:\\Programming\\Qt\\Meraki-APIboard\\URL_list.txt");
 	urlListFile = QString("C:\\Users\\Davide\\Documents\\Meraki-APIboard\\URL_list.txt");
 	qDebug() << urlListFile;
 
@@ -33,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
+	// start by getting the list of organizations associated with the license key
 	on_refreshOrgsButton_clicked();
 
 
@@ -55,6 +57,186 @@ QString MainWindow::getAPIkeyFromFile(QString file) {
 	if (tmp.at(tmp.length()-1) == QChar('\n')) { tmp.remove(tmp.length()-1, 1); }
 
 	return tmp;
+
+}
+
+void MainWindow::prepareModelObj() {
+	// use this function to initialise the QStandardItemModel aobjects
+	// do not give them the number of rows here, the individual display functions will do so
+
+	adminListModel[0] = new QStandardItemModel(this);
+	adminListModel[0]->setColumnCount(4);
+	ui->adminsTableView->setModel(adminListModel[0]);
+	adminListModel[1] = new QStandardItemModel(this);
+	adminListModel[1]->setColumnCount(2);
+	ui->adminsTableView_2->setModel(adminListModel[1]);
+	adminListModel[2] = new QStandardItemModel(this);
+	adminListModel[2]->setColumnCount(2);
+	ui->adminsTableView_3->setModel(adminListModel[2]);
+
+	//	inventoryModel = new QStandardItemModel(orgList.at(orgIndex)->getOrgInventorySize(), 6, this);
+	inventoryModel = new QStandardItemModel(this);
+	inventoryModel->setColumnCount(6);
+	ui->orgInventoryView->setModel(inventoryModel);
+
+	//	msListModel = new QStandardItemModel(count, 5, this);
+	msListModel = new QStandardItemModel(this);
+	msListModel->setColumnCount(5);
+	ui->msSwitchesTable->setModel(msListModel);
+
+	//	msPortListModel = new QStandardItemModel(portCount, 13, this);
+	msPortListModel = new QStandardItemModel(this);
+	msPortListModel->setColumnCount(13);
+	ui->msSwitchPortsTable->setModel(msPortListModel);
+
+	//	mxListModel = new QStandardItemModel(count, 5, this);
+	mxListModel = new QStandardItemModel(this);
+	mxListModel->setColumnCount(5);
+	ui->mxDeviceTable->setModel(mxListModel);
+
+	//	smDeviceListModel = new QStandardItemModel(count, 49, this);
+	smDeviceListModel = new QStandardItemModel(this);
+	smDeviceListModel->setColumnCount(49);
+	ui->smDevicesTable->setModel(smDeviceListModel);
+
+	//	mxL3RulesModel = new QStandardItemModel(rulesCount, 8, this);
+	mxL3RulesModel = new QStandardItemModel(this);
+	mxL3RulesModel->setColumnCount(8);
+	ui->mxL3FirewallTable->setModel(mxL3RulesModel);
+
+
+
+}
+
+void MainWindow::prepareColumnHeaders() {
+	// show columns header and things in the UI, when the program first starts
+	// this should be called after prepareUI()
+	// consider reading all the column headers from file?
+
+	// columns are | name | email | org_privilege | admin_id | networks | tags |
+	adminListModel[0]->setHeaderData(0, Qt::Horizontal, QString("Name"));
+	adminListModel[0]->setHeaderData(1, Qt::Horizontal, QString("E-mail"));
+	adminListModel[0]->setHeaderData(2, Qt::Horizontal, QString("Org Privilege"));
+	adminListModel[0]->setHeaderData(3, Qt::Horizontal, QString("ID"));
+
+	adminListModel[2]->setHeaderData(0, Qt::Horizontal, QString("Tag"));
+	adminListModel[2]->setHeaderData(1, Qt::Horizontal, QString("Access"));
+
+
+	// columns are | model | mac | serial | publicIp | claimedAt | networkId |
+	inventoryModel->setHeaderData(0, Qt::Horizontal, QString("model"));
+	inventoryModel->setHeaderData(1, Qt::Horizontal, QString("mac"));
+	inventoryModel->setHeaderData(2, Qt::Horizontal, QString("serial"));
+	inventoryModel->setHeaderData(3, Qt::Horizontal, QString("publicIp"));
+	inventoryModel->setHeaderData(4, Qt::Horizontal, QString("claimedAt"));
+	inventoryModel->setHeaderData(5, Qt::Horizontal, QString("networkId"));
+
+
+	// columns are | MAC | Model | Serial | public IP | network |
+	msListModel->setHeaderData(0, Qt::Horizontal, QString("MAC"));
+	msListModel->setHeaderData(1, Qt::Horizontal, QString("Model"));
+	msListModel->setHeaderData(2, Qt::Horizontal, QString("Serial"));
+	msListModel->setHeaderData(3, Qt::Horizontal, QString("Public IP"));
+	msListModel->setHeaderData(4, Qt::Horizontal, QString("Network"));
+
+
+	// columns are | number | name | tags | enabled | poeEnabled | type | vlan | voiceVlan | allowedVlans |
+	// | isolationEnabled | rstpEnabled | stpGuard | accessPolicyNumber
+	msPortListModel->setHeaderData(0, Qt::Horizontal, QString("number"));
+	msPortListModel->setHeaderData(1, Qt::Horizontal, QString("name"));
+	msPortListModel->setHeaderData(2, Qt::Horizontal, QString("tags"));
+	msPortListModel->setHeaderData(3, Qt::Horizontal, QString("enabled"));
+	msPortListModel->setHeaderData(4, Qt::Horizontal, QString("poeEnabled"));
+	msPortListModel->setHeaderData(5, Qt::Horizontal, QString("type"));
+	msPortListModel->setHeaderData(6, Qt::Horizontal, QString("vlan"));
+	msPortListModel->setHeaderData(7, Qt::Horizontal, QString("voiceVlan"));
+	msPortListModel->setHeaderData(8, Qt::Horizontal, QString("allowedVlans"));
+	msPortListModel->setHeaderData(9, Qt::Horizontal, QString("isolationEnabled"));
+	msPortListModel->setHeaderData(10, Qt::Horizontal, QString("rstpEnabled"));
+	msPortListModel->setHeaderData(11, Qt::Horizontal, QString("stpGuard"));
+	msPortListModel->setHeaderData(12, Qt::Horizontal, QString("accessPolicyNumber"));
+
+
+	// columns are | MAC | Model | Serial | public IP | network |
+	mxListModel->setHeaderData(0, Qt::Horizontal, QString("MAC"));
+	mxListModel->setHeaderData(1, Qt::Horizontal, QString("Model"));
+	mxListModel->setHeaderData(2, Qt::Horizontal, QString("Serial"));
+	mxListModel->setHeaderData(3, Qt::Horizontal, QString("Public IP"));
+	mxListModel->setHeaderData(4, Qt::Horizontal, QString("Network"));
+
+
+	// columns are | id | name | tags | ssid | wifiMac | osName | systemModel | uuid |
+	// | serialNumber | ip | systemType | availableDeviceCapacity | kioskAppName |
+	// | biosVersion | lastConnected | missingAppsCount | userSuppliedAddress |
+	// | location | lastUser | publicIp | phoneNumber | diskInfoJson | deviceCapacity |
+	// | isManaged | hadMdm | isSupervised | meid | imei | iccid | simCarrierNetwork |
+	// | cellularDataUsed | isHotspotEnabled | createdAt | batteryEstCharge | quarantined |
+	// | avName | avRunning | asName | fwName | isRooted | loginRequired | screenLockEnabled |
+	// | autoLoginDisabled | hasMdm | hasDesktopAgent | diskEncryptionEnabled |
+	// | hardwareEncryptionCaps | passCodeLock
+	// 49 columns, I missed one above, the full list is in the smDevice struct, wow
+	smDeviceListModel->setHeaderData(0, Qt::Horizontal, QString("id"));
+	smDeviceListModel->setHeaderData(1, Qt::Horizontal, QString("name"));
+	smDeviceListModel->setHeaderData(2, Qt::Horizontal, QString("tags"));
+	smDeviceListModel->setHeaderData(3, Qt::Horizontal, QString("ssid"));
+	smDeviceListModel->setHeaderData(4, Qt::Horizontal, QString("wifiMac"));
+	smDeviceListModel->setHeaderData(5, Qt::Horizontal, QString("osName"));
+	smDeviceListModel->setHeaderData(6, Qt::Horizontal, QString("systemModel"));
+	smDeviceListModel->setHeaderData(7, Qt::Horizontal, QString("uuid"));
+	smDeviceListModel->setHeaderData(8, Qt::Horizontal, QString("serialNumber"));
+	smDeviceListModel->setHeaderData(9, Qt::Horizontal, QString("ip"));
+	smDeviceListModel->setHeaderData(10, Qt::Horizontal, QString("systemType"));
+	smDeviceListModel->setHeaderData(11, Qt::Horizontal, QString("availableDeviceCapacity"));
+	smDeviceListModel->setHeaderData(12, Qt::Horizontal, QString("kioskAppName"));
+	smDeviceListModel->setHeaderData(13, Qt::Horizontal, QString("biosVersion"));
+	smDeviceListModel->setHeaderData(14, Qt::Horizontal, QString("lastConnected"));
+	smDeviceListModel->setHeaderData(15, Qt::Horizontal, QString("missingAppsCount"));
+	smDeviceListModel->setHeaderData(16, Qt::Horizontal, QString("userSuppliedAddress"));
+	smDeviceListModel->setHeaderData(17, Qt::Horizontal, QString("location"));
+	smDeviceListModel->setHeaderData(18, Qt::Horizontal, QString("lastUser"));
+	smDeviceListModel->setHeaderData(19, Qt::Horizontal, QString("publicIp"));
+	smDeviceListModel->setHeaderData(20, Qt::Horizontal, QString("phoneNumber"));
+	smDeviceListModel->setHeaderData(21, Qt::Horizontal, QString("diskInfoJson"));
+	smDeviceListModel->setHeaderData(22, Qt::Horizontal, QString("deviceCapacity"));
+	smDeviceListModel->setHeaderData(23, Qt::Horizontal, QString("isManaged"));
+	smDeviceListModel->setHeaderData(24, Qt::Horizontal, QString("hadMdm"));
+	smDeviceListModel->setHeaderData(25, Qt::Horizontal, QString("isSupervised"));
+	smDeviceListModel->setHeaderData(26, Qt::Horizontal, QString("meid"));
+	smDeviceListModel->setHeaderData(27, Qt::Horizontal, QString("imei"));
+	smDeviceListModel->setHeaderData(28, Qt::Horizontal, QString("iccid"));
+	smDeviceListModel->setHeaderData(29, Qt::Horizontal, QString("simCarrierNetwork"));
+	smDeviceListModel->setHeaderData(30, Qt::Horizontal, QString("cellularDataUsed"));
+	smDeviceListModel->setHeaderData(31, Qt::Horizontal, QString("isHotspotEnabled"));
+	smDeviceListModel->setHeaderData(32, Qt::Horizontal, QString("createdAt"));
+	smDeviceListModel->setHeaderData(33, Qt::Horizontal, QString("batteryEstCharge"));
+	smDeviceListModel->setHeaderData(34, Qt::Horizontal, QString("quarantined"));
+	smDeviceListModel->setHeaderData(35, Qt::Horizontal, QString("avName"));
+	smDeviceListModel->setHeaderData(36, Qt::Horizontal, QString("avRunning"));
+	smDeviceListModel->setHeaderData(37, Qt::Horizontal, QString("asName"));
+	smDeviceListModel->setHeaderData(38, Qt::Horizontal, QString("fwName"));
+	smDeviceListModel->setHeaderData(39, Qt::Horizontal, QString("isRooted"));
+	smDeviceListModel->setHeaderData(40, Qt::Horizontal, QString("loginRequired"));
+	smDeviceListModel->setHeaderData(41, Qt::Horizontal, QString("screenLockEnabled"));
+	smDeviceListModel->setHeaderData(42, Qt::Horizontal, QString("screenLockDelay"));
+	smDeviceListModel->setHeaderData(43, Qt::Horizontal, QString("autoLoginDisabled"));
+	smDeviceListModel->setHeaderData(44, Qt::Horizontal, QString("hasMdm"));
+	smDeviceListModel->setHeaderData(45, Qt::Horizontal, QString("hasDesktopAgent"));
+	smDeviceListModel->setHeaderData(46, Qt::Horizontal, QString("diskEncryptionEnabled"));
+	smDeviceListModel->setHeaderData(47, Qt::Horizontal, QString("hardwareEncryptionCaps"));
+	smDeviceListModel->setHeaderData(48, Qt::Horizontal, QString("passCodeLock"));
+
+
+	// columns are | policy | protocol | srcCidr | srcPort | dstCidr | dstPort | syslogEnabled | comment |
+	mxL3RulesModel->setHeaderData(0, Qt::Horizontal, QString("policy"));
+	mxL3RulesModel->setHeaderData(1, Qt::Horizontal, QString("protocol"));
+	mxL3RulesModel->setHeaderData(2, Qt::Horizontal, QString("srcCidr"));
+	mxL3RulesModel->setHeaderData(3, Qt::Horizontal, QString("srcPort"));
+	mxL3RulesModel->setHeaderData(4, Qt::Horizontal, QString("destCidr"));
+	mxL3RulesModel->setHeaderData(5, Qt::Horizontal, QString("destPort"));
+	mxL3RulesModel->setHeaderData(6, Qt::Horizontal, QString("syslogEnabled"));
+	mxL3RulesModel->setHeaderData(7, Qt::Horizontal, QString("comment"));
+
+
 
 }
 
@@ -142,76 +324,64 @@ void MainWindow::updateNetworkUI(QModelIndex &index) {
 
 void MainWindow::displayAdminStuff(int orgIndex) {
 	// show administrators in the table view
-	// columns are <name | email | org_privilege | admin_id | networks | tags>
-	QStandardItemModel *adminTree = new QStandardItemModel(orgList.at(orgIndex)->getAdminListSize(), 4, this);
 
-	// set column headers
-	adminTree->setHeaderData(0, Qt::Horizontal, QString("Name"));
-	adminTree->setHeaderData(1, Qt::Horizontal, QString("E-mail"));
-	adminTree->setHeaderData(2, Qt::Horizontal, QString("Org Privilege"));
-	adminTree->setHeaderData(3, Qt::Horizontal, QString("ID"));
-
+	adminListModel[0]->setRowCount(orgList.at(orgIndex)->getAdminListSize());
 
 	for (int i = 0; i < orgList.at(orgIndex)->getAdminListSize(); i++) {
 		adminStruct tmpAdmin = orgList.at(orgIndex)->getAdmin(i);
 
-		adminTree->setItem(i, 0, new QStandardItem(tmpAdmin.name));
-		adminTree->setItem(i, 1, new QStandardItem(tmpAdmin.email));
-		adminTree->setItem(i, 2, new QStandardItem(tmpAdmin.orgAccess));
-		adminTree->setItem(i, 3, new QStandardItem(tmpAdmin.id));
+		adminListModel[0]->setItem(i, 0, new QStandardItem(tmpAdmin.name));
+		adminListModel[0]->setItem(i, 1, new QStandardItem(tmpAdmin.email));
+		adminListModel[0]->setItem(i, 2, new QStandardItem(tmpAdmin.orgAccess));
+		adminListModel[0]->setItem(i, 3, new QStandardItem(tmpAdmin.id));
 
 
 		// display list of networks admin has access to, if this is a network admin
 		// also display privileges of camera-only administrators
-			QStandardItemModel *adminTree2 = new QStandardItemModel(orgList.at(orgIndex)->getAdmin(i).nets.size(), 2, this);
-			adminTree2->setHeaderData(0, Qt::Horizontal, QString("Net ID"));
-			adminTree2->setHeaderData(1, Qt::Horizontal, QString("Access"));
+		// since there could be either 2 or 3 columns, leave the setHeaderData here
+		adminListModel[1]->setRowCount(orgList.at(orgIndex)->getAdmin(i).nets.size());
+		adminListModel[1]->setHeaderData(0, Qt::Horizontal, QString("Net ID"));
+		adminListModel[1]->setHeaderData(1, Qt::Horizontal, QString("Access"));
 
-			int j = 0;	// I think that a network admin can be a network admin and camera-only admin in different networks
-			for (j = 0; j < tmpAdmin.nets.size(); j++) {
-				adminNetPermission tmpPerm = tmpAdmin.nets.at(j);
-				adminTree2->setItem(j, 0, new QStandardItem(tmpPerm.netID));
-				adminTree2->setItem(j, 1, new QStandardItem(tmpPerm.accessLevel));
+		int j = 0;	// I think that a network admin can be a network admin and camera-only admin in different networks
+		for (j = 0; j < tmpAdmin.nets.size(); j++) {
+			adminNetPermission tmpPerm = tmpAdmin.nets.at(j);
+			adminListModel[1]->setItem(j, 0, new QStandardItem(tmpPerm.netID));
+			adminListModel[1]->setItem(j, 1, new QStandardItem(tmpPerm.accessLevel));
+		}
+
+		// for camera-only admins
+		if (tmpAdmin.cNets.size() > 0) {
+			adminListModel[1]->setColumnCount(3);
+			adminListModel[1]->setHeaderData(2, Qt::Horizontal, QString("network_type"));
+
+			for (j = j; j < tmpAdmin.cNets.size(); j++) {
+				adminNetPermission tmpCPerm = tmpAdmin.cNets.at(j);
+				adminListModel[1]->setItem(j, 0, new QStandardItem(tmpCPerm.netID));
+				adminListModel[1]->setItem(j, 1, new QStandardItem(tmpCPerm.accessLevel));
+				adminListModel[1]->setItem(j, 2, new QStandardItem(tmpCPerm.networkType));
 			}
+		}
 
-			// for camera-only admins
-			if (tmpAdmin.cNets.size() > 0) {
-				adminTree2->setColumnCount(3);
-				adminTree2->setHeaderData(2, Qt::Horizontal, QString("network_type"));
+		ui->adminsTableView_2->resizeColumnsToContents();
+		ui->adminsTableView_2->resizeRowsToContents();
 
-				for (j = j; j < tmpAdmin.cNets.size(); j++) {
-					adminNetPermission tmpCPerm = tmpAdmin.cNets.at(j);
-					adminTree2->setItem(j, 0, new QStandardItem(tmpCPerm.netID));
-					adminTree2->setItem(j, 1, new QStandardItem(tmpCPerm.accessLevel));
-					adminTree2->setItem(j, 2, new QStandardItem(tmpCPerm.networkType));
-				}
-			}
-
-
-			ui->adminsTableView_2->setModel(adminTree2);
-			ui->adminsTableView_2->resizeColumnsToContents();
-			ui->adminsTableView_2->resizeRowsToContents();
 
 
 		// display list of tags assigned to administrator
-			QStandardItemModel *adminTree3 = new QStandardItemModel(orgList.at(orgIndex)->getAdmin(i).tags.size(), 2, this);
-			adminTree3->setHeaderData(0, Qt::Horizontal, QString("Tag"));
-			adminTree3->setHeaderData(1, Qt::Horizontal, QString("Access"));
+		adminListModel[2]->setRowCount(orgList.at(orgIndex)->getAdmin(i).tags.size());
 
-			for (int j = 0; j < tmpAdmin.tags.size(); j++) {
-				adminTag tmpTag = tmpAdmin.tags.at(j);
-				adminTree3->setItem(j, 0, new QStandardItem(tmpTag.tag));
-				adminTree3->setItem(j, 1, new QStandardItem(tmpTag.adminAccessLevel));
-			}
+		for (int j = 0; j < tmpAdmin.tags.size(); j++) {
+			adminTag tmpTag = tmpAdmin.tags.at(j);
+			adminListModel[2]->setItem(j, 0, new QStandardItem(tmpTag.tag));
+			adminListModel[2]->setItem(j, 1, new QStandardItem(tmpTag.adminAccessLevel));
+		}
 
-			ui->adminsTableView_3->setModel(adminTree3);
-			ui->adminsTableView_3->resizeColumnsToContents();
-			ui->adminsTableView_3->resizeRowsToContents();
-
+		ui->adminsTableView_3->resizeColumnsToContents();
+		ui->adminsTableView_3->resizeRowsToContents();
 
 	}
 
-	ui->adminsTableView->setModel(adminTree);
 	ui->adminsTableView->resizeColumnsToContents();
 	ui->adminsTableView->resizeRowsToContents();
 
@@ -236,16 +406,7 @@ void MainWindow::displayLicenseInfo(int orgIndex) {
 
 void MainWindow::displayInventory(int orgIndex) {
 	// show devices in the inventory table
-	QStandardItemModel *inventoryModel = new QStandardItemModel(orgList.at(orgIndex)->getOrgInventorySize(), 6, this);
-
-	// columns are <model | mac | serial | publicIp | claimedAt | networkId>
-	inventoryModel->setHeaderData(0, Qt::Horizontal, QString("model"));
-	inventoryModel->setHeaderData(1, Qt::Horizontal, QString("mac"));
-	inventoryModel->setHeaderData(2, Qt::Horizontal, QString("serial"));
-	inventoryModel->setHeaderData(3, Qt::Horizontal, QString("publicIp"));
-	inventoryModel->setHeaderData(4, Qt::Horizontal, QString("claimedAt"));
-	inventoryModel->setHeaderData(5, Qt::Horizontal, QString("networkId"));
-
+	inventoryModel->setRowCount(orgList.at(orgIndex)->getOrgInventorySize());
 
 	// show stuff
 	for (int i = 0; i < orgList.at(orgIndex)->getOrgInventorySize(); i++) {
@@ -260,8 +421,6 @@ void MainWindow::displayInventory(int orgIndex) {
 
 	}
 
-
-	ui->orgInventoryView->setModel(inventoryModel);
 	ui->orgInventoryView->resizeColumnsToContents();
 	ui->orgInventoryView->resizeRowsToContents();
 
@@ -329,10 +488,10 @@ void MainWindow::displayOrgVPN(int orgIndex) {
 		ui->nonMVPNPeersMenu->clear();	// remove all the items from QComboBox
 
 		// TODO: for some reason this makes QComboBox go out of bounds
-//		for (int i = 0; i < orgList.at(orgIndex)->getOrgVPNPeerNum(); i++) {
-//			qDebug() << "i: " << i;
-//			ui->nonMVPNPeersMenu->addItem(orgList.at(orgIndex)->getOrgVPNPeer(i).peerName);
-//		}
+		//		for (int i = 0; i < orgList.at(orgIndex)->getOrgVPNPeerNum(); i++) {
+		//			qDebug() << "i: " << i;
+		//			ui->nonMVPNPeersMenu->addItem(orgList.at(orgIndex)->getOrgVPNPeer(i).peerName);
+		//		}
 
 
 		on_nonMVPNPeersMenu_currentIndexChanged(0);		// show the first item and update all the GUI
@@ -373,14 +532,7 @@ void MainWindow::displayMSInfo(int orgIndex, int netIndex) {
 	if (count == 0) { return; }
 
 
-	msListModel = new QStandardItemModel(count, 5, this);
-
-	// columns are | MAC | Model | Serial | public IP | network |
-	msListModel->setHeaderData(0, Qt::Horizontal, QString("MAC"));
-	msListModel->setHeaderData(1, Qt::Horizontal, QString("Model"));
-	msListModel->setHeaderData(2, Qt::Horizontal, QString("Serial"));
-	msListModel->setHeaderData(3, Qt::Horizontal, QString("Public IP"));
-	msListModel->setHeaderData(4, Qt::Horizontal, QString("Network"));
+	msListModel->setRowCount(count);
 
 
 	// show stuff
@@ -409,7 +561,6 @@ void MainWindow::displayMSInfo(int orgIndex, int netIndex) {
 		}
 	}
 
-	ui->msSwitchesTable->setModel(msListModel);
 	ui->msSwitchesTable->resizeColumnsToContents();
 	ui->msSwitchesTable->resizeRowsToContents();
 
@@ -420,23 +571,7 @@ void MainWindow::displayMSPort(int devIndex, int orgIndex) {
 	qDebug() << "\nMainWindow::displayMSPort, orgIndex: " << orgIndex << "\tdevIndex: " << devIndex;
 
 	int portCount = orgList.at(orgIndex)->getOrgInventoryDevice(devIndex).ports.size();
-	msPortListModel = new QStandardItemModel(portCount, 13, this);
-
-	// columns are | number | name | tags | enabled | poeEnabled | type | vlan | voiceVlan | allowedVlans |
-	// | isolationEnabled | rstpEnabled | stpGuard | accessPolicyNumber
-	msPortListModel->setHeaderData(0, Qt::Horizontal, QString("number"));
-	msPortListModel->setHeaderData(1, Qt::Horizontal, QString("name"));
-	msPortListModel->setHeaderData(2, Qt::Horizontal, QString("tags"));
-	msPortListModel->setHeaderData(3, Qt::Horizontal, QString("enabled"));
-	msPortListModel->setHeaderData(4, Qt::Horizontal, QString("poeEnabled"));
-	msPortListModel->setHeaderData(5, Qt::Horizontal, QString("type"));
-	msPortListModel->setHeaderData(6, Qt::Horizontal, QString("vlan"));
-	msPortListModel->setHeaderData(7, Qt::Horizontal, QString("voiceVlan"));
-	msPortListModel->setHeaderData(8, Qt::Horizontal, QString("allowedVlans"));
-	msPortListModel->setHeaderData(9, Qt::Horizontal, QString("isolationEnabled"));
-	msPortListModel->setHeaderData(10, Qt::Horizontal, QString("rstpEnabled"));
-	msPortListModel->setHeaderData(11, Qt::Horizontal, QString("stpGuard"));
-	msPortListModel->setHeaderData(12, Qt::Horizontal, QString("accessPolicyNumber"));
+	msPortListModel->setRowCount(portCount);
 
 	// show port info
 	for (int i = 0; i < portCount; i++) {
@@ -458,8 +593,6 @@ void MainWindow::displayMSPort(int devIndex, int orgIndex) {
 
 	}
 
-
-	ui->msSwitchPortsTable->setModel(msPortListModel);
 	ui->msSwitchPortsTable->resizeColumnsToContents();
 	ui->msSwitchPortsTable->resizeRowsToContents();
 
@@ -489,15 +622,7 @@ void MainWindow::displayMXInfo(int orgIndex, int netIndex) {
 	if (count == 0) { return; }
 
 
-	mxListModel = new QStandardItemModel(count, 5, this);
-
-	// columns are | MAC | Model | Serial | public IP | network |
-	mxListModel->setHeaderData(0, Qt::Horizontal, QString("MAC"));
-	mxListModel->setHeaderData(1, Qt::Horizontal, QString("Model"));
-	mxListModel->setHeaderData(2, Qt::Horizontal, QString("Serial"));
-	mxListModel->setHeaderData(3, Qt::Horizontal, QString("Public IP"));
-	mxListModel->setHeaderData(4, Qt::Horizontal, QString("Network"));
-
+	mxListModel->setRowCount(count);
 
 	// show stuff
 	count = 0;
@@ -525,11 +650,8 @@ void MainWindow::displayMXInfo(int orgIndex, int netIndex) {
 		}
 	}
 
-
-	ui->mxDeviceTable->setModel(mxListModel);
 	ui->mxDeviceTable->resizeColumnsToContents();
 	ui->mxDeviceTable->resizeRowsToContents();
-
 
 }
 
@@ -538,17 +660,7 @@ void MainWindow::displayMXL3Rules(int devIndex, int orgIndex) {
 	qDebug() << "\nMainWindow::displayMXL3Rules, orgIndex: " << orgIndex << "\tdevIndex: " << devIndex;
 
 	int rulesCount = orgList.at(orgIndex)->getOrgInventoryDevice(devIndex).rules.size();
-	mxL3RulesModel = new QStandardItemModel(rulesCount, 8, this);
-
-	// columns are | policy | protocol | srcCidr | srcPort | dstCidr | dstPort | syslogEnabled | comment |
-	mxL3RulesModel->setHeaderData(0, Qt::Horizontal, QString("policy"));
-	mxL3RulesModel->setHeaderData(1, Qt::Horizontal, QString("protocol"));
-	mxL3RulesModel->setHeaderData(2, Qt::Horizontal, QString("srcCidr"));
-	mxL3RulesModel->setHeaderData(3, Qt::Horizontal, QString("srcPort"));
-	mxL3RulesModel->setHeaderData(4, Qt::Horizontal, QString("destCidr"));
-	mxL3RulesModel->setHeaderData(5, Qt::Horizontal, QString("destPort"));
-	mxL3RulesModel->setHeaderData(6, Qt::Horizontal, QString("syslogEnabled"));
-	mxL3RulesModel->setHeaderData(7, Qt::Horizontal, QString("comment"));
+	mxL3RulesModel->setRowCount(rulesCount);
 
 	// show rule info
 	for (int i = 0; i < rulesCount; i++) {
@@ -565,7 +677,6 @@ void MainWindow::displayMXL3Rules(int devIndex, int orgIndex) {
 
 	}
 
-	ui->mxL3FirewallTable->setModel(mxL3RulesModel);
 	ui->mxL3FirewallTable->resizeColumnsToContents();
 	ui->mxL3FirewallTable->resizeRowsToContents();
 
@@ -597,68 +708,7 @@ void MainWindow::displaySMDevices(int orgIndex, int netIndex) {
 	qDebug() << "count: " << count;
 	if (count == 0) { return; }
 
-	smDeviceListModel = new QStandardItemModel(count, 49, this);
-
-
-	// columns are | id | name | tags | ssid | wifiMac | osName | systemModel | uuid |
-	// | serialNumber | ip | systemType | availableDeviceCapacity | kioskAppName |
-	// | biosVersion | lastConnected | missingAppsCount | userSuppliedAddress |
-	// | location | lastUser | publicIp | phoneNumber | diskInfoJson | deviceCapacity |
-	// | isManaged | hadMdm | isSupervised | meid | imei | iccid | simCarrierNetwork |
-	// | cellularDataUsed | isHotspotEnabled | createdAt | batteryEstCharge | quarantined |
-	// | avName | avRunning | asName | fwName | isRooted | loginRequired | screenLockEnabled |
-	// | autoLoginDisabled | hasMdm | hasDesktopAgent | diskEncryptionEnabled |
-	// | hardwareEncryptionCaps | passCodeLock
-	// 49 columns, I missed one above, the full list is in the smDevice struct, wow
-	smDeviceListModel->setHeaderData(0, Qt::Horizontal, QString("id"));
-	smDeviceListModel->setHeaderData(1, Qt::Horizontal, QString("name"));
-	smDeviceListModel->setHeaderData(2, Qt::Horizontal, QString("tags"));
-	smDeviceListModel->setHeaderData(3, Qt::Horizontal, QString("ssid"));
-	smDeviceListModel->setHeaderData(4, Qt::Horizontal, QString("wifiMac"));
-	smDeviceListModel->setHeaderData(5, Qt::Horizontal, QString("osName"));
-	smDeviceListModel->setHeaderData(6, Qt::Horizontal, QString("systemModel"));
-	smDeviceListModel->setHeaderData(7, Qt::Horizontal, QString("uuid"));
-	smDeviceListModel->setHeaderData(8, Qt::Horizontal, QString("serialNumber"));
-	smDeviceListModel->setHeaderData(9, Qt::Horizontal, QString("ip"));
-	smDeviceListModel->setHeaderData(10, Qt::Horizontal, QString("systemType"));
-	smDeviceListModel->setHeaderData(11, Qt::Horizontal, QString("availableDeviceCapacity"));
-	smDeviceListModel->setHeaderData(12, Qt::Horizontal, QString("kioskAppName"));
-	smDeviceListModel->setHeaderData(13, Qt::Horizontal, QString("biosVersion"));
-	smDeviceListModel->setHeaderData(14, Qt::Horizontal, QString("lastConnected"));
-	smDeviceListModel->setHeaderData(15, Qt::Horizontal, QString("missingAppsCount"));
-	smDeviceListModel->setHeaderData(16, Qt::Horizontal, QString("userSuppliedAddress"));
-	smDeviceListModel->setHeaderData(17, Qt::Horizontal, QString("location"));
-	smDeviceListModel->setHeaderData(18, Qt::Horizontal, QString("lastUser"));
-	smDeviceListModel->setHeaderData(19, Qt::Horizontal, QString("publicIp"));
-	smDeviceListModel->setHeaderData(20, Qt::Horizontal, QString("phoneNumber"));
-	smDeviceListModel->setHeaderData(21, Qt::Horizontal, QString("diskInfoJson"));
-	smDeviceListModel->setHeaderData(22, Qt::Horizontal, QString("deviceCapacity"));
-	smDeviceListModel->setHeaderData(23, Qt::Horizontal, QString("isManaged"));
-	smDeviceListModel->setHeaderData(24, Qt::Horizontal, QString("hadMdm"));
-	smDeviceListModel->setHeaderData(25, Qt::Horizontal, QString("isSupervised"));
-	smDeviceListModel->setHeaderData(26, Qt::Horizontal, QString("meid"));
-	smDeviceListModel->setHeaderData(27, Qt::Horizontal, QString("imei"));
-	smDeviceListModel->setHeaderData(28, Qt::Horizontal, QString("iccid"));
-	smDeviceListModel->setHeaderData(29, Qt::Horizontal, QString("simCarrierNetwork"));
-	smDeviceListModel->setHeaderData(30, Qt::Horizontal, QString("cellularDataUsed"));
-	smDeviceListModel->setHeaderData(31, Qt::Horizontal, QString("isHotspotEnabled"));
-	smDeviceListModel->setHeaderData(32, Qt::Horizontal, QString("createdAt"));
-	smDeviceListModel->setHeaderData(33, Qt::Horizontal, QString("batteryEstCharge"));
-	smDeviceListModel->setHeaderData(34, Qt::Horizontal, QString("quarantined"));
-	smDeviceListModel->setHeaderData(35, Qt::Horizontal, QString("avName"));
-	smDeviceListModel->setHeaderData(36, Qt::Horizontal, QString("avRunning"));
-	smDeviceListModel->setHeaderData(37, Qt::Horizontal, QString("asName"));
-	smDeviceListModel->setHeaderData(38, Qt::Horizontal, QString("fwName"));
-	smDeviceListModel->setHeaderData(39, Qt::Horizontal, QString("isRooted"));
-	smDeviceListModel->setHeaderData(40, Qt::Horizontal, QString("loginRequired"));
-	smDeviceListModel->setHeaderData(41, Qt::Horizontal, QString("screenLockEnabled"));
-	smDeviceListModel->setHeaderData(42, Qt::Horizontal, QString("screenLockDelay"));
-	smDeviceListModel->setHeaderData(43, Qt::Horizontal, QString("autoLoginDisabled"));
-	smDeviceListModel->setHeaderData(44, Qt::Horizontal, QString("hasMdm"));
-	smDeviceListModel->setHeaderData(45, Qt::Horizontal, QString("hasDesktopAgent"));
-	smDeviceListModel->setHeaderData(46, Qt::Horizontal, QString("diskEncryptionEnabled"));
-	smDeviceListModel->setHeaderData(47, Qt::Horizontal, QString("hardwareEncryptionCaps"));
-	smDeviceListModel->setHeaderData(48, Qt::Horizontal, QString("passCodeLock"));
+	smDeviceListModel->setRowCount(count);
 
 
 	// show SM devices
@@ -802,8 +852,6 @@ void MainWindow::displaySMDevices(int orgIndex, int netIndex) {
 		}
 	}
 
-
-	ui->smDevicesTable->setModel(smDeviceListModel);
 	ui->smDevicesTable->resizeColumnsToContents();
 	ui->smDevicesTable->resizeRowsToContents();
 
@@ -829,7 +877,7 @@ void MainWindow::replyFinished(QNetworkReply *reply) {
 void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 	// distinguish on whether an organization or a network was double clicked
 	// run query for that organization / network
-//	updateNetworkUI(QModelIndex(index));
+	//	updateNetworkUI(QModelIndex(index));
 	eventRequest tmp;
 	if (index.parent().data() == QVariant::Invalid) {
 		// an organization was selected in the tree view
@@ -839,7 +887,7 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 		apiHelpObj->putEventInQueue(tmp);	// get networks in the org
 
 
-//		apiHelpObj->runQuery(27, tmpOrgIndex, tmpNetIndex);	// get networks in the org
+		//		apiHelpObj->runQuery(27, tmpOrgIndex, tmpNetIndex);	// get networks in the org
 
 		updateOrgUI(tmp.orgIndex);
 
@@ -847,7 +895,7 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 		// a network was selected in the tree view
 		tmp.orgIndex = index.parent().row();
 		tmp.netIndex = index.row();
-//		updateNetworkUI(QModelIndex(index));
+		//		updateNetworkUI(QModelIndex(index));
 	}
 
 
@@ -1005,49 +1053,49 @@ void MainWindow::on_adminsTableView_clicked(const QModelIndex &index) {
 
 	// display list of networks admin has access to, if this is a network admin
 	// also display privileges of camera-only administrators
-	QStandardItemModel *adminTree2 = new QStandardItemModel(tmpAdmin.nets.size(), 2, this);
-	adminTree2->setHeaderData(0, Qt::Horizontal, QString("Net ID"));
-	adminTree2->setHeaderData(1, Qt::Horizontal, QString("Access"));
+	QStandardItemModel *adminListModel2 = new QStandardItemModel(tmpAdmin.nets.size(), 2, this);
+	adminListModel2->setHeaderData(0, Qt::Horizontal, QString("Net ID"));
+	adminListModel2->setHeaderData(1, Qt::Horizontal, QString("Access"));
 
 	int j = 0;
 	for (int j = 0; j < tmpAdmin.nets.size(); j++) {
 		adminNetPermission tmpPerm = tmpAdmin.nets.at(j);
-		adminTree2->setItem(j, 0, new QStandardItem(tmpPerm.netID));
-		adminTree2->setItem(j, 1, new QStandardItem(tmpPerm.accessLevel));
+		adminListModel2->setItem(j, 0, new QStandardItem(tmpPerm.netID));
+		adminListModel2->setItem(j, 1, new QStandardItem(tmpPerm.accessLevel));
 	}
 
 	// for camera-only admins
 	if (tmpAdmin.cNets.size() > 0) {
-		adminTree2->setColumnCount(3);
-		adminTree2->setHeaderData(2, Qt::Horizontal, QString("network_type"));
+		adminListModel2->setColumnCount(3);
+		adminListModel2->setHeaderData(2, Qt::Horizontal, QString("network_type"));
 
 		for (j = j; j < tmpAdmin.cNets.size(); j++) {
 			adminNetPermission tmpCPerm = tmpAdmin.cNets.at(j);
-			adminTree2->setItem(j, 0, new QStandardItem(tmpCPerm.netID));
-			adminTree2->setItem(j, 1, new QStandardItem(tmpCPerm.accessLevel));
-			adminTree2->setItem(j, 2, new QStandardItem(tmpCPerm.networkType));
+			adminListModel2->setItem(j, 0, new QStandardItem(tmpCPerm.netID));
+			adminListModel2->setItem(j, 1, new QStandardItem(tmpCPerm.accessLevel));
+			adminListModel2->setItem(j, 2, new QStandardItem(tmpCPerm.networkType));
 		}
 	}
 
 
-	ui->adminsTableView_2->setModel(adminTree2);
+	ui->adminsTableView_2->setModel(adminListModel2);
 	ui->adminsTableView_2->resizeColumnsToContents();
 	ui->adminsTableView_2->resizeRowsToContents();
 
 
 
 	// display list of tags assigned to administrator
-	QStandardItemModel *adminTree3 = new QStandardItemModel(tmpAdmin.tags.size(), 2, this);
-	adminTree3->setHeaderData(0, Qt::Horizontal, QString("Tag"));
-	adminTree3->setHeaderData(1, Qt::Horizontal, QString("Access"));
+	QStandardItemModel *adminListModel3 = new QStandardItemModel(tmpAdmin.tags.size(), 2, this);
+	adminListModel3->setHeaderData(0, Qt::Horizontal, QString("Tag"));
+	adminListModel3->setHeaderData(1, Qt::Horizontal, QString("Access"));
 
 	for (int j = 0; j < tmpAdmin.tags.size(); j++) {
 		adminTag tmpTag = tmpAdmin.tags.at(j);
-		adminTree3->setItem(j, 0, new QStandardItem(tmpTag.tag));
-		adminTree3->setItem(j, 1, new QStandardItem(tmpTag.adminAccessLevel));
+		adminListModel3->setItem(j, 0, new QStandardItem(tmpTag.tag));
+		adminListModel3->setItem(j, 1, new QStandardItem(tmpTag.adminAccessLevel));
 	}
 
-	ui->adminsTableView_3->setModel(adminTree3);
+	ui->adminsTableView_3->setModel(adminListModel3);
 	ui->adminsTableView_3->resizeColumnsToContents();
 	ui->adminsTableView_3->resizeRowsToContents();
 
@@ -1127,7 +1175,6 @@ void MainWindow::on_msSwitchesTable_clicked(const QModelIndex &index) {
 	tmp.urlListIndex = 93;	// GET /devices/[serial]/switchPorts
 	tmp.deviceSerial = tmpDev.serial;
 	apiHelpObj->putEventInQueue(tmp);
-
 
 }
 
