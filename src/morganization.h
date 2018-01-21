@@ -59,6 +59,11 @@ struct smDevice {
 	bool passCodeLock;
 };
 
+struct groupPolicy {
+	QString name;		// name of group policy
+	int groupPolicyId;	// id of group policy
+};
+
 struct networkVars {
 	QString netID;			// network ID
 	QString orgID;			// ID of parent organization
@@ -68,6 +73,7 @@ struct networkVars {
 	QString netTags;		// tags assigned to network, these are returned as a single string
 
 	QVector<smDevice> smDevices;	// if SM network, put SM devices here
+	QVector<groupPolicy> gPolicies;	// group policies in the network
 };
 
 struct licensesPerDevice {
@@ -192,6 +198,8 @@ class MOrganization {
 		void setOrgVPNPeer(nonMerakiVPNPeer p, int index);
 		void setSMDevicesNum(int netIndex, int n);
 		void setSMDevice(int netIndex, smDevice s, int index);
+		void setGroupPolicyNum(int netIndex, int n);
+		void setGroupPolicy(int netIndex, groupPolicy s, int index);
 
 
 		// get
@@ -218,6 +226,8 @@ class MOrganization {
 		nonMerakiVPNPeer getOrgVPNPeer(int index);
 		int getSMDevicesNum(int netIndex);
 		smDevice getSMDevice(int netIndex, int index);
+		int getGroupPolicyNum(int netIndex);
+		groupPolicy getGroupPolicy(int netIndex, int index);
 
 
 		// functions to help navigating lists and vectors

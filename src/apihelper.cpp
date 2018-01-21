@@ -180,6 +180,13 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 26: {
+			// GET /networks/[networkId]/groupPolicies
+			processGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									, queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
+
 		case 27: {
 			// GET /organizations/[organizationId]/networks
 			processNetworkQuery(jDoc);
@@ -808,6 +815,37 @@ bool APIHelper::processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIn
 	}
 
 	parent->displaySMDevices(orgIndex);
+
+	return true;	// everything went ok
+
+}
+
+bool APIHelper::processGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+	qDebug() << "\nAPIHelper::processGroupPolicyQuery(...), orgIndex: "
+			 << orgIndex << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processGroupPolicyQuery(...)";
+		return false;
+	}
+
+	// the reply contains an array containing the group policies
+	QJsonArray jArray = doc.toArray();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	parent->orgList.at(orgIndex)->setGroupPolicyNum(netIndex, jArray.size());
+
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		groupPolicy tmpGPolicy;
+
+		tmpGPolicy.name = jObj["name"].toString();
+		tmpGPolicy.groupPolicyId = jObj["groupPolicyId"].toInt();
+
+		parent->orgList.at(orgIndex)->setGroupPolicy(netIndex, tmpGPolicy, i);
+
+	}
 
 	return true;	// everything went ok
 

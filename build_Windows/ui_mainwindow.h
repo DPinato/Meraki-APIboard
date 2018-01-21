@@ -118,6 +118,10 @@ public:
     QWidget *tab_5;
     QWidget *tab_6;
     QWidget *tab_7;
+    QPushButton *smRefreshButton;
+    QTableView *smDevicesTable;
+    QLabel *label_49;
+    QLineEdit *smNetworkEdit;
     QTreeView *treeView;
     QPushButton *debugButton;
     QPushButton *adSnapshotButton;
@@ -400,6 +404,19 @@ public:
         tabWidget->addTab(tab_6, QString());
         tab_7 = new QWidget();
         tab_7->setObjectName(QStringLiteral("tab_7"));
+        smRefreshButton = new QPushButton(tab_7);
+        smRefreshButton->setObjectName(QStringLiteral("smRefreshButton"));
+        smRefreshButton->setGeometry(QRect(590, 10, 51, 21));
+        smDevicesTable = new QTableView(tab_7);
+        smDevicesTable->setObjectName(QStringLiteral("smDevicesTable"));
+        smDevicesTable->setGeometry(QRect(10, 40, 821, 221));
+        label_49 = new QLabel(tab_7);
+        label_49->setObjectName(QStringLiteral("label_49"));
+        label_49->setGeometry(QRect(10, 10, 51, 21));
+        smNetworkEdit = new QLineEdit(tab_7);
+        smNetworkEdit->setObjectName(QStringLiteral("smNetworkEdit"));
+        smNetworkEdit->setGeometry(QRect(60, 10, 191, 21));
+        smNetworkEdit->setMaxLength(30);
         tabWidget->addTab(tab_7, QString());
         treeView = new QTreeView(centralWidget);
         treeView->setObjectName(QStringLiteral("treeView"));
@@ -416,7 +433,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1084, 20));
+        menuBar->setGeometry(QRect(0, 0, 1084, 21));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QStringLiteral("menuFile"));
         menuEdit = new QMenu(menuBar);
@@ -440,7 +457,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(3);
+        tabWidget->setCurrentIndex(8);
         adminTabWidget->setCurrentIndex(0);
 
 
@@ -547,6 +564,9 @@ public:
         tabWidget->setTabText(tabWidget->indexOf(tab_4), QApplication::translate("MainWindow", "MR", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_5), QApplication::translate("MainWindow", "MV", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_6), QApplication::translate("MainWindow", "MC", nullptr));
+        smRefreshButton->setText(QApplication::translate("MainWindow", "Refresh", nullptr));
+        label_49->setText(QApplication::translate("MainWindow", "Network", nullptr));
+        smNetworkEdit->setText(QApplication::translate("MainWindow", "123456789012345678901234567890", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_7), QApplication::translate("MainWindow", "Systems Manager", nullptr));
         debugButton->setText(QApplication::translate("MainWindow", "DEBUG", nullptr));
         adSnapshotButton->setText(QApplication::translate("MainWindow", "Take Snapshot", nullptr));

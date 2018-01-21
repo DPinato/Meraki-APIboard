@@ -50,6 +50,7 @@ public:
 	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 	bool processMXL3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 	bool processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex);
+	bool processGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
 
 	// set

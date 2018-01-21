@@ -18,13 +18,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 	// I am doing this so I do not have to leave my API key in this code
-	//	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
-	apiKey = getAPIkeyFromFile(QString("C:\\Users\\Davide\\Documents\\meraki_api_key.txt"));
+	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
+//	apiKey = getAPIkeyFromFile(QString("C:\\Users\\Davide\\Documents\\meraki_api_key.txt"));
 	qDebug() << apiKey;
+	if (apiKey == "") {
+		qDebug() << "Could not find API key";
+		exit(1);
+	}
 
-	//	urlListFile = QString("D:\\Programming\\Qt\\Meraki-APIboard\\URL_list.txt");
-	urlListFile = QString("C:\\Users\\Davide\\Documents\\Meraki-APIboard\\URL_list.txt");
+	urlListFile = QString("D:\\Programming\\Qt\\Meraki-APIboard\\URL_list.txt");
+//	urlListFile = QString("C:\\Users\\Davide\\Documents\\Meraki-APIboard\\URL_list.txt");
 	qDebug() << urlListFile;
+	if (urlListFile.size() == 0) {
+		qDebug() << "Could not get list of URLs";
+		exit(2);
+	}
 
 
 	apiHelpObj = new APIHelper(apiKey, this);

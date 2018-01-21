@@ -103,6 +103,14 @@ void MOrganization::setSMDevice(int netIndex, smDevice s, int index) {
 	netList[netIndex].smDevices[index] = s;
 }
 
+void MOrganization::setGroupPolicyNum(int netIndex, int n) {
+	netList[netIndex].gPolicies.resize(n);
+}
+
+void MOrganization::setGroupPolicy(int netIndex, groupPolicy s, int index) {
+	netList[netIndex].gPolicies[index] = s;
+}
+
 
 
 
@@ -207,6 +215,14 @@ int MOrganization::getSMDevicesNum(int netIndex) {
 
 smDevice MOrganization::getSMDevice(int netIndex, int index) {
 	return netList.at(netIndex).smDevices.at(index);
+}
+
+int MOrganization::getGroupPolicyNum(int netIndex) {
+	return netList.at(netIndex).gPolicies.size();
+}
+
+groupPolicy MOrganization::getGroupPolicy(int netIndex, int index) {
+	return netList.at(netIndex).gPolicies.at(index);
 }
 
 int MOrganization::getIndexOfInventoryDevice(QString serial) {
