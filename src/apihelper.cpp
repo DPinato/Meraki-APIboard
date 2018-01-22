@@ -173,6 +173,13 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 4: {
+			// GET /devices/[serial]/clients
+			processClientsConnectedQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+										 , queueEventRequests.at(eventIndex).deviceSerial);
+			break;
+		}
+
 		case 20: {
 			// GET /networks/[networkId]/l3FirewallRules
 			processMXL3FirewallQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
@@ -648,8 +655,6 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString 
 	// get the index of the device in the organization inventory
 	deviceInInventory tmpDevice = parent->orgList.at(orgIndex)->getOrgDeviceFromSerial(devSerial);
 	int devIndex = parent->orgList.at(orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
-	parent->orgList.at(orgIndex)->setSwitchPortNum(devIndex, jArray.size());
-
 
 	if (devIndex == -1) {
 		qDebug() << "Could not find " << devSerial << " in orgIndex " << orgIndex;
@@ -657,6 +662,8 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString 
 	}
 
 	qDebug() << devSerial << " is at index: " << devIndex;
+	parent->orgList.at(orgIndex)->setSwitchPortNum(devIndex, jArray.size());
+
 
 	// get switch ports info in the appropriate organization device
 	for (int i = 0; i < jArray.size(); i++) {
@@ -846,6 +853,59 @@ bool APIHelper::processGroupPolicyQuery(QJsonDocument doc, int orgIndex, int net
 		parent->orgList.at(orgIndex)->setGroupPolicy(netIndex, tmpGPolicy, i);
 
 	}
+
+	return true;	// everything went ok
+
+}
+
+bool APIHelper::processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QString devSerial) {
+	qDebug() << "\nAPIHelper::processClientsConnectedQuery(...), orgIndex: "
+			 << orgIndex << "\tdevSerial" << devSerial;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processClientsConnectedQuery(...)";
+		return false;
+	}
+
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+	// get the index of the device in the organization inventory
+	deviceInInventory tmpDevice = parent->orgList.at(orgIndex)->getOrgDeviceFromSerial(devSerial);
+	int devIndex = parent->orgList.at(orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
+
+	if (devIndex == -1) {
+		qDebug() << "Could not find " << devSerial << " in orgIndex " << orgIndex;
+		return false;
+	}
+
+	qDebug() << devSerial << " is at index: " << devIndex;
+	parent->orgList.at(orgIndex)->setClientsConnectedNum(devIndex, jArray.size());
+
+
+	// get clients connected info in the appropriate organization device
+	for (int i = 0; i < jArray.size(); i++) {
+		clientConnected tmpClient;
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		tmpClient.sent = jObj["usage"].toObject()["sent"].toDouble();
+		tmpClient.recv = jObj["usage"].toObject()["recv"].toDouble();
+
+		tmpClient.id = jObj["id"].toString();
+		tmpClient.description = jObj["description"].toString();
+		tmpClient.mdnsName = jObj["mdnsName"].toString();
+		tmpClient.dhcpHostname = jObj["dhcpHostname"].toString();
+		tmpClient.mac = jObj["mac"].toString();
+		tmpClient.ip = jObj["ip"].toString();
+		tmpClient.vlan = jObj["vlan"].toInt();
+		tmpClient.switchport = jObj["switchport"].toString();
+
+		parent->orgList.at(orgIndex)->setClientConnected(devIndex, tmpClient, i);
+
+	}
+
 
 	return true;	// everything went ok
 

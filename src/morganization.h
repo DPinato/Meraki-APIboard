@@ -108,6 +108,19 @@ struct mxL3Firewall {
 	bool syslogEnabled;		// Syslog logging enabled
 };
 
+struct clientConnected{
+	double sent;			// data sent by client, in kiloBytes
+	double recv;			// data received by client, in kilobytes
+	QString id;				// client id
+	QString description;	// client description
+	QString mdnsName;		// MDNS name of client
+	QString dhcpHostname;	// DHCP hostname
+	QString mac;			// MAC address of client
+	QString ip;				// IP address of client
+	int vlan;				// VLAN of client, looks like that if there is no VLAN, an empty string is returned
+	QString switchport;		// switchport to which client is connected, only returned if querying an MS, null otherwise
+};
+
 struct deviceInInventory {
 	QString mac;			// MAC address of device
 	QString serial;			// serial number of device
@@ -116,8 +129,10 @@ struct deviceInInventory {
 	QString claimedAt;		// when the device was claimed
 	QString publicIP;		// public IP address of device
 
-	QVector<switchPort> ports;		// info about switch ports (in case device is an MS)
-	QVector<mxL3Firewall> rules;	// info about L3 firewall rules (in case device is an MX)
+	QVector<switchPort> ports;			// info about switch ports (in case device is an MS)
+	QVector<mxL3Firewall> rules;		// info about L3 firewall rules (in case device is an MX)
+	QVector<clientConnected> clients;	// clients connected to device
+
 };
 
 struct nonMerakiVPNPeer {
@@ -200,6 +215,8 @@ class MOrganization {
 		void setSMDevice(int netIndex, smDevice s, int index);
 		void setGroupPolicyNum(int netIndex, int n);
 		void setGroupPolicy(int netIndex, groupPolicy s, int index);
+		void setClientsConnectedNum(int devIndex, int n);
+		void setClientConnected(int devIndex, clientConnected s, int index);
 
 
 		// get
@@ -228,6 +245,8 @@ class MOrganization {
 		smDevice getSMDevice(int netIndex, int index);
 		int getGroupPolicyNum(int netIndex);
 		groupPolicy getGroupPolicy(int netIndex, int index);
+		int getClientsConnectedNum(int devIndex);
+		clientConnected getClientConnected(int devIndex, int index);
 
 
 		// functions to help navigating lists and vectors

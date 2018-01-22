@@ -111,6 +111,14 @@ void MOrganization::setGroupPolicy(int netIndex, groupPolicy s, int index) {
 	netList[netIndex].gPolicies[index] = s;
 }
 
+void MOrganization::setClientsConnectedNum(int devIndex, int n) {
+	orgInventory[devIndex].clients.resize(n);
+}
+
+void MOrganization::setClientConnected(int devIndex, clientConnected s, int index) {
+	orgInventory[devIndex].clients[index] = s;
+}
+
 
 
 
@@ -223,6 +231,14 @@ int MOrganization::getGroupPolicyNum(int netIndex) {
 
 groupPolicy MOrganization::getGroupPolicy(int netIndex, int index) {
 	return netList.at(netIndex).gPolicies.at(index);
+}
+
+int MOrganization::getClientsConnectedNum(int devIndex) {
+	return orgInventory.at(devIndex).clients.size();
+}
+
+clientConnected MOrganization::getClientConnected(int devIndex, int index) {
+	return orgInventory.at(devIndex).clients.at(index);
 }
 
 int MOrganization::getIndexOfInventoryDevice(QString serial) {
