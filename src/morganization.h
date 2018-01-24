@@ -59,7 +59,7 @@ struct smDevice {
 	bool passCodeLock;
 };
 
-struct groupPolicy {
+struct networkGroupPolicy {
 	QString name;		// name of group policy
 	int groupPolicyId;	// id of group policy
 };
@@ -73,7 +73,7 @@ struct networkVars {
 	QString netTags;		// tags assigned to network, these are returned as a single string
 
 	QVector<smDevice> smDevices;	// if SM network, put SM devices here
-	QVector<groupPolicy> gPolicies;	// group policies in the network
+	QVector<networkGroupPolicy> gPolicies;	// group policies in the network
 };
 
 struct licensesPerDevice {
@@ -108,6 +108,12 @@ struct mxL3Firewall {
 	bool syslogEnabled;		// Syslog logging enabled
 };
 
+struct clientGroupPolicy {
+	QString mac;				// mac address of client
+	QString type;				// I suppose this will either be "Group policy" if applied from dashboard, or 802.1X if from RADIUS
+	int groupPolicyId = -1;		// group policy ID, this is only returned if a group policy is assigned to the client
+};
+
 struct clientConnected{
 	double sent;			// data sent by client, in kiloBytes
 	double recv;			// data received by client, in kilobytes
@@ -119,6 +125,8 @@ struct clientConnected{
 	QString ip;				// IP address of client
 	int vlan;				// VLAN of client, looks like that if there is no VLAN, an empty string is returned
 	QString switchport;		// switchport to which client is connected, only returned if querying an MS, null otherwise
+
+	clientGroupPolicy policy;	// group policy assigned to the client
 };
 
 struct deviceInInventory {
@@ -132,7 +140,6 @@ struct deviceInInventory {
 	QVector<switchPort> ports;			// info about switch ports (in case device is an MS)
 	QVector<mxL3Firewall> rules;		// info about L3 firewall rules (in case device is an MX)
 	QVector<clientConnected> clients;	// clients connected to device
-
 };
 
 struct nonMerakiVPNPeer {
@@ -213,8 +220,8 @@ class MOrganization {
 		void setOrgVPNPeer(nonMerakiVPNPeer p, int index);
 		void setSMDevicesNum(int netIndex, int n);
 		void setSMDevice(int netIndex, smDevice s, int index);
-		void setGroupPolicyNum(int netIndex, int n);
-		void setGroupPolicy(int netIndex, groupPolicy s, int index);
+		void setNetworkGroupPolicyNum(int netIndex, int n);
+		void setNetworkGroupPolicy(int netIndex, networkGroupPolicy s, int index);
 		void setClientsConnectedNum(int devIndex, int n);
 		void setClientConnected(int devIndex, clientConnected s, int index);
 
@@ -243,14 +250,15 @@ class MOrganization {
 		nonMerakiVPNPeer getOrgVPNPeer(int index);
 		int getSMDevicesNum(int netIndex);
 		smDevice getSMDevice(int netIndex, int index);
-		int getGroupPolicyNum(int netIndex);
-		groupPolicy getGroupPolicy(int netIndex, int index);
+		int getNetworkGroupPolicyNum(int netIndex);
+		networkGroupPolicy getNetworkGroupPolicy(int netIndex, int index);
 		int getClientsConnectedNum(int devIndex);
 		clientConnected getClientConnected(int devIndex, int index);
 
 
 		// functions to help navigating lists and vectors
 		int getIndexOfInventoryDevice(QString serial);
+		int getIndexOfClientConnected(QString netID, QString mac);
 		int getIndexOfNetwork(QString netID);
 
 

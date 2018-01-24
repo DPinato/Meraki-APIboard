@@ -109,12 +109,21 @@ void APIHelper::runQuery(eventRequest e) {
 		queryURL = queryURL.replace(queryURL.indexOf(QString("[serial]"))
 									, QString("[serial]").length()
 									, e.deviceSerial);
-
 	}
 
 	if (e.orgIndex == -1 && e.netIndex == -1) {
 		// these kinds of queries will return info for multiple organizations at once, i.e. queryID 41
 //		queryURL = QString(baseURL.left(baseURL.length()-1) + urlList.at(e.urlListIndex).url);
+	}
+
+	if (queryURL.indexOf(QString("[mac]")) != -1) {
+		// queryURL has a MAC address
+		qDebug() << queryURL.indexOf(QString("[serial]"));
+		int devIndex = parent->orgList.at(e.orgIndex)->getIndexOfInventoryDevice(e.deviceSerial);
+		QString mac = parent->orgList.at(e.orgIndex)->getOrgInventoryDevice(devIndex).mac;
+		queryURL = queryURL.replace(queryURL.indexOf(QString("[mac]"))
+									, QString("[mac]").length()
+									, mac);
 	}
 
 
@@ -180,6 +189,21 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 5: {
+			// GET /networks/[networkId]/clients/[mac]/policy
+			processClientGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+										  , queueEventRequests.at(eventIndex).netIndex
+										  , queueEventRequests.at(eventIndex).clientMac);
+			break;
+		}
+
+		case 11: {
+			// GET /networks/[networkId]/devices
+			// Meraki devices in the network
+
+			break;
+		}
+
 		case 20: {
 			// GET /networks/[networkId]/l3FirewallRules
 			processMXL3FirewallQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
@@ -189,7 +213,7 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 		case 26: {
 			// GET /networks/[networkId]/groupPolicies
-			processGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+			processNetworkGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
 									, queueEventRequests.at(eventIndex).netIndex);
 			break;
 		}
@@ -827,7 +851,7 @@ bool APIHelper::processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIn
 
 }
 
-bool APIHelper::processGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+bool APIHelper::processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex) {
 	qDebug() << "\nAPIHelper::processGroupPolicyQuery(...), orgIndex: "
 			 << orgIndex << "\tnetIndex" << netIndex;
 
@@ -837,20 +861,20 @@ bool APIHelper::processGroupPolicyQuery(QJsonDocument doc, int orgIndex, int net
 	}
 
 	// the reply contains an array containing the group policies
-	QJsonArray jArray = doc.toArray();
+	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList.at(orgIndex)->setGroupPolicyNum(netIndex, jArray.size());
+	parent->orgList.at(orgIndex)->setNetworkGroupPolicyNum(netIndex, jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
 		QJsonObject jObj = jArray.at(i).toObject();
-		groupPolicy tmpGPolicy;
+		networkGroupPolicy tmpGPolicy;
 
 		tmpGPolicy.name = jObj["name"].toString();
 		tmpGPolicy.groupPolicyId = jObj["groupPolicyId"].toInt();
 
-		parent->orgList.at(orgIndex)->setGroupPolicy(netIndex, tmpGPolicy, i);
+		parent->orgList.at(orgIndex)->setNetworkGroupPolicy(netIndex, tmpGPolicy, i);
 
 	}
 
@@ -905,6 +929,29 @@ bool APIHelper::processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QS
 		parent->orgList.at(orgIndex)->setClientConnected(devIndex, tmpClient, i);
 
 	}
+
+
+	return true;	// everything went ok
+
+}
+
+bool APIHelper::processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex, QString clientMac) {
+	qDebug() << "\nAPIHelper::processClientGroupPolicyQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex << "\tclientMac" << clientMac;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processClientGroupPolicyQuery(...)";
+		return false;
+	}
+
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+
+
+
 
 
 	return true;	// everything went ok

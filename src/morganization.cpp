@@ -103,11 +103,11 @@ void MOrganization::setSMDevice(int netIndex, smDevice s, int index) {
 	netList[netIndex].smDevices[index] = s;
 }
 
-void MOrganization::setGroupPolicyNum(int netIndex, int n) {
+void MOrganization::setNetworkGroupPolicyNum(int netIndex, int n) {
 	netList[netIndex].gPolicies.resize(n);
 }
 
-void MOrganization::setGroupPolicy(int netIndex, groupPolicy s, int index) {
+void MOrganization::setNetworkGroupPolicy(int netIndex, networkGroupPolicy s, int index) {
 	netList[netIndex].gPolicies[index] = s;
 }
 
@@ -225,11 +225,11 @@ smDevice MOrganization::getSMDevice(int netIndex, int index) {
 	return netList.at(netIndex).smDevices.at(index);
 }
 
-int MOrganization::getGroupPolicyNum(int netIndex) {
+int MOrganization::getNetworkGroupPolicyNum(int netIndex) {
 	return netList.at(netIndex).gPolicies.size();
 }
 
-groupPolicy MOrganization::getGroupPolicy(int netIndex, int index) {
+networkGroupPolicy MOrganization::getNetworkGroupPolicy(int netIndex, int index) {
 	return netList.at(netIndex).gPolicies.at(index);
 }
 
@@ -250,8 +250,31 @@ int MOrganization::getIndexOfInventoryDevice(QString serial) {
 		}
 	}
 
-	// no device was found
-	return -1;
+
+	return -1;	// no device was found
+
+}
+
+int MOrganization::getIndexOfClientConnected(QString netID, QString mac) {
+	// given the network ID and MAC address of a connected client, returns the index of it
+	// in the clients connected vector, this function should be used in conjunction with getIndexOfInventoryDevice(...)
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < orgInventory.size(); i++) {
+		if (netID == orgInventory.at(i).netID) {
+			// check if MAC address can be found in this device
+
+			for (int j = 0; j < orgInventory.at(i).clients.size(); j++) {
+				clientConnected tmpClient = orgInventory.at(i).clients.at(j);
+
+				if (tmpClient.mac == mac) {	return j; }
+			}
+
+		}
+
+	}
+
+
+	return -1;	// no device was found
 
 }
 

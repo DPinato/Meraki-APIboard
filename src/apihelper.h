@@ -21,6 +21,7 @@ struct eventRequest {
 	int orgIndex;				// organization index in orgList
 	int netIndex = -1;				// network index in the orgList object
 	QString deviceSerial = "";	// in case the query is specific to a particular device, i.e. a switch
+	QString clientMac = "";		// client MAC address, i.e. when getting group policies associated to the client
 	QByteArray data = 0;		// data to use in case of a PUT or POST
 
 	bool responseReceived = false;	// indicates whether a response for this request was received
@@ -50,8 +51,9 @@ public:
 	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 	bool processMXL3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 	bool processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex);
-	bool processGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex);
+	bool processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QString devSerial);
+	bool processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex, QString clientMac);
 
 
 	// set
