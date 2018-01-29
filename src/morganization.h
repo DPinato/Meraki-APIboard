@@ -64,6 +64,22 @@ struct networkGroupPolicy {
 	int groupPolicyId;	// id of group policy
 };
 
+struct deviceInNetwork {
+	// this is for the devices in the particular network
+	QString lanIp;
+	QString serial;
+	QString mac;
+	double lat;
+	double lng;
+	QString address;
+	QString name;
+	QString model;
+	QString networkId;
+
+	QString wan1Ip;
+	QString wan2Ip;
+};
+
 struct networkVars {
 	QString netID;			// network ID
 	QString orgID;			// ID of parent organization
@@ -74,6 +90,7 @@ struct networkVars {
 
 	QVector<smDevice> smDevices;	// if SM network, put SM devices here
 	QVector<networkGroupPolicy> gPolicies;	// group policies in the network
+	QVector<deviceInNetwork> netDevices;	// devices in network
 };
 
 struct licensesPerDevice {
@@ -130,6 +147,7 @@ struct clientConnected{
 };
 
 struct deviceInInventory {
+	// this is for devices in the whole organization inventory
 	QString mac;			// MAC address of device
 	QString serial;			// serial number of device
 	QString netID;			// network ID in which the device is
@@ -224,6 +242,8 @@ class MOrganization {
 		void setNetworkGroupPolicy(int netIndex, networkGroupPolicy s, int index);
 		void setClientsConnectedNum(int devIndex, int n);
 		void setClientConnected(int devIndex, clientConnected s, int index);
+		void setNetworkDevicesNum(int netIndex, int n);
+		void setNetworkDevice(int netIndex, deviceInNetwork s, int index);
 
 
 		// get
@@ -254,6 +274,8 @@ class MOrganization {
 		networkGroupPolicy getNetworkGroupPolicy(int netIndex, int index);
 		int getClientsConnectedNum(int devIndex);
 		clientConnected getClientConnected(int devIndex, int index);
+		int getNetworkDevicesNum(int netIndex);
+		deviceInNetwork getNetworkDevice(int netIndex, int index);
 
 
 		// functions to help navigating lists and vectors

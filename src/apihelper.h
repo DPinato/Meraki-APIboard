@@ -46,6 +46,7 @@ public:
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
+	bool processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
 	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
 	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial);
@@ -54,6 +55,7 @@ public:
 	bool processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 	bool processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex, QString clientMac);
+
 
 
 	// set

@@ -119,6 +119,14 @@ void MOrganization::setClientConnected(int devIndex, clientConnected s, int inde
 	orgInventory[devIndex].clients[index] = s;
 }
 
+void MOrganization::setNetworkDevicesNum(int netIndex, int n) {
+	netList[netIndex].netDevices.resize(n);
+}
+
+void MOrganization::setNetworkDevice(int netIndex, deviceInNetwork s, int index) {
+	netList[netIndex].netDevices[index] = s;
+}
+
 
 
 
@@ -239,6 +247,14 @@ int MOrganization::getClientsConnectedNum(int devIndex) {
 
 clientConnected MOrganization::getClientConnected(int devIndex, int index) {
 	return orgInventory.at(devIndex).clients.at(index);
+}
+
+int MOrganization::getNetworkDevicesNum(int netIndex) {
+	return netList.at(netIndex).netDevices.size();
+}
+
+deviceInNetwork MOrganization::getNetworkDevice(int netIndex, int index) {
+	return netList.at(netIndex).netDevices.at(index);
 }
 
 int MOrganization::getIndexOfInventoryDevice(QString serial) {

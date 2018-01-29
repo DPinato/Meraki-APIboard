@@ -191,6 +191,7 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 		case 5: {
 			// GET /networks/[networkId]/clients/[mac]/policy
+			// TODO: FINISH THIS
 			processClientGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
 										  , queueEventRequests.at(eventIndex).netIndex
 										  , queueEventRequests.at(eventIndex).clientMac);
@@ -200,6 +201,13 @@ void APIHelper::processQuery(QNetworkReply *r) {
 		case 11: {
 			// GET /networks/[networkId]/devices
 			// Meraki devices in the network
+			processNetworkDevicesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									   , queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
+
+		case 12: {
+			// GET /networks/[networkId]/devices/[serial]
 
 			break;
 		}
@@ -541,9 +549,9 @@ bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
 
 
 	QJsonArray jArray = doc.array();
-	parent->orgList[orgIndex]->setOrgInventorySize(jArray.size());
-
 	qDebug() << jArray << "\t" << jArray.size();
+
+	parent->orgList[orgIndex]->setOrgInventorySize(jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
@@ -562,6 +570,53 @@ bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
 	}
 
 	parent->displayInventory(orgIndex);
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial) {
+	// if serial is present, it means that the query was run for a single device
+	qDebug() << "\nAPIHelper::processNetworkDevicesQuery(...), orgIndex: "
+			 << orgIndex << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkDevicesQuery(...)";
+		return false;
+	}
+
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	int i = 0;
+	if (serial.length() > 0) {
+
+	} else {
+		parent->orgList[orgIndex]->setNetworkDevicesNum(netIndex, jArray.size());
+	}
+
+
+	for (i; i < jArray.size(); i++) {
+		deviceInNetwork tmpNetDev;
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		tmpNetDev.lanIp = jObj["lanIp"].toString();
+		tmpNetDev.serial = jObj["serial"].toString();
+		tmpNetDev.mac = jObj["mac"].toString();
+		tmpNetDev.lat = jObj["lat"].toDouble();
+		tmpNetDev.lng = jObj["lng"].toDouble();
+		tmpNetDev.address = jObj["address"].toString();
+		tmpNetDev.name = jObj["name"].toString();
+		tmpNetDev.model = jObj["model"].toString();
+		tmpNetDev.networkId = jObj["networkId"].toString();
+		tmpNetDev.wan1Ip = jObj["wan1Ip"].toString();
+		tmpNetDev.wan2Ip = jObj["wan2Ip"].toString();
+
+		parent->orgList[orgIndex]->setNetworkDevice(netIndex, tmpNetDev, i);
+
+	}
+
 
 	return true;	// everything went well
 
