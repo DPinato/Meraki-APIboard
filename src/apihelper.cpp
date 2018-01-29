@@ -208,7 +208,9 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 		case 12: {
 			// GET /networks/[networkId]/devices/[serial]
-
+			processNetworkDevicesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									   , queueEventRequests.at(eventIndex).netIndex
+									   , queueEventRequests.at(eventIndex).deviceSerial);
 			break;
 		}
 
@@ -577,6 +579,7 @@ bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
 
 bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial) {
 	// if serial is present, it means that the query was run for a single device
+	// if serial is empty, get all devices in the network
 	qDebug() << "\nAPIHelper::processNetworkDevicesQuery(...), orgIndex: "
 			 << orgIndex << "\tnetIndex" << netIndex;
 
@@ -591,13 +594,15 @@ bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int 
 
 	int i = 0;
 	if (serial.length() > 0) {
-
+		// only do single serial
+		i = parent->orgList[orgIndex]->getIndexOfInventoryDevice(serial);
 	} else {
 		parent->orgList[orgIndex]->setNetworkDevicesNum(netIndex, jArray.size());
 	}
 
 
-	for (i; i < jArray.size(); i++) {
+	// this will make it run at least once
+	do {
 		deviceInNetwork tmpNetDev;
 		QJsonObject jObj = jArray.at(i).toObject();
 
@@ -615,7 +620,7 @@ bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int 
 
 		parent->orgList[orgIndex]->setNetworkDevice(netIndex, tmpNetDev, i);
 
-	}
+	} while (i++ < jArray.size());
 
 
 	return true;	// everything went well
