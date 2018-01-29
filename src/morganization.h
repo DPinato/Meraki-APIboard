@@ -64,6 +64,16 @@ struct networkGroupPolicy {
 	int groupPolicyId;	// id of group policy
 };
 
+struct deviceUplink {
+	QString interface;
+	QString status;
+	QString ip;
+	QString gateway;
+	QString publicIp;
+	QString dns;			// DNS servers are returned as a single string separated by commas, "x.x.x.x, y.y.y.y"
+	bool usingStaticIp;
+};
+
 struct deviceInNetwork {
 	// this is for the devices in the particular network
 	QString lanIp;
@@ -76,8 +86,13 @@ struct deviceInNetwork {
 	QString model;
 	QString networkId;
 
-	QString wan1Ip;
-	QString wan2Ip;
+	QString wan1Ip;		// for MX
+	QString wan2Ip;		// for MX
+
+	// these are returned in case of GET /networks/[networkId]/devices/[serial]/uplink
+	int uplinkNum;
+	deviceUplink uplink[2];
+
 };
 
 struct networkVars {
@@ -282,6 +297,7 @@ class MOrganization {
 		int getIndexOfInventoryDevice(QString serial);
 		int getIndexOfClientConnected(QString netID, QString mac);
 		int getIndexOfNetwork(QString netID);
+		int getIndexOfNetworkDevice(QString netID, QString serial);
 
 
 		// debug

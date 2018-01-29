@@ -47,6 +47,8 @@ public:
 	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
 	bool processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
+	bool processNetworkDeviceUplinkQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
+
 	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
 	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial);

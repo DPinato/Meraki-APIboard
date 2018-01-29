@@ -214,6 +214,14 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 13: {
+			 // GET /networks/[networkId]/devices/[serial]/uplink
+			processNetworkDeviceUplinkQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+											, queueEventRequests.at(eventIndex).netIndex
+											, queueEventRequests.at(eventIndex).deviceSerial);
+			break;
+		}
+
 		case 20: {
 			// GET /networks/[networkId]/l3FirewallRules
 			processMXL3FirewallQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
@@ -580,8 +588,10 @@ bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
 bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial) {
 	// if serial is present, it means that the query was run for a single device
 	// if serial is empty, get all devices in the network
+	// this should probably be run with a serial number only after it is run without it, to avoid
+	// QVector out of bounds accesses
 	qDebug() << "\nAPIHelper::processNetworkDevicesQuery(...), orgIndex: "
-			 << orgIndex << "\tnetIndex" << netIndex;
+			 << orgIndex << "\tnetIndex" << netIndex << "\tserial: " << serial;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkDevicesQuery(...)";
@@ -603,8 +613,8 @@ bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int 
 
 	// this will make it run at least once
 	do {
-		deviceInNetwork tmpNetDev;
 		QJsonObject jObj = jArray.at(i).toObject();
+		deviceInNetwork tmpNetDev;
 
 		tmpNetDev.lanIp = jObj["lanIp"].toString();
 		tmpNetDev.serial = jObj["serial"].toString();
@@ -622,6 +632,55 @@ bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int 
 
 	} while (i++ < jArray.size());
 
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkDeviceUplinkQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial) {
+	qDebug() << "\nAPIHelper::processNetworkDeviceUplinkQuery(...), orgIndex: "
+			 << orgIndex << "\tnetIndex" << netIndex << "\tdevSerial: " << devSerial;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkDeviceUplinkQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+	// the idea here is that the deviceInNetwork in the networkVars, will be overwritten with the
+	// uplink information added to it
+	networkVars tmpNet = parent->orgList[orgIndex]->getNetwork(netIndex);
+	int netDevIndex = parent->orgList.at(orgIndex)->getIndexOfNetworkDevice(tmpNet.netID, devSerial);
+	deviceInNetwork tmpNetDev = parent->orgList.at(orgIndex)->getNetworkDevice(netIndex, netDevIndex);
+
+
+	// read uplink info
+	tmpNetDev.uplinkNum = jArray.size();
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		deviceUplink tmpDevUplink;
+
+		tmpDevUplink.interface = jObj["interface"].toString();
+		tmpDevUplink.status = jObj["status"].toString();
+		tmpDevUplink.ip = jObj["ip"].toString();
+		tmpDevUplink.gateway = jObj["gateway"].toString();
+		tmpDevUplink.publicIp = jObj["publicIp"].toString();
+		tmpDevUplink.dns = jObj["dns"].toString();
+		tmpDevUplink.usingStaticIp = jObj["usingStaticIp"].toBool();
+
+		tmpNetDev.uplink[i] = tmpDevUplink;
+
+	}
+
+
+	// update networkVars netDevices element
+	// this should only run if netDevices.size() > 0
+	// so this function should probably be used only after
+	parent->orgList[orgIndex]->setNetworkDevice(netIndex, tmpNetDev, netDevIndex);
 
 	return true;	// everything went well
 

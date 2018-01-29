@@ -307,6 +307,21 @@ int MOrganization::getIndexOfNetwork(QString netID) {
 	return -1;
 }
 
+int MOrganization::getIndexOfNetworkDevice(QString netID, QString serial) {
+	// given network ID and device serial number, return the index of the serial number in netDevices, i.e.
+	// list of devices in this network
+	// returns -1 if it is unable to find it
+	int netIndex = getIndexOfNetwork(netID);
+	for (int i = 0; i < netList.at(netIndex).netDevices.size(); i++) {
+		if (netList.at(netIndex).netDevices.at(i).serial == serial) {
+			return i;
+		}
+	}
+
+	// no device was found
+	return -1;
+}
+
 
 
 
