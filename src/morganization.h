@@ -74,6 +74,20 @@ struct deviceUplink {
 	bool usingStaticIp;
 };
 
+struct deviceCDP {
+    QString deviceId;
+    QString portId;
+    QString address;
+    QString sourcePort;
+};
+
+struct deviceLLDP {
+    QString systemName;
+    QString portId;
+    QString managementAddress;
+    QString sourcePort;
+};
+
 struct deviceInNetwork {
 	// this is for the devices in the particular network
 	QString lanIp;
@@ -93,6 +107,9 @@ struct deviceInNetwork {
 	int uplinkNum;
 	deviceUplink uplink[2];
 
+	// these are returned in case of GET /networks/[networkId]/devices/[serial]/lldp_cdp
+	QVector<deviceCDP> devCDP;
+	QVector<deviceLLDP> devLLDP;
 };
 
 struct networkVars {

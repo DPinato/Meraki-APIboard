@@ -57,7 +57,7 @@ public:
 	bool processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 	bool processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex, QString clientMac);
-
+	bool processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
 
 
 	// set

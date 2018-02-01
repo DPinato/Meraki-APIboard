@@ -222,6 +222,14 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 17: {
+			// GET /networks/[networkId]/devices/[serial]/lldp_cdp
+			processDeviceLLDPCDPQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									  , queueEventRequests.at(eventIndex).netIndex
+									  , queueEventRequests.at(eventIndex).deviceSerial);
+			break;
+		}
+
 		case 20: {
 			// GET /networks/[networkId]/l3FirewallRules
 			processMXL3FirewallQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
@@ -1074,6 +1082,49 @@ bool APIHelper::processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, i
 
 
 	return true;	// everything went ok
+
+}
+
+bool APIHelper::processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial) {
+	qDebug() << "\nAPIHelper::processDeviceLLDPCDPQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex << "\tdevSerial" << devSerial;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processDeviceLLDPCDPQuery(...)";
+		return false;
+	}
+
+	// an array is not returned anywhere in the JSON reply
+	// try this anyway for ports, since a bunch of port values will be returned
+	QJsonObject jObj = doc.object()["ports"];
+	qDebug() << jObj << "\t" << jObj.size();
+
+
+	// the idea here is that the deviceInNetwork in the networkVars, will be overwritten with the
+	// uplink information added to it
+	networkVars tmpNet = parent->orgList[orgIndex]->getNetwork(netIndex);
+	int netDevIndex = parent->orgList.at(orgIndex)->getIndexOfNetworkDevice(tmpNet.netID, devSerial);
+	deviceInNetwork tmpNetDev = parent->orgList.at(orgIndex)->getNetworkDevice(netIndex, netDevIndex);
+
+	int portCount = jObj.keys().size();
+
+	// this is a workaround, since there are no devices with more than 54 ports
+	// 48 LAN ports + 4 SFP + 2 stack ports
+	tmpNetDev.devCDP.resize(54);
+	tmpNetDev.devLLDP.resize(54);
+
+	for (int i = 0; i < portCount; i++) {
+		QJsonObject jObjPort = jArray.at(i).toObject();
+		int portId = jObjPort.keys().at(i);
+
+
+
+		parent->orgList[orgIndex]->setNetworkDevice(netIndex, tmpNetDev, i);
+
+	}
+
+
+	return true;	// everything went well
 
 }
 
