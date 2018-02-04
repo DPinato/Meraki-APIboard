@@ -19,7 +19,8 @@ struct eventRequest {
 	// used to maintain a queue for HTTP requests to make
 	int urlListIndex;			// which index in the urlList it corresponds to
 	int orgIndex;				// organization index in orgList
-	int netIndex = -1;				// network index in the orgList object
+	int netIndex = -1;			// network index in the orgList object
+	int ssidIndex = -1;			// SSID index for queries at index 90 and 91
 	QString deviceSerial = "";	// in case the query is specific to a particular device, i.e. a switch
 	QString clientMac = "";		// client MAC address, i.e. when getting group policies associated to the client
 	QByteArray data = 0;		// data to use in case of a PUT or POST
@@ -42,22 +43,25 @@ public:
 
 	// functions to process data returned from queries
 	bool processOrgQuery(QJsonDocument doc);
-	void processNetworkQuery(QJsonDocument doc);
+	bool processNetworkQuery(QJsonDocument doc, int orgIndex, int netIndex = -1);
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
 	bool processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
 	bool processNetworkDeviceUplinkQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
-
 	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
+	bool processOrgVPNFirewallRulesQuery(QJsonDocument doc, int orgIndex);
 	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial);
-	bool processMXL3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
+	bool processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
+	bool processNetworkCellularFirewallQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 	bool processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex, QString clientMac);
 	bool processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
+	bool processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int netIndex, int ssidIndex = -1);
+
 
 
 	// set

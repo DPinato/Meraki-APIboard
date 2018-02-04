@@ -43,7 +43,7 @@ public:
 	void prepareModelObj();
 	void prepareColumnHeaders();
 	void updateOrgUI(int orgIndex);		// update the tree view of the organization/network
-	void updateNetworkUI(QModelIndex &index);
+	void updateNetworkUI(int orgIndex, int netIndex);
 
 
 	// functions to show different things in the GUI

@@ -50,6 +50,8 @@ public:
     QTableView *adminsTableView_2;
     QTableView *adminsTableView;
     QWidget *tab_28;
+    QLabel *label_21;
+    QLineEdit *networkIDEdit;
     QWidget *tab_17;
     QLineEdit *nonMVPNPeerNameEdit;
     QLineEdit *snmpPrivPassEdit;
@@ -184,6 +186,13 @@ public:
         tab_28 = new QWidget();
         tab_28->setObjectName(QStringLiteral("tab_28"));
         adminTabWidget->addTab(tab_28, QString());
+        label_21 = new QLabel(tab);
+        label_21->setObjectName(QStringLiteral("label_21"));
+        label_21->setGeometry(QRect(340, 40, 71, 21));
+        networkIDEdit = new QLineEdit(tab);
+        networkIDEdit->setObjectName(QStringLiteral("networkIDEdit"));
+        networkIDEdit->setGeometry(QRect(410, 40, 191, 21));
+        networkIDEdit->setMaxLength(30);
         tabWidget->addTab(tab, QString());
         tab_17 = new QWidget();
         tab_17->setObjectName(QStringLiteral("tab_17"));
@@ -433,7 +442,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1084, 21));
+        menuBar->setGeometry(QRect(0, 0, 1084, 20));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QStringLiteral("menuFile"));
         menuEdit = new QMenu(menuBar);
@@ -457,7 +466,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(8);
+        tabWidget->setCurrentIndex(0);
         adminTabWidget->setCurrentIndex(0);
 
 
@@ -475,6 +484,8 @@ public:
         networkNameEdit->setText(QApplication::translate("MainWindow", "123456789012345678901234567890", nullptr));
         adminTabWidget->setTabText(adminTabWidget->indexOf(tab_27), QApplication::translate("MainWindow", "Administrators", nullptr));
         adminTabWidget->setTabText(adminTabWidget->indexOf(tab_28), QApplication::translate("MainWindow", "SAML", nullptr));
+        label_21->setText(QApplication::translate("MainWindow", "Network ID:", nullptr));
+        networkIDEdit->setText(QApplication::translate("MainWindow", "123456789012345678901234567890", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("MainWindow", "Administration", nullptr));
         nonMVPNPeerNameEdit->setText(QString());
         nonMVPNPeerNameEdit->setPlaceholderText(QApplication::translate("MainWindow", "Non-Meraki VPN peer name", nullptr));

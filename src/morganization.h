@@ -59,6 +59,37 @@ struct smDevice {
 	bool passCodeLock;
 };
 
+struct radiusServer {
+	QString host;
+	QString port;
+};
+
+struct ssid {
+	// TODO: I am sure that is radiusAccountingEnabled is true, there are more settings
+	// the API endpoint always reports all 15 configurable SSIDs, even if some were never configured
+	int number;
+	QString name;
+	bool enabled;
+	QString splashPage;
+	bool ssidAdminAccessible;
+	QString authMode;
+	QString psk;
+	QString encryptionMode;
+	QString wpaEncryptionMode;
+
+	QVector<radiusServer> radiusServers;
+	bool radiusAccountingEnabled;
+	bool radiusCoaEnabled;
+	QString radiusAttributeForGroupPolicies;
+
+	QString ipAssignmentMode;
+	bool useVlanTagging;
+	int minBitrate;
+	QString bandSelection;
+	double perClientBandwidthLimitUp;
+	double perClientBandwidthLimitDown;
+};
+
 struct networkGroupPolicy {
 	QString name;		// name of group policy
 	int groupPolicyId;	// id of group policy
@@ -75,17 +106,17 @@ struct deviceUplink {
 };
 
 struct deviceCDP {
-    QString deviceId;
-    QString portId;
-    QString address;
-    QString sourcePort;
+	QString deviceId;
+	QString portId;
+	QString address;
+	QString sourcePort;
 };
 
 struct deviceLLDP {
-    QString systemName;
-    QString portId;
-    QString managementAddress;
-    QString sourcePort;
+	QString systemName;
+	QString portId;
+	QString managementAddress;
+	QString sourcePort;
 };
 
 struct deviceInNetwork {
@@ -112,6 +143,17 @@ struct deviceInNetwork {
 	QVector<deviceLLDP> devLLDP;
 };
 
+struct l3Firewall {
+	QString comment;		// comment for rule
+	QString policy;			// allow or deny
+	QString protocol;		// TCP, UDP, ICMP or Any
+	QString destPort;		// L4 destination port
+	QString destCidr;		// destination subnet
+	QString srcPort;		// L4 source port
+	QString srcCidr;		// source subnet (needs to be either a local or Meraki VPN subnet)
+	bool syslogEnabled;		// Syslog logging enabled
+};
+
 struct networkVars {
 	QString netID;			// network ID
 	QString orgID;			// ID of parent organization
@@ -123,6 +165,10 @@ struct networkVars {
 	QVector<smDevice> smDevices;	// if SM network, put SM devices here
 	QVector<networkGroupPolicy> gPolicies;	// group policies in the network
 	QVector<deviceInNetwork> netDevices;	// devices in network
+	QVector<ssid> netSSIDs;			// SSIDs in the network
+
+	QVector<l3Firewall> cellularRules;	// if there is an MX in the network, list cellular rules. no need to
+										//  have another struct, it returns the same variables that are in l3Firewall
 };
 
 struct licensesPerDevice {
@@ -144,17 +190,6 @@ struct switchPort {
 	bool rstpEnabled;
 	QString stpGuard;
 	QString accessPolicyNumber;		// what is this? maybe when a port is set to Access
-};
-
-struct mxL3Firewall {
-	QString comment;		// comment for rule
-	QString policy;			// allow or deny
-	QString protocol;		// TCP, UDP, ICMP or Any
-	QString destPort;		// L4 destination port
-	QString destCidr;		// destination subnet
-	QString srcPort;		// L4 source port
-	QString srcCidr;		// source subnet (needs to be either a local or Meraki VPN subnet)
-	bool syslogEnabled;		// Syslog logging enabled
 };
 
 struct clientGroupPolicy {
@@ -188,7 +223,7 @@ struct deviceInInventory {
 	QString publicIP;		// public IP address of device
 
 	QVector<switchPort> ports;			// info about switch ports (in case device is an MS)
-	QVector<mxL3Firewall> rules;		// info about L3 firewall rules (in case device is an MX)
+	QVector<l3Firewall> rules;		// info about L3 firewall rules (in case device is an MX)
 	QVector<clientConnected> clients;	// clients connected to device
 };
 
@@ -264,10 +299,14 @@ class MOrganization {
 		void setSwitchPortNum(int devIndex, int n);
 		void setSwitchPort(int devIndex, switchPort s, int index);
 		void setMXL3RulesNum(int devIndex, int n);
-		void setMXL3Rule(int devIndex, mxL3Firewall s, int index);
+		void setMXL3Rule(int devIndex, l3Firewall s, int index);
+		void setNetworkCellularRulesNum(int netIndex, int n);
+		void setNetworkCellularRule(int netIndex, l3Firewall s, int index);
 		void setOrgSNMPSettings(orgSNMP s);
 		void setOrgVPNPeerNum(int n);
 		void setOrgVPNPeer(nonMerakiVPNPeer p, int index);
+		void setOrgVPNFirewallRulesNum(int n);
+		void setOrgVPNFirewallRule(l3Firewall s, int index);
 		void setSMDevicesNum(int netIndex, int n);
 		void setSMDevice(int netIndex, smDevice s, int index);
 		void setNetworkGroupPolicyNum(int netIndex, int n);
@@ -276,6 +315,8 @@ class MOrganization {
 		void setClientConnected(int devIndex, clientConnected s, int index);
 		void setNetworkDevicesNum(int netIndex, int n);
 		void setNetworkDevice(int netIndex, deviceInNetwork s, int index);
+		void setNetworkSSID(int netIndex, ssid s, int index);
+
 
 
 		// get
@@ -296,10 +337,14 @@ class MOrganization {
 		int getSwitchPortNum(int devIndex);
 		switchPort getSwitchport(int devIndex, int index);
 		int getMXL3RulesNum(int devIndex);
-		mxL3Firewall getMXL3Rule(int devIndex, int index);
+		l3Firewall getMXL3Rule(int devIndex, int index);
+		int getNetworkCellularRuleNum(int netIndex);
+		l3Firewall getNetworkCellularRule(int netIndex, int index);
 		orgSNMP getOrgSNMPSettings();
 		int getOrgVPNPeerNum();
 		nonMerakiVPNPeer getOrgVPNPeer(int index);
+		int getOrgVPNFirewallRulesNum();
+		l3Firewall getOrgVPNFirewallRule(int index);
 		int getSMDevicesNum(int netIndex);
 		smDevice getSMDevice(int netIndex, int index);
 		int getNetworkGroupPolicyNum(int netIndex);
@@ -308,6 +353,7 @@ class MOrganization {
 		clientConnected getClientConnected(int devIndex, int index);
 		int getNetworkDevicesNum(int netIndex);
 		deviceInNetwork getNetworkDevice(int netIndex, int index);
+		ssid getNetworkSSID(int netIndex, int index);
 
 
 		// functions to help navigating lists and vectors
@@ -341,6 +387,7 @@ class MOrganization {
 
 		// non-Meraki site-to-site VPN
 		QVector<nonMerakiVPNPeer> nonMerakiVPNs;	// holds list of non-Meraki site-to-site VPN peers
+		QVector<l3Firewall> vpnFirewallRules;
 
 		// administrators
 		QVector<adminStruct> adminList;

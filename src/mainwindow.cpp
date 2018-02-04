@@ -18,16 +18,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 	// I am doing this so I do not have to leave my API key in this code
-//	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
-	apiKey = getAPIkeyFromFile(QString("C:\\Users\\Davide\\Documents\\meraki_api_key.txt"));
+	apiKey = getAPIkeyFromFile(QString("D:\\Programming\\meraki_api_key.txt"));
+//	apiKey = getAPIkeyFromFile(QString("C:\\Users\\Davide\\Documents\\meraki_api_key.txt"));
 	qDebug() << apiKey;
 	if (apiKey == "") {
 		qDebug() << "Could not find API key";
 		exit(1);
 	}
 
-//	urlListFile = QString("D:\\Programming\\Qt\\Meraki-APIboard\\URL_list.txt");
-	urlListFile = QString("C:\\Users\\Davide\\Documents\\Meraki-APIboard\\URL_list.txt");
+	urlListFile = QString("D:\\Programming\\Qt\\Meraki-APIboard\\URL_list.txt");
+//	urlListFile = QString("C:\\Users\\Davide\\Documents\\Meraki-APIboard\\URL_list.txt");
 	qDebug() << urlListFile;
 	if (urlListFile.size() == 0) {
 		qDebug() << "Could not get list of URLs";
@@ -293,38 +293,26 @@ void MainWindow::updateOrgUI(int orgIndex) {
 
 }
 
-void MainWindow::updateNetworkUI(QModelIndex &index) {
+void MainWindow::updateNetworkUI(int orgIndex, int netIndex) {
 	// show information about the network/organization
-	qDebug() << index;
-	qDebug() << index.data() << "\t" << index.row();
-	qDebug() << index.parent().data() << "\t" << index.parent().row();
-
-	int tmpOrgIndex, tmpNetIndex;
-
-	if (index.parent().data() == QVariant::Invalid) {
-		// an organization was selected in the tree view
-		tmpOrgIndex = index.row();
-		tmpNetIndex = -1;
-	} else {
-		// a network was selected in the tree view
-		tmpOrgIndex = index.parent().row();
-		tmpNetIndex = index.row();
-	}
-	qDebug() << "tmpOrgIndex: " << tmpOrgIndex << "\ttmpNetIndex: " << tmpNetIndex;
-	qDebug() << "\n";
+	qDebug() << "orgIndex: " << orgIndex << "\tnetIndex: " << netIndex;
 
 
 	// show info about the organization
-	ui->orgNameEdit->setText(orgList.at(tmpOrgIndex)->getOrgName());
+	ui->orgNameEdit->setText(orgList.at(orgIndex)->getOrgName());
 
 
-	if (tmpNetIndex != -1) {
+	if (netIndex != -1) {
 		// show info about network
 		ui->networkNameEdit->setEnabled(true);
-		ui->networkNameEdit->setText(orgList.at(tmpOrgIndex)->getNetwork(tmpNetIndex).netName);
+		ui->networkNameEdit->setText(orgList.at(orgIndex)->getNetwork(netIndex).netName);
+		ui->networkIDEdit->setEnabled(false);	// the network ID cannot be changed anyway
+		ui->networkIDEdit->setText(orgList.at(orgIndex)->getNetwork(netIndex).netID);
 	} else {
 		ui->networkNameEdit->setEnabled(false);
 		ui->networkNameEdit->setText("");
+		ui->networkIDEdit->setEnabled(false);
+		ui->networkIDEdit->setText("");
 	}
 
 
@@ -885,7 +873,6 @@ void MainWindow::replyFinished(QNetworkReply *reply) {
 void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 	// distinguish on whether an organization or a network was double clicked
 	// run query for that organization / network
-	//	updateNetworkUI(QModelIndex(index));
 	eventRequest tmp;
 	if (index.parent().data() == QVariant::Invalid) {
 		// an organization was selected in the tree view
@@ -903,7 +890,7 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 		// a network was selected in the tree view
 		tmp.orgIndex = index.parent().row();
 		tmp.netIndex = index.row();
-		//		updateNetworkUI(QModelIndex(index));
+		updateNetworkUI(tmp.orgIndex, tmp.netIndex);
 	}
 
 
@@ -933,6 +920,14 @@ void MainWindow::on_debugButton_clicked() {
 
 void MainWindow::on_treeView_clicked(const QModelIndex &index) {
 	// update info shown for the org
+//	qDebug() << "on_treeView_clicked()\t" << index.parent().row() << "\t" << index.row()
+//			 << orgList.at(currOrgIndex)->getNetworksNum();
+
+
+//	// do it just temporarily
+//	if (orgList.at(currOrgIndex)->getNetworksNum() > 0) {
+//		qDebug() << orgList.at(currOrgIndex)->getNetwork(index.row()).netID;
+//	}
 
 }
 

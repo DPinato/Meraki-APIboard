@@ -33,6 +33,7 @@ void MOrganization::setNetworksNum(int n) {
 
 void MOrganization::setNetwork(networkVars v, int index) {
 	netList[index] = v;
+	netList[index].netSSIDs.resize(15);		// doing it here as this is a default constant value
 }
 
 void MOrganization::setLicenseStatus(QString s) {
@@ -79,8 +80,16 @@ void MOrganization::setMXL3RulesNum(int devIndex, int n) {
 	orgInventory[devIndex].rules.resize(n);
 }
 
-void MOrganization::setMXL3Rule(int devIndex, mxL3Firewall s, int index) {
+void MOrganization::setMXL3Rule(int devIndex, l3Firewall s, int index) {
 	orgInventory[devIndex].rules[index] = s;
+}
+
+void MOrganization::setNetworkCellularRulesNum(int netIndex, int n) {
+	netList[netIndex].cellularRules.resize(n);
+}
+
+void MOrganization::setNetworkCellularRule(int netIndex, l3Firewall s, int index) {
+	netList[netIndex].cellularRules[index] = s;
 }
 
 void MOrganization::setOrgSNMPSettings(orgSNMP s) {
@@ -93,6 +102,14 @@ void MOrganization::setOrgVPNPeerNum(int n) {
 
 void MOrganization::setOrgVPNPeer(nonMerakiVPNPeer p, int index) {
 	nonMerakiVPNs[index] = p;
+}
+
+void MOrganization::setOrgVPNFirewallRulesNum(int n) {
+	vpnFirewallRules.resize(n);
+}
+
+void MOrganization::setOrgVPNFirewallRule(l3Firewall s, int index) {
+	vpnFirewallRules[index] = s;
 }
 
 void MOrganization::setSMDevicesNum(int netIndex, int n) {
@@ -125,6 +142,10 @@ void MOrganization::setNetworkDevicesNum(int netIndex, int n) {
 
 void MOrganization::setNetworkDevice(int netIndex, deviceInNetwork s, int index) {
 	netList[netIndex].netDevices[index] = s;
+}
+
+void MOrganization::setNetworkSSID(int netIndex, ssid s, int index) {
+	netList[netIndex].netSSIDs[index] = s;
 }
 
 
@@ -209,8 +230,16 @@ int MOrganization::getMXL3RulesNum(int devIndex) {
 	return orgInventory.at(devIndex).rules.size();
 }
 
-mxL3Firewall MOrganization::getMXL3Rule(int devIndex, int index) {
+l3Firewall MOrganization::getMXL3Rule(int devIndex, int index) {
 	return orgInventory.at(devIndex).rules.at(index);
+}
+
+int MOrganization::getNetworkCellularRuleNum(int netIndex) {
+	return netList.at(netIndex).cellularRules.size();
+}
+
+l3Firewall MOrganization::getNetworkCellularRule(int netIndex, int index) {
+	return netList.at(netIndex).cellularRules.at(index);
 }
 
 orgSNMP MOrganization::getOrgSNMPSettings() {
@@ -223,6 +252,14 @@ int MOrganization::getOrgVPNPeerNum() {
 
 nonMerakiVPNPeer MOrganization::getOrgVPNPeer(int index) {
 	return nonMerakiVPNs.at(index);
+}
+
+int MOrganization::getOrgVPNFirewallRulesNum() {
+	return vpnFirewallRules.size();
+}
+
+l3Firewall MOrganization::getOrgVPNFirewallRule(int index) {
+	return vpnFirewallRules.at(index);
 }
 
 int MOrganization::getSMDevicesNum(int netIndex) {
@@ -255,6 +292,10 @@ int MOrganization::getNetworkDevicesNum(int netIndex) {
 
 deviceInNetwork MOrganization::getNetworkDevice(int netIndex, int index) {
 	return netList.at(netIndex).netDevices.at(index);
+}
+
+ssid MOrganization::getNetworkSSID(int netIndex, int index) {
+	return netList.at(netIndex).netSSIDs.at(index);
 }
 
 int MOrganization::getIndexOfInventoryDevice(QString serial) {
