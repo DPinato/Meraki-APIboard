@@ -1096,7 +1096,8 @@ bool APIHelper::processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int n
 
 	// an array is not returned anywhere in the JSON reply
 	// try this anyway for ports, since a bunch of port values will be returned
-	QJsonObject jObj = doc.object()["ports"];
+	QJsonObject jObj = doc.object();
+	jObj = jObj["ports"].toObject();
 	qDebug() << jObj << "\t" << jObj.size();
 
 
@@ -1114,14 +1115,27 @@ bool APIHelper::processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int n
 	tmpNetDev.devLLDP.resize(54);
 
 	for (int i = 0; i < portCount; i++) {
-		QJsonObject jObjPort = jArray.at(i).toObject();
-		int portId = jObjPort.keys().at(i);
+		// this is not great since it will still go through portCount iterations
+		// I do not think there is an alternative, as no array is returned here
+		QJsonObject jObjPort = jObj[QString::number(i)].toObject();
+//		QString portId = jObjPort.keys().at(i);
 
+		// CDP
+		tmpNetDev.devCDP[i].deviceId = jObjPort["deviceId"].toString();
+		tmpNetDev.devCDP[i].portId = jObjPort["portId"].toString();
+		tmpNetDev.devCDP[i].address = jObjPort["address"].toString();
+		tmpNetDev.devCDP[i].sourcePort = jObjPort["sourcePort"].toString();
 
-
-		parent->orgList[orgIndex]->setNetworkDevice(netIndex, tmpNetDev, i);
+		// LLDP
+		tmpNetDev.devLLDP[i].systemName = jObjPort["systemName"].toString();
+		tmpNetDev.devLLDP[i].portId = jObjPort["portId"].toString();
+		tmpNetDev.devLLDP[i].managementAddress = jObjPort["managementAddress"].toString();
+		tmpNetDev.devLLDP[i].sourcePort = jObjPort["sourcePort"].toString();
 
 	}
+
+	// update the network device
+	parent->orgList[orgIndex]->setNetworkDevice(netIndex, tmpNetDev, netDevIndex);
 
 
 	return true;	// everything went well
