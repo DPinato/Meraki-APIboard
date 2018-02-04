@@ -148,6 +148,10 @@ void MOrganization::setNetworkSSID(int netIndex, ssid s, int index) {
 	netList[netIndex].netSSIDs[index] = s;
 }
 
+void MOrganization::setNetworkS2SVPN(int netIndex, merakiVPN s) {
+	netList[netIndex].s2sMerakiVPN = s;
+}
+
 
 
 
@@ -296,6 +300,10 @@ deviceInNetwork MOrganization::getNetworkDevice(int netIndex, int index) {
 
 ssid MOrganization::getNetworkSSID(int netIndex, int index) {
 	return netList.at(netIndex).netSSIDs.at(index);
+}
+
+merakiVPN MOrganization::getNetworkS2SVPN(int netIndex) {
+	return netList.at(netIndex).s2sMerakiVPN;
 }
 
 int MOrganization::getIndexOfInventoryDevice(QString serial) {

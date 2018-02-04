@@ -90,6 +90,22 @@ struct ssid {
 	double perClientBandwidthLimitDown;
 };
 
+struct merakiVPNHub {
+	QString hubId;			// network ID of the hub the spoke is pointing to
+	bool useDefaultRoute;	// true if full-tunnel site-to-site VPN
+};
+
+struct merakiVPNSubnets {
+	QString localSubnet;	// local subnet on the MX
+	bool useVpn;			// whether subnet is advertised through site-to-site VPN
+};
+
+struct merakiVPN {
+	QString mode;						// hub or spoke
+	QVector<merakiVPNHub> hubs;			// if spoke, these will be the hubs the spoke is pointing to
+	QVector<merakiVPNSubnets> subnets;	// local subnets and whether they are advertised
+};
+
 struct networkGroupPolicy {
 	QString name;		// name of group policy
 	int groupPolicyId;	// id of group policy
@@ -166,9 +182,9 @@ struct networkVars {
 	QVector<networkGroupPolicy> gPolicies;	// group policies in the network
 	QVector<deviceInNetwork> netDevices;	// devices in network
 	QVector<ssid> netSSIDs;			// SSIDs in the network
-
 	QVector<l3Firewall> cellularRules;	// if there is an MX in the network, list cellular rules. no need to
 										//  have another struct, it returns the same variables that are in l3Firewall
+	merakiVPN s2sMerakiVPN;		// site-to-site auto-VPN
 };
 
 struct licensesPerDevice {
@@ -316,6 +332,7 @@ class MOrganization {
 		void setNetworkDevicesNum(int netIndex, int n);
 		void setNetworkDevice(int netIndex, deviceInNetwork s, int index);
 		void setNetworkSSID(int netIndex, ssid s, int index);
+		void setNetworkS2SVPN(int netIndex, merakiVPN s);
 
 
 
@@ -354,6 +371,7 @@ class MOrganization {
 		int getNetworkDevicesNum(int netIndex);
 		deviceInNetwork getNetworkDevice(int netIndex, int index);
 		ssid getNetworkSSID(int netIndex, int index);
+		merakiVPN getNetworkS2SVPN(int netIndex);
 
 
 		// functions to help navigating lists and vectors

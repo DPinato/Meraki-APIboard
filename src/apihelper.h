@@ -61,6 +61,7 @@ public:
 	bool processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex, QString clientMac);
 	bool processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
 	bool processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int netIndex, int ssidIndex = -1);
+	bool processMerakiS2SVPNQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
 
 

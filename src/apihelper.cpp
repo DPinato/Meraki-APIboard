@@ -272,7 +272,8 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 		case 34: {
 			// GET /networks/[networkId]/siteToSiteVpn
-
+			processMerakiS2SVPNQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									 , queueEventRequests.at(eventIndex).netIndex);
 			break;
 		}
 
@@ -1302,6 +1303,43 @@ bool APIHelper::processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int ne
 		parent->orgList[orgIndex]->setNetworkSSID(netIndex, tmpSSID, i);
 
 	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processMerakiS2SVPNQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+	qDebug() << "\nAPIHelper::processMerakiS2SVPNQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processMerakiS2SVPNQuery(...)";
+		return false;
+	}
+
+	QJsonObject jObj = doc.object();
+	qDebug() << jObj << "\t" << jObj.size();
+
+
+	merakiVPN tmpVPN;
+	tmpVPN.mode = jObj["mode"].toString();
+
+	QJsonArray jHubs = jObj["hubs"].toArray();
+	tmpVPN.hubs.resize(jHubs.size());
+	for (int i = 0; i < jHubs.size(); i++) {
+		tmpVPN.hubs[i].hubId = jHubs.at(i).toObject()["hubId"].toString();
+		tmpVPN.hubs[i].useDefaultRoute = jHubs.at(i).toObject()["useDefaultRoute"].toBool();
+	}
+
+	QJsonArray jSubnets = jObj["subnets"].toArray();
+	tmpVPN.subnets.resize(jSubnets.size());
+	for (int i = 0; i < jSubnets.size(); i++) {
+		tmpVPN.subnets[i].localSubnet = jSubnets.at(i).toObject()["localSubnet"].toString();
+		tmpVPN.subnets[i].useVpn = jSubnets.at(i).toObject()["useVpn"].toBool();
+	}
+
+
+	parent->orgList[orgIndex]->setNetworkS2SVPN(netIndex, tmpVPN);
 
 	return true;	// everything went well
 
