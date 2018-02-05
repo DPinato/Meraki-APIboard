@@ -152,6 +152,22 @@ void MOrganization::setNetworkS2SVPN(int netIndex, merakiVPN s) {
 	netList[netIndex].s2sMerakiVPN = s;
 }
 
+void MOrganization::setNetworkTrafficFlowsNum(int netIndex, int num) {
+	netList[netIndex].netFlows.resize(num);
+}
+
+void MOrganization::setNetworkTrafficFlow(int netIndex, netTraffic s, int index) {
+	netList[netIndex].netFlows[index] = s;
+}
+
+void MOrganization::setNetworkAccessPoliciesNum(int netIndex, int num) {
+	netList[netIndex].accessPolicies.resize(num);
+}
+
+void MOrganization::setNetworkAccessPolicy(int netIndex, netAccessPolicy s, int index) {
+	netList[netIndex].accessPolicies[index] = s;
+}
+
 
 
 
@@ -306,6 +322,22 @@ merakiVPN MOrganization::getNetworkS2SVPN(int netIndex) {
 	return netList.at(netIndex).s2sMerakiVPN;
 }
 
+int MOrganization::getNetworkTrafficFlowsNum(int netIndex) {
+	return netList.at(netIndex).netFlows.size();
+}
+
+netTraffic MOrganization::getNetworkTrafficFlow(int netIndex, int index) {
+	return netList.at(netIndex).netFlows.at(index);
+}
+
+int MOrganization::getNetworkAccessPoliciesNum(int netIndex) {
+	return netList.at(netIndex).accessPolicies.size();
+}
+
+netAccessPolicy MOrganization::getNetworkAccessPolicy(int netIndex, int index) {
+	return netList.at(netIndex).accessPolicies.at(index);
+}
+
 int MOrganization::getIndexOfInventoryDevice(QString serial) {
 	// given the serial number of a device, returns the index of it in the inventory vector
 	// returns -1 if it is unable to find it
@@ -314,7 +346,6 @@ int MOrganization::getIndexOfInventoryDevice(QString serial) {
 			return i;
 		}
 	}
-
 
 	return -1;	// no device was found
 

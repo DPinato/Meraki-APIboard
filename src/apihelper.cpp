@@ -277,6 +277,22 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 36: {
+			// GET /networks/[networkId]/traffic
+			processNetworkTrafficQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									   , queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
+
+		case 37: {
+			// GET /networks/[networkId]/accessPolicies
+			processNetworkAccessPoliciesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+											  , queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
+
+
+
 		case 41: {
 			// GET /organizations
 			processOrgQuery(jDoc);
@@ -1271,7 +1287,7 @@ bool APIHelper::processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int ne
 	}
 
 	for (i; i < count; i++) {
-		QJsonObject jObj;
+		QJsonObject jObj = jArray.at(i).toObject();
 		ssid tmpSSID;
 
 		tmpSSID.number = jObj["number"].toInt();
@@ -1342,6 +1358,50 @@ bool APIHelper::processMerakiS2SVPNQuery(QJsonDocument doc, int orgIndex, int ne
 	parent->orgList[orgIndex]->setNetworkS2SVPN(netIndex, tmpVPN);
 
 	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+	qDebug() << "\nAPIHelper::processNetworkTrafficQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkTrafficQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	parent->orgList[orgIndex]->setNetworkTrafficFlowsNum(netIndex, jArray.size());
+
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		netTraffic tmpTraffic;
+
+		tmpTraffic.application = jObj["application"].toString();
+		tmpTraffic.destination = jObj["destination"].toString();
+		tmpTraffic.protocol = jObj["protocol"].toString();
+		tmpTraffic.port = jObj["port"].toInt();
+		tmpTraffic.recv = jObj["recv"].toDouble();
+		tmpTraffic.sent = jObj["sent"].toDouble();
+		tmpTraffic.flows = jObj["flows"].toInt();
+		tmpTraffic.activeTime = jObj["activeTime"].toDouble();
+		tmpTraffic.numClients = jObj["numClients"].toInt();
+
+		parent->orgList[orgIndex]->setNetworkTrafficFlow(netIndex, tmpTraffic, i);
+
+	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+
+
+
 
 }
 

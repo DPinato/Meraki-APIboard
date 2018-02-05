@@ -170,6 +170,27 @@ struct l3Firewall {
 	bool syslogEnabled;		// Syslog logging enabled
 };
 
+struct netTraffic {
+    QString application;
+    QString destination;
+    QString protocol;
+    int port;       // careful because sometimes a string "-" is returned
+    double recv;
+    double sent;
+    int flows;
+    double activeTime;
+    int numClients;
+};
+
+struct netAccessPolicy {
+	// only valid for MS networks
+	int number;		// access policy number, like an ID so it also indicates position
+	QString name;
+	QString accessType;
+	int guestVlan;
+	QVector<radiusServer> radiusServers;		// here the "host" is reported as "ip"
+};
+
 struct networkVars {
 	QString netID;			// network ID
 	QString orgID;			// ID of parent organization
@@ -185,6 +206,9 @@ struct networkVars {
 	QVector<l3Firewall> cellularRules;	// if there is an MX in the network, list cellular rules. no need to
 										//  have another struct, it returns the same variables that are in l3Firewall
 	merakiVPN s2sMerakiVPN;		// site-to-site auto-VPN
+	QVector<netTraffic> netFlows;	// network flows seen by traffic analytics
+									// TODO: what is being returned if traffic analytics is disabled?
+	QVector<netAccessPolicy> accessPolicies;		// access policies in the MS network
 };
 
 struct licensesPerDevice {
@@ -205,7 +229,7 @@ struct switchPort {
 	bool isolationEnabled;
 	bool rstpEnabled;
 	QString stpGuard;
-	QString accessPolicyNumber;		// what is this? maybe when a port is set to Access
+	QString accessPolicyNumber;		// access policy number
 };
 
 struct clientGroupPolicy {
@@ -333,6 +357,10 @@ class MOrganization {
 		void setNetworkDevice(int netIndex, deviceInNetwork s, int index);
 		void setNetworkSSID(int netIndex, ssid s, int index);
 		void setNetworkS2SVPN(int netIndex, merakiVPN s);
+		void setNetworkTrafficFlowsNum(int netIndex, int num);
+		void setNetworkTrafficFlow(int netIndex, netTraffic s, int index);
+		void setNetworkAccessPoliciesNum(int netIndex, int num);
+		void setNetworkAccessPolicy(int netIndex, netAccessPolicy s, int index);
 
 
 
@@ -372,6 +400,11 @@ class MOrganization {
 		deviceInNetwork getNetworkDevice(int netIndex, int index);
 		ssid getNetworkSSID(int netIndex, int index);
 		merakiVPN getNetworkS2SVPN(int netIndex);
+		int getNetworkTrafficFlowsNum(int netIndex);
+		netTraffic getNetworkTrafficFlow(int netIndex, int index);
+		int getNetworkAccessPoliciesNum(int netIndex);
+		netAccessPolicy getNetworkAccessPolicy(int netIndex, int index);
+
 
 
 		// functions to help navigating lists and vectors
