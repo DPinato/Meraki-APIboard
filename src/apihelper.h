@@ -64,6 +64,7 @@ public:
 	bool processMerakiS2SVPNQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgIndex, int netIndex);
+	bool processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
 
 	// set

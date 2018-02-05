@@ -291,6 +291,14 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 38: {
+			// GET /networks/[networkId]/airMarshal
+			processNetworkAirMarshalQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+											  , queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
+
+
 
 
 		case 41: {
@@ -1399,9 +1407,123 @@ bool APIHelper::processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int 
 }
 
 bool APIHelper::processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+	qDebug() << "\nAPIHelper::processNetworkAccessPoliciesQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkAccessPoliciesQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	parent->orgList[orgIndex]->setNetworkAccessPoliciesNum(netIndex, jArray.size());
 
 
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		netAccessPolicy tmpPolicy;
 
+		tmpPolicy.number = jObj["number"].toInt();
+		tmpPolicy.name = jObj["name"].toString();
+		tmpPolicy.accessType = jObj["accessType"].toString();
+		tmpPolicy.guestVlan = jObj["guestVlan"].toInt();
+
+		QJsonArray jRadius = jObj["radiusServers"].toArray();	// get RADIUS servers
+		tmpPolicy.radiusServers.resize(jRadius.size());
+		for (int j = 0; j < jRadius.size(); j++) {
+			radiusServer tmpRadius;
+			tmpRadius.host = jRadius.at(j).toObject()["ip"].toString();
+			tmpRadius.port = jRadius.at(j).toObject()["port"].toInt();
+			tmpPolicy.radiusServers[j] = tmpRadius;
+		}
+
+		parent->orgList[orgIndex]->setNetworkAccessPolicy(netIndex, tmpPolicy, i);
+
+	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+	qDebug() << "\nAPIHelper::processNetworkAirMarshalQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkAirMarshalQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	parent->orgList[orgIndex]->setNetworkAirMarshalEntriesNum(jArray.size());
+
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		netAirMarshal tmpAirMarshal;
+
+		tmpAirMarshal.ssid = jObj["ssid"].toString();
+
+		QJsonArray jBssids = jObj["bssids"].toArray();		// get bssids
+		tmpAirMarshal.bssids.resize(jBssids.size());
+		for (int j = 0; j < jBssids.size(); j++) {
+			// this will be a bit messed up, since there is another QVector in here
+			QJsonObject jObjBssids = jBssids.at(j).toObject();
+			bssidAirMarshal tmpBssid;
+
+			tmpBssid.bssid = jObjBssids["bssid"].toString();
+			tmpBssid.contained = jObjBssids["contained"].toBool();
+
+			// get the list of who detected this BSSID
+			QJsonArray jDetectedBy = jObjBssids["detectedBy"].toArray();
+			tmpBssid.detectedBy.resize(jDetectedBy.size());
+			for (int m = 0; m < jDetectedBy.size(); m++) {
+				detectedAirMarshal tmpDetected;
+				tmpDetected.device = jDetectedBy.at(m).toObject()["device"].toString();
+				tmpDetected.rssi = jDetectedBy.at(m).toObject()["rssi"].toInt();
+				tmpBssid.detectedBy[m] = tmpDetected;
+			}
+
+			tmpAirMarshal.bssids[j] = tmpBssid;
+		}
+
+
+		QJsonArray jChannels = jObj["channels"].toArray();	// get channels
+		tmpAirMarshal.channels.resize(jChannels.size());
+		for (int i = 0; i < jChannels.size(); i++) {
+			tmpAirMarshal.channels[i] = jChannels.at(i).toInt();		// not 100% sure this is correct
+		}
+
+
+		tmpAirMarshal.firstSeen = jObj["firstSeen"].toDouble();
+		tmpAirMarshal.lastSeen = jObj["lastSeen"].toDouble();
+
+
+		QJsonArray jWiredMacs = jObj["wiredMacs"].toArray();
+		tmpAirMarshal.wiredMacs.resize(jWiredMacs.size());
+		for (int i = 0; i < jWiredMacs.size(); i++) {
+			tmpAirMarshal.wiredMacs[i] = jWiredMacs.at(i).toString();	// not 100% sure this is correct
+		}
+
+
+		QJsonArray jWiredVlans = jObj["wiredVlans"].toArray();
+		tmpAirMarshal.jWiredVlans.resize(jWiredVlans.size());
+		for (int i = 0; i < jWiredVlans.size(); i++) {
+			tmpAirMarshal.jWiredVlans[i] = jWiredVlans.at(i).toInt();	// not 100% sure this is correct
+		}
+
+
+		tmpAirMarshal.wiredLastSeen = jObj["wiredLastSeen"].toDouble();
+
+		parent->orgList[orgIndex]->setNetworkAirMarshalEntry(netIndex, tmpAirMarshal, i);
+
+	}
+
+	return true;	// everything went well
 
 }
 

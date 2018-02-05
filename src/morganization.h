@@ -171,15 +171,15 @@ struct l3Firewall {
 };
 
 struct netTraffic {
-    QString application;
-    QString destination;
-    QString protocol;
-    int port;       // careful because sometimes a string "-" is returned
-    double recv;
-    double sent;
-    int flows;
-    double activeTime;
-    int numClients;
+	QString application;
+	QString destination;
+	QString protocol;
+	int port;       // careful because sometimes a string "-" is returned
+	double recv;
+	double sent;
+	int flows;
+	double activeTime;
+	int numClients;
 };
 
 struct netAccessPolicy {
@@ -189,6 +189,28 @@ struct netAccessPolicy {
 	QString accessType;
 	int guestVlan;
 	QVector<radiusServer> radiusServers;		// here the "host" is reported as "ip"
+};
+
+struct detectedAirMarshal {
+	QString device;		// device serial number
+	int rssi;
+};
+
+struct bssidAirMarshal {
+	QString bssid;
+	bool contained;
+	QVector<detectedAirMarshal> detectedBy;		// who detected this BSSID
+};
+
+struct netAirMarshal {
+	QString ssid;		// name of SSID seen
+	QVector<bssidAirMarshal> bssids;
+	QVector<int> channels;		// these are returned as an array with no key, just [1,6,48,...]
+	double firstSeen;
+	double lastSeen;
+	QVector<QString> wiredMacs;	// these are returned as an array of strings, like channels
+	QVector<int> wiredVlans;	// returned like wiredMacs and channels
+	double wiredLastSeen;
 };
 
 struct networkVars {
@@ -209,6 +231,7 @@ struct networkVars {
 	QVector<netTraffic> netFlows;	// network flows seen by traffic analytics
 									// TODO: what is being returned if traffic analytics is disabled?
 	QVector<netAccessPolicy> accessPolicies;		// access policies in the MS network
+	QVector<netAirMarshal> airMarshalEntries;		// list of entries detected by air marshal
 };
 
 struct licensesPerDevice {
@@ -361,7 +384,8 @@ class MOrganization {
 		void setNetworkTrafficFlow(int netIndex, netTraffic s, int index);
 		void setNetworkAccessPoliciesNum(int netIndex, int num);
 		void setNetworkAccessPolicy(int netIndex, netAccessPolicy s, int index);
-
+		void setNetworkAirMarshalEntriesNum(int netIndex, int num);
+		void setNetworkAirMarshalEntry(int netIndex, netAirMarshal s, int index);
 
 
 		// get
@@ -404,7 +428,8 @@ class MOrganization {
 		netTraffic getNetworkTrafficFlow(int netIndex, int index);
 		int getNetworkAccessPoliciesNum(int netIndex);
 		netAccessPolicy getNetworkAccessPolicy(int netIndex, int index);
-
+		int getNetworkAirMarshalEntriesNum(int netIndex);
+		netAirMarshal getNetworkAirMarshalEntry(int netIndex, int index);
 
 
 		// functions to help navigating lists and vectors

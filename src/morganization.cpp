@@ -168,6 +168,14 @@ void MOrganization::setNetworkAccessPolicy(int netIndex, netAccessPolicy s, int 
 	netList[netIndex].accessPolicies[index] = s;
 }
 
+void MOrganization::setNetworkAirMarshalEntriesNum(int netIndex, int num) {
+	netList[netIndex].airMarshalEntries.resize(num);
+}
+
+void MOrganization::setNetworkAirMarshalEntry(int netIndex, netAirMarshal s, int index) {
+	netList[netIndex].airMarshalEntries[index] = s;
+}
+
 
 
 
@@ -336,6 +344,14 @@ int MOrganization::getNetworkAccessPoliciesNum(int netIndex) {
 
 netAccessPolicy MOrganization::getNetworkAccessPolicy(int netIndex, int index) {
 	return netList.at(netIndex).accessPolicies.at(index);
+}
+
+int MOrganization::getNetworkAirMarshalEntriesNum(int netIndex) {
+	return netList.at(netIndex).airMarshalEntries.size();
+}
+
+netAirMarshal MOrganization::getNetworkAirMarshalEntry(int netIndex, int index) {
+	return netList.at(netIndex).airMarshalEntries.at(index);
 }
 
 int MOrganization::getIndexOfInventoryDevice(QString serial) {
