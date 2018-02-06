@@ -213,6 +213,16 @@ struct netAirMarshal {
 	double wiredLastSeen;
 };
 
+struct netBtoothSettings {
+	QString id;		// network ID presumably, from my testing this is not returned
+	bool scanningEnabled;
+	bool advertisingEnabled;
+	QString uuid;
+	QString majorMinorAssignmentMode;
+	int major;
+	int minor;	// not returned if majorMinorAssignmentMode is "Unique"
+};
+
 struct networkVars {
 	QString netID;			// network ID
 	QString orgID;			// ID of parent organization
@@ -227,11 +237,13 @@ struct networkVars {
 	QVector<ssid> netSSIDs;			// SSIDs in the network
 	QVector<l3Firewall> cellularRules;	// if there is an MX in the network, list cellular rules. no need to
 										//  have another struct, it returns the same variables that are in l3Firewall
-	merakiVPN s2sMerakiVPN;		// site-to-site auto-VPN
+	merakiVPN s2sMerakiVPN;			// site-to-site auto-VPN
 	QVector<netTraffic> netFlows;	// network flows seen by traffic analytics
 									// TODO: what is being returned if traffic analytics is disabled?
 	QVector<netAccessPolicy> accessPolicies;		// access policies in the MS network
 	QVector<netAirMarshal> airMarshalEntries;		// list of entries detected by air marshal
+	netBtoothSettings bToothSettings;				// settings for bluetooth scanning
+
 };
 
 struct licensesPerDevice {
@@ -348,7 +360,10 @@ class MOrganization {
 		// set
 		void setOrgID(QString orgId);
 		void setOrgName(QString orgName);
-		void setSamlURL(QString url);
+		void setOrgSamlUrl(QString url);
+		void setOrgSamlUrlsNum(int num);
+		void setOrgSamlUrlEntry(QString s, int index);
+
 		void setNetworksNum(int n);
 		void setNetwork(networkVars v, int index);
 		void setLicenseStatus(QString s);
@@ -386,12 +401,17 @@ class MOrganization {
 		void setNetworkAccessPolicy(int netIndex, netAccessPolicy s, int index);
 		void setNetworkAirMarshalEntriesNum(int netIndex, int num);
 		void setNetworkAirMarshalEntry(int netIndex, netAirMarshal s, int index);
+		void setNetworkBtoothSettings(int netIndex, netBtoothSettings s);
+
 
 
 		// get
 		QString getOrgID();
 		QString getOrgName();
-		QString getSamlURL();
+		QString getOrgSamlUrl();
+		int getOrgSamlUrlsNum();
+		QString getOrgSamlUrlEntry(int index);
+
 		int getNetworksNum();
 		networkVars getNetwork(int index);
 		QString getLicenseStatus();
@@ -430,6 +450,8 @@ class MOrganization {
 		netAccessPolicy getNetworkAccessPolicy(int netIndex, int index);
 		int getNetworkAirMarshalEntriesNum(int netIndex);
 		netAirMarshal getNetworkAirMarshalEntry(int netIndex, int index);
+		netBtoothSettings getNetworkBtoothSettings(int netIndex);
+
 
 
 		// functions to help navigating lists and vectors
@@ -444,10 +466,10 @@ class MOrganization {
 
 
 	private:
-		QString id;					// organization ID, this number can be really long, store it as string for now
-		QString name;				// organization name
-		QString samlURL;			// SAML URL for organization
-		QVector<QString> samlURLs;	// SAML URLs for organization, not implemented yet
+		QString id;		// organization ID, this number can be really long, better as a string
+		QString name;						// organization name
+		QString samlConsumerUrl;			// SAML URL for organization
+		QVector<QString> samlConsumerUrls;	// SAML URLs for organization
 		QVector<networkVars> netList;	// list of networks associated with this organization
 
 		// licensing state

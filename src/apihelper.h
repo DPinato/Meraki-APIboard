@@ -42,7 +42,7 @@ public:
 	void putEventInQueue(eventRequest e, bool force = false);
 
 	// functions to process data returned from queries
-	bool processOrgQuery(QJsonDocument doc);
+	bool processOrgQuery(QJsonDocument doc, int orgIndex = -1);
 	bool processNetworkQuery(QJsonDocument doc, int orgIndex, int netIndex = -1);
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex);
@@ -65,6 +65,7 @@ public:
 	bool processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, int netIndex);
+	bool processNetworkBtoothSettingsQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
 
 	// set

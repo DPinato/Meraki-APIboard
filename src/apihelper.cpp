@@ -298,12 +298,22 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
-
-
+		case 39: {
+			// GET /networks/[networkId]/bluetoothSettings
+			processNetworkBtoothSettingsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+											  , queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
 
 		case 41: {
 			// GET /organizations
 			processOrgQuery(jDoc);
+			break;
+		}
+
+		case 42: {
+			// GET /organizations/[organizationId]
+			processOrgQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
 			break;
 		}
 
@@ -330,6 +340,12 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			processOrgVPNQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
 			break;
 		}
+
+
+
+
+
+
 
 		case 82: {
 			// GET /networks/[networkId]/sm/devices
@@ -405,9 +421,9 @@ void APIHelper::putEventInQueue(eventRequest e, bool force) {
 
 }
 
-bool APIHelper::processOrgQuery(QJsonDocument doc) {
+bool APIHelper::processOrgQuery(QJsonDocument doc, int orgIndex) {
 	// call this after querying list of organizations
-	// https://api.meraki.com/api/v0/organizations
+	// if orgIndex is not -1, it means that a particular org was queried
 	qDebug() << "\nAPIHelper::processOrgQuery(...)";
 
 	if (doc.isNull()) {
@@ -415,54 +431,37 @@ bool APIHelper::processOrgQuery(QJsonDocument doc) {
 		return false;
 	}
 
-//	qDebug() << jDoc.toJson(QJsonDocument::Indented);
-
-
 	// get organization data
 	QJsonArray jArray = doc.array();
-//	qDebug() << jArray << "\t" << jArray.size();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	int i = orgIndex;
+	int count = orgIndex+1;	// makes it so that the for-loop will do at least 1 iteration
+	if (orgIndex == -1) {
+		i = 0;		// update all the orgs
+		count = jArray.size();
+
+		// TODO: consider deleting all the MOrganization objects before this
+		parent->orgList.resize(jArray.size());
+	}
 
 
-	parent->orgList.resize(jArray.size());
+	for (i; i < count; i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		parent->orgList[i] = new MOrganization();
+		parent->orgList[i]->setOrgID(jObj["id"].toVariant().toString());
+//		parent->orgList[i]->setOrgID(jObj["id"].toDouble());
+		parent->orgList[i]->setOrgName(jObj["name"].toString());
+		parent->orgList[i]->setOrgSamlUrl(jObj["samlConsumerUrl"].toString());
 
-	for (int index = 0; index < jArray.size(); index++) {
-		QJsonObject jObj = jArray.at(index).toObject();
-		parent->orgList[index] = new MOrganization();
+		QJsonArray jSaml = jObj["samlConsumerUrls"].toArray();
+//		parent->orgList[i]->
 
-		parent->orgList[index]->setOrgID(jObj["id"].toVariant().toString());
-//		qDebug() << orgList[index]->getOrgID();
-
-		parent->orgList[index]->setOrgName(jObj["name"].toString());
-//		qDebug() << orgList[index]->getOrgName();
-
-
-		// these are not necessarily be sent with the response
-		if (jObj["samlConsumerUrl"] != QJsonValue::Undefined) {
-			parent->orgList[index]->setSamlURL(jObj["samlConsumerUrl"].toString());
-//			qDebug() << orgList[index]->getSamlURL();
-		}
-
-//		if (jObj.contains("samlConsumerUrls")) {
-//			// this not yet implemented
-//			qDebug() << "YES, index: " << index;
-//			QJsonArray tmpJArray = jObj["samlConsumerUrls"].toArray();
-
-//			for (int i = 0; i < tmpJArray.size(); i++) {
-//				qDebug() << tmpJArray.at(i).toString();
-//			}
-//		}
-
-//		qDebug() << "\n";
 
 	}
 
 
-	qDebug() << "ORGS: " << parent->orgList.size();
 
-//	// do not do this, what if there are a lot of orgs with a lot of networks
-//	for (int i = 0; i < parent->orgList.size(); i++) {
-//		runQuery(i);
-//	}
 
 	parent->updateOrgUI(-1);
 
@@ -1459,7 +1458,7 @@ bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, i
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList[orgIndex]->setNetworkAirMarshalEntriesNum(jArray.size());
+	parent->orgList[orgIndex]->setNetworkAirMarshalEntriesNum(netIndex, jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
@@ -1494,8 +1493,8 @@ bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, i
 
 		QJsonArray jChannels = jObj["channels"].toArray();	// get channels
 		tmpAirMarshal.channels.resize(jChannels.size());
-		for (int i = 0; i < jChannels.size(); i++) {
-			tmpAirMarshal.channels[i] = jChannels.at(i).toInt();		// not 100% sure this is correct
+		for (int j = 0; j < jChannels.size(); j++) {
+			tmpAirMarshal.channels[j] = jChannels.at(j).toInt();		// not 100% sure this is correct
 		}
 
 
@@ -1505,15 +1504,15 @@ bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, i
 
 		QJsonArray jWiredMacs = jObj["wiredMacs"].toArray();
 		tmpAirMarshal.wiredMacs.resize(jWiredMacs.size());
-		for (int i = 0; i < jWiredMacs.size(); i++) {
-			tmpAirMarshal.wiredMacs[i] = jWiredMacs.at(i).toString();	// not 100% sure this is correct
+		for (int j = 0; j < jWiredMacs.size(); j++) {
+			tmpAirMarshal.wiredMacs[j] = jWiredMacs.at(j).toString();	// not 100% sure this is correct
 		}
 
 
 		QJsonArray jWiredVlans = jObj["wiredVlans"].toArray();
-		tmpAirMarshal.jWiredVlans.resize(jWiredVlans.size());
-		for (int i = 0; i < jWiredVlans.size(); i++) {
-			tmpAirMarshal.jWiredVlans[i] = jWiredVlans.at(i).toInt();	// not 100% sure this is correct
+		tmpAirMarshal.wiredVlans.resize(jWiredVlans.size());
+		for (int j = 0; j < jWiredVlans.size(); j++) {
+			tmpAirMarshal.wiredVlans[j] = jWiredVlans.at(j).toInt();	// not 100% sure this is correct
 		}
 
 
@@ -1522,6 +1521,31 @@ bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, i
 		parent->orgList[orgIndex]->setNetworkAirMarshalEntry(netIndex, tmpAirMarshal, i);
 
 	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkBtoothSettingsQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+	qDebug() << "\nAPIHelper::processNetworkBtoothSettingsQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkBtoothSettingsQuery(...)";
+		return false;
+	}
+
+	QJsonObject jObj = doc.object();
+	qDebug() << jObj << "\t" << jObj.size();
+
+	netBtoothSettings tmpBtooth;
+	tmpBtooth.id = jObj["id"].toString();	// this may not even be returned
+	tmpBtooth.scanningEnabled = jObj["scanningEnabled"].toBool();
+	tmpBtooth.advertisingEnabled = jObj["advertisingEnabled"].toBool();
+	tmpBtooth.uuid = jObj["uuid"].toString();
+	tmpBtooth.majorMinorAssignmentMode = jObj["majorMinorAssignmentMode"].toString();
+	tmpBtooth.major = jObj["major"].toInt();
+	tmpBtooth.minor = jObj["minor"].toInt();
 
 	return true;	// everything went well
 

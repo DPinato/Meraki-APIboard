@@ -1,4 +1,4 @@
-﻿baseURL https://api.meraki.com/api/v0/
+﻿baseURL https://api.meraki.com/api/v0
 
 # request_type URL
 GET /organizations/[organizationId]/admins

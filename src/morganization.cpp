@@ -3,13 +3,11 @@
 
 
 MOrganization::MOrganization() {
-	samlURL = QString("");
 }
 
 MOrganization::MOrganization(QString orgName, QString orgId) {
 	id = orgId;
 	name = orgName;
-	samlURL = QString("");
 }
 
 MOrganization::~MOrganization() {
@@ -23,8 +21,16 @@ void MOrganization::setOrgName(QString orgName) {
 	name = orgName;
 }
 
-void MOrganization::setSamlURL(QString url) {
-	samlURL = url;
+void MOrganization::setOrgSamlUrl(QString url) {
+	samlConsumerUrl = url;
+}
+
+void MOrganization::setOrgSamlUrlsNum(int num) {
+	samlConsumerUrls.reserve(num);
+}
+
+void MOrganization::setOrgSamlUrlEntry(QString s, int index) {
+	samlConsumerUrls[index] = s;
 }
 
 void MOrganization::setNetworksNum(int n) {
@@ -176,6 +182,10 @@ void MOrganization::setNetworkAirMarshalEntry(int netIndex, netAirMarshal s, int
 	netList[netIndex].airMarshalEntries[index] = s;
 }
 
+void MOrganization::setNetworkBtoothSettings(int netIndex, netBtoothSettings s) {
+	netList[netIndex].bToothSettings = s;
+}
+
 
 
 
@@ -188,8 +198,16 @@ QString MOrganization::getOrgName() {
 	return name;
 }
 
-QString MOrganization::getSamlURL() {
-	return samlURL;
+QString MOrganization::getOrgSamlUrl() {
+	return samlConsumerUrl;
+}
+
+int MOrganization::getOrgSamlUrlsNum() {
+	return samlConsumerUrls.size();
+}
+
+QString MOrganization::getOrgSamlUrlEntry(int index) {
+	return samlConsumerUrls.at(index);
 }
 
 int MOrganization::getNetworksNum() {
@@ -354,6 +372,10 @@ netAirMarshal MOrganization::getNetworkAirMarshalEntry(int netIndex, int index) 
 	return netList.at(netIndex).airMarshalEntries.at(index);
 }
 
+netBtoothSettings MOrganization::getNetworkBtoothSettings(int netIndex) {
+	return netList.at(netIndex).bToothSettings;
+}
+
 int MOrganization::getIndexOfInventoryDevice(QString serial) {
 	// given the serial number of a device, returns the index of it in the inventory vector
 	// returns -1 if it is unable to find it
@@ -426,11 +448,11 @@ void MOrganization::showVariables() {
 	// debug function, just show all the variables in the class
 	qDebug() << "Org ID: " << id;
 	qDebug() << "Org name: " << name;
-	qDebug() << "SAML URL: " << samlURL;
+	qDebug() << "SAML URL: " << samlConsumerUrl;
 
 	qDebug() << "SAML URLs: ";
-	for (int i = 0; i < samlURLs.size(); i++) {
-		qDebug() << "\t" << samlURLs.at(i);
+	for (int i = 0; i < samlConsumerUrls.size(); i++) {
+		qDebug() << "\t" << samlConsumerUrls.at(i);
 	}
 
 

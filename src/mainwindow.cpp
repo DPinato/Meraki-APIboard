@@ -252,6 +252,8 @@ void MainWindow::updateOrgUI(int orgIndex) {
 	// for the organization/network tree view
 	// put the stuff in the UI after an API reply
 	qDebug() << "MainWindow::updateUI(), orgIndex: " << orgIndex;
+	qDebug() << "ORGS: " << orgList.size();
+
 	if (orgIndex == -1) {
 		// data for more than 1 org was queried
 		// without this, the tree view would close all the time
