@@ -70,6 +70,12 @@ GET /networks/[networkId]/phoneAssignments/[serial]
 PUT /networks/[networkId]/phoneAssignments/[serial]
 DELETE /networks/[networkId]/phoneAssignments/[serial]
 
+GET /networks/[networkId]/phoneCallgroups
+GET /networks/[networkId]/phoneCallgroups/[id]
+POST /networks/[networkId]/phoneCallgroups/
+PUT /networks/[networkId]/phoneCallgroups/[id]
+DELETE /networks/[networkId]/phoneCallgroups/[id]
+
 GET /networks/[networkId]/phoneContacts
 POST /networks/[networkId]/phoneContacts
 PUT /networks/[networkId]/phoneContacts/[contactId]

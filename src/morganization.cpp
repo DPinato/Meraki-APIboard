@@ -186,6 +186,22 @@ void MOrganization::setNetworkBtoothSettings(int netIndex, netBtoothSettings s) 
 	netList[netIndex].bToothSettings = s;
 }
 
+void MOrganization::setNetworkPhoneNum(int netIndex, int num) {
+	netList[netIndex].netPhones.resize(num);
+}
+
+void MOrganization::setNetworkPhone(int netIndex, netPhone s, int index) {
+	netList[netIndex].netPhones[index] = s;
+}
+
+void MOrganization::setNetworkPhoneContactNum(int netIndex, int num) {
+	netList[netIndex].netPhoneContacts.resize(num);
+}
+
+void MOrganization::setNetworkPhoneContact(int netIndex, netPhoneContact s, int index) {
+	netList[netIndex].netPhoneContacts[index] = s;
+}
+
 
 
 
@@ -375,6 +391,27 @@ netAirMarshal MOrganization::getNetworkAirMarshalEntry(int netIndex, int index) 
 netBtoothSettings MOrganization::getNetworkBtoothSettings(int netIndex) {
 	return netList.at(netIndex).bToothSettings;
 }
+
+int MOrganization::getNetworkPhoneNum(int netIndex) {
+	return netList.at(netIndex).netPhones.size();
+}
+
+netPhone MOrganization::getNetworkPhone(int netIndex, int index) {
+	return netList.at(netIndex).netPhones.at(index);
+}
+
+int MOrganization::getNetworkPhoneContactNum(int netIndex) {
+	return netList.at(netIndex).netPhoneContacts.size();
+}
+
+netPhoneContact MOrganization::getNetworkPhoneContact(int netIndex, int index) {
+	return netList.at(netIndex).netPhoneContacts.at(index);
+}
+
+
+
+
+
 
 int MOrganization::getIndexOfInventoryDevice(QString serial) {
 	// given the serial number of a device, returns the index of it in the inventory vector

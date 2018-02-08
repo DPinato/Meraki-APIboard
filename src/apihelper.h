@@ -66,6 +66,8 @@ public:
 	bool processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkBtoothSettingsQuery(QJsonDocument doc, int orgIndex, int netIndex);
+	bool processNetworkPhonesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
+	bool processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
 
 	// set

@@ -341,27 +341,65 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 53: {
+			// GET /networks/[networkId]/phoneAssignments
+			processNetworkPhonesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+								  , queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
+
+		case 54: {
+			// GET /networks/[networkId]/phoneAssignments/[serial]
+			processNetworkPhonesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									  , queueEventRequests.at(eventIndex).netIndex
+									  , queueEventRequests.at(eventIndex).deviceSerial);
+			break;
+		}
 
 
 
 
 
 
-		case 82: {
+
+		case 61: {
+			// GET /networks/[networkId]/phoneContacts
+			processNetworkPhoneContactsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+								  , queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
+
+		case 66: {
+			// GET /networks/[networkId]/phoneNumbers
+			// ???????
+			break;
+		}
+
+		case 67: {
+			// GET /networks/[networkId]/phoneNumbers/available
+			// ???????
+			break;
+		}
+
+
+
+
+
+		case 87: {
 			// GET /networks/[networkId]/sm/devices
 			processSMDevicesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
 								  , queueEventRequests.at(eventIndex).netIndex);
 			break;
 		}
 
-		case 90: {
+		case 95: {
 			// GET /networks/[networkId]/ssids
 			processNetworkSSIDsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
 									 , queueEventRequests.at(eventIndex).netIndex);
 			break;
 		}
 
-		case 91: {
+		case 96: {
 			// GET /networks/[networkId]/ssids/[number]
 			processNetworkSSIDsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
 									 , queueEventRequests.at(eventIndex).netIndex
@@ -369,7 +407,7 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
-		case 93: {
+		case 98: {
 			// GET /devices/[serial]/switchPorts
 			processSwitchPortQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
 								   , queueEventRequests.at(eventIndex).deviceSerial);
@@ -1546,6 +1584,82 @@ bool APIHelper::processNetworkBtoothSettingsQuery(QJsonDocument doc, int orgInde
 	tmpBtooth.majorMinorAssignmentMode = jObj["majorMinorAssignmentMode"].toString();
 	tmpBtooth.major = jObj["major"].toInt();
 	tmpBtooth.minor = jObj["minor"].toInt();
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkPhonesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial) {
+	qDebug() << "\nAPIHelper::processNetworkPhonesQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex << "\tserial: " << serial;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkPhonesQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	int i = 0;
+	int count = jArray.size();
+	if (serial.length() > 0) {
+		// only do single serial
+		i = parent->orgList[orgIndex]->getIndexOfInventoryDevice(serial);
+		count = i+1;
+	} else {
+		parent->orgList[orgIndex]->setNetworkPhoneNum(netIndex, jArray.size());
+	}
+
+
+	for (i; i < count; i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		netPhone tmpPhone;
+
+		tmpPhone.serial = jObj["serial"].toString();
+		tmpPhone.contactId = jObj["contactId"].toString();
+		tmpPhone.contactType = jObj["contactType"].toString();
+		tmpPhone.ext = jObj["ext"].toString();
+
+		QJsonArray jPublicNumber = jObj["publicNumber"].toArray();
+		tmpPhone.publicNumber.resize(jPublicNumber.size());
+		for (int j = 0; j < jPublicNumber.size(); j++) {
+			tmpPhone.publicNumber[j] = jPublicNumber.at(j).toString();
+		}
+
+		parent->orgList[orgIndex]->setNetworkPhone(netIndex, tmpPhone, i);
+
+	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+	qDebug() << "\nAPIHelper::processNetworkPhoneContactsQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkPhoneContactsQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	parent->orgList[orgIndex]->setNetworkPhoneContactNum(netIndex, jArray.size());
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		netPhoneContact tmpPhoneContact;
+
+		tmpPhoneContact.id = jObj["id"].toInt();
+		tmpPhoneContact.name = jObj["name"].toString();
+		tmpPhoneContact.type = jObj["type"].toString();
+
+		parent->orgList[orgIndex]->setNetworkPhoneContact(netIndex, tmpPhoneContact, i);
+
+	}
 
 	return true;	// everything went well
 

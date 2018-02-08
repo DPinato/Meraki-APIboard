@@ -223,6 +223,20 @@ struct netBtoothSettings {
 	int minor;	// not returned if majorMinorAssignmentMode is "Unique"
 };
 
+struct netPhone {
+	QString serial;
+	QString contactId;
+	QString contactType;
+	QVector<QString> publicNumber;
+	QString ext;
+};
+
+struct netPhoneContact{
+	int id;
+	QString name;
+	QString type;
+};
+
 struct networkVars {
 	QString netID;			// network ID
 	QString orgID;			// ID of parent organization
@@ -243,6 +257,8 @@ struct networkVars {
 	QVector<netAccessPolicy> accessPolicies;		// access policies in the MS network
 	QVector<netAirMarshal> airMarshalEntries;		// list of entries detected by air marshal
 	netBtoothSettings bToothSettings;				// settings for bluetooth scanning
+	QVector<netPhone> netPhones;					// phones and contact assignments
+	QVector<netPhoneContact> netPhoneContacts;		// phone contacts
 
 };
 
@@ -363,7 +379,6 @@ class MOrganization {
 		void setOrgSamlUrl(QString url);
 		void setOrgSamlUrlsNum(int num);
 		void setOrgSamlUrlEntry(QString s, int index);
-
 		void setNetworksNum(int n);
 		void setNetwork(networkVars v, int index);
 		void setLicenseStatus(QString s);
@@ -402,6 +417,10 @@ class MOrganization {
 		void setNetworkAirMarshalEntriesNum(int netIndex, int num);
 		void setNetworkAirMarshalEntry(int netIndex, netAirMarshal s, int index);
 		void setNetworkBtoothSettings(int netIndex, netBtoothSettings s);
+		void setNetworkPhoneNum(int netIndex, int num);
+		void setNetworkPhone(int netIndex, netPhone s, int index);
+		void setNetworkPhoneContactNum(int netIndex, int num);
+		void setNetworkPhoneContact(int netIndex, netPhoneContact s, int index);
 
 
 
@@ -451,6 +470,10 @@ class MOrganization {
 		int getNetworkAirMarshalEntriesNum(int netIndex);
 		netAirMarshal getNetworkAirMarshalEntry(int netIndex, int index);
 		netBtoothSettings getNetworkBtoothSettings(int netIndex);
+		int getNetworkPhoneNum(int netIndex);
+		netPhone getNetworkPhone(int netIndex, int index);
+		int getNetworkPhoneContactNum(int netIndex);
+		netPhoneContact getNetworkPhoneContact(int netIndex, int index);
 
 
 
