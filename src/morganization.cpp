@@ -66,6 +66,14 @@ void MOrganization::setAdmin(adminStruct a, int index) {
 	adminList[index] = a;
 }
 
+void MOrganization::setOrgSamlRolesNum(int n) {
+	samlRolesList.resize(n);
+}
+
+void MOrganization::setOrgSamlRole(orgSamlRoles s, int index) {
+	samlRolesList[index] = s;
+}
+
 void MOrganization::setOrgInventorySize(int n) {
 	orgInventory.resize(n);
 }
@@ -202,6 +210,14 @@ void MOrganization::setNetworkPhoneContact(int netIndex, netPhoneContact s, int 
 	netList[netIndex].netPhoneContacts[index] = s;
 }
 
+void MOrganization::setNetworkPhoneCallgroupsNum(int netIndex, int num) {
+	netList[netIndex].netPhoneCallgroups.resize(num);
+}
+
+void MOrganization::setNetworkPhoneCallgroupEntry(int netIndex, netPhoneCallgroup s, int index) {
+	netList[netIndex].netPhoneCallgroups[index] = s;
+}
+
 
 
 
@@ -256,6 +272,14 @@ int MOrganization::getAdminListSize() {
 
 adminStruct MOrganization::getAdmin(int index) {
 	return adminList.at(index);
+}
+
+int MOrganization::getOrgSamlRolesNum() {
+	return samlRolesList.size();
+}
+
+orgSamlRoles MOrganization::getOrgSamlRole(int index) {
+	return samlRolesList.at(index);
 }
 
 int MOrganization::getOrgInventorySize() {
@@ -408,6 +432,14 @@ netPhoneContact MOrganization::getNetworkPhoneContact(int netIndex, int index) {
 	return netList.at(netIndex).netPhoneContacts.at(index);
 }
 
+int MOrganization::getNetworkPhoneCallgroupsNum(int netIndex) {
+	return netList.at(netIndex).netPhoneCallgroups.size();
+}
+
+netPhoneCallgroup MOrganization::getNetworkPhoneCallgroupEntry(int netIndex, int index) {
+	return netList.at(netIndex).netPhoneCallgroups.at(index);
+}
+
 
 
 
@@ -423,7 +455,6 @@ int MOrganization::getIndexOfInventoryDevice(QString serial) {
 	}
 
 	return -1;	// no device was found
-
 }
 
 int MOrganization::getIndexOfClientConnected(QString netID, QString mac) {
@@ -436,7 +467,6 @@ int MOrganization::getIndexOfClientConnected(QString netID, QString mac) {
 
 			for (int j = 0; j < orgInventory.at(i).clients.size(); j++) {
 				clientConnected tmpClient = orgInventory.at(i).clients.at(j);
-
 				if (tmpClient.mac == mac) {	return j; }
 			}
 
@@ -444,9 +474,7 @@ int MOrganization::getIndexOfClientConnected(QString netID, QString mac) {
 
 	}
 
-
 	return -1;	// no device was found
-
 }
 
 int MOrganization::getIndexOfNetwork(QString netID) {
@@ -458,8 +486,7 @@ int MOrganization::getIndexOfNetwork(QString netID) {
 		}
 	}
 
-	// no network was found
-	return -1;
+	return -1;	// no device was found
 }
 
 int MOrganization::getIndexOfNetworkDevice(QString netID, QString serial) {
@@ -473,8 +500,31 @@ int MOrganization::getIndexOfNetworkDevice(QString netID, QString serial) {
 		}
 	}
 
-	// no device was found
-	return -1;
+	return -1;	// no device was found
+}
+
+int MOrganization::getIndexOfPhoneCallgroupId(int netIndex, QString id) {
+	// given network index and id, return index of call group id
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < netList.at(netIndex).netPhoneCallgroups.size(); i++) {
+		if (netList.at(netIndex).netPhoneCallgroups.at(i).id == id) {
+			return i;
+		}
+	}
+
+	return -1;	// no device was found
+}
+
+int MOrganization::getIndexOfSamlRole(QString id) {
+	// given id of SAML role, return index of SAML role
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < samlRolesList.size(); i++) {
+		if (samlRolesList.at(i).id == id) {
+			return i;
+		}
+	}
+
+	return -1;	// no device was found
 }
 
 

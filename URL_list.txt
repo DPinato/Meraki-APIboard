@@ -78,8 +78,8 @@ DELETE /networks/[networkId]/phoneCallgroups/[id]
 
 GET /networks/[networkId]/phoneContacts
 POST /networks/[networkId]/phoneContacts
-PUT /networks/[networkId]/phoneContacts/[contactId]
-DELETE /networks/[networkId]/phoneContacts/[contactId]
+PUT /networks/[networkId]/phoneContacts/[id]
+DELETE /networks/[networkId]/phoneContacts/[id]
 
 GET /networks/[networkId]/phoneNumbers
 GET /networks/[networkId]/phoneNumbers/available
@@ -91,19 +91,19 @@ POST /organizations/[organizationId]/samlRoles
 DELETE /organizations/[organizationId]/samlRoles/[id]
 
 POST /networks/[networkId]/sm/profile/clarity
-PUT /networks/[networkId]/sm/profile/clarity/[profileId]
-POST /networks/[networkId]/sm/profile/clarity/[profileId]
-GET /networks/[networkId]/sm/profile/clarity/[profileId]
-DELETE /networks/[networkId]/sm/profile/clarity/[profileId]
+PUT /networks/[networkId]/sm/profile/clarity/[id]
+POST /networks/[networkId]/sm/profile/clarity/[id]
+GET /networks/[networkId]/sm/profile/clarity/[id]
+DELETE /networks/[networkId]/sm/profile/clarity/[id]
 POST /networks/[networkId]/sm/profile/umbrella
-PUT /networks/[networkId]/sm/profile/umbrella/[profileId]
-POST /networks/[networkId]/sm/profile/umbrella/[profileId]
-GET /networks/[networkId]/sm/profile/umbrella/[profileId]
-DELETE /networks/[networkId]/sm/profile/umbrella/[profileId]
+PUT /networks/[networkId]/sm/profile/umbrella/[id]
+POST /networks/[networkId]/sm/profile/umbrella/[id]
+GET /networks/[networkId]/sm/profile/umbrella/[id]
+DELETE /networks/[networkId]/sm/profile/umbrella/[id]
 POST /networks/[networkId]/sm/app/polaris
-PUT /networks/[networkId]/sm/app/polaris/[appId]
+PUT /networks/[networkId]/sm/app/polaris/[id]
 GET /networks/[networkId]/sm/app/polaris
-DELETE /networks/[networkId]/sm/app/polaris/[appId]
+DELETE /networks/[networkId]/sm/app/polaris/[id]
 GET /networks/[networkId]/sm/devices
 PUT /networks/[networkId]/sm/devices/tags
 PUT /networks/[networkId]/sm/device/fields
@@ -122,13 +122,13 @@ GET /devices/[serial]/switchPorts/[number]
 PUT /devices/[serial]/switchPorts/[number]
 
 GET /networks/[networkId]/staticRoutes
-GET /networks/[networkId]/staticRoutes/[srId]
-PUT /networks/[networkId]/staticRoutes/[srId]
+GET /networks/[networkId]/staticRoutes/[id]
+PUT /networks/[networkId]/staticRoutes/[id]
 POST /networks/[networkId]/staticRoutes
-DELETE /networks/[networkId]/staticRoutes/[srId]
+DELETE /networks/[networkId]/staticRoutes/[id]
 
 GET /networks/[networkId]/vlans
-GET /networks/[networkId]/vlans/[vlanId]
-PUT /networks/[networkId]/vlans/[vlanId]
+GET /networks/[networkId]/vlans/[id]
+PUT /networks/[networkId]/vlans/[id]
 POST /networks/[networkId]/vlans
 DELETE /networks/[networkId]/vlans/[id]

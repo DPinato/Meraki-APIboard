@@ -356,11 +356,20 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 57: {
+			// GET /networks/[networkId]/phoneCallgroups
+			processNetworkPhoneCallgroupsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+											   , queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
 
-
-
-
-
+		case 58: {
+			// GET /networks/[networkId]/phoneCallgroups/[id]
+			processNetworkPhoneCallgroupsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+											   , queueEventRequests.at(eventIndex).netIndex
+											   , queueEventRequests.at(eventIndex).id);
+			break;
+		}
 
 		case 61: {
 			// GET /networks/[networkId]/phoneContacts
@@ -380,6 +389,20 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			// ???????
 			break;
 		}
+
+		case 68: {
+			// GET /organizations/[organizationId]/samlRoles
+			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			break;
+		}
+
+		case 69: {
+			// GET /organizations/[organizationId]/samlRoles/[id]
+			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+								  , queueEventRequests.at(eventIndex).id);
+			break;
+		}
+
 
 
 
@@ -651,6 +674,66 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex) {
 
 
 	parent->displayAdminStuff(orgIndex);
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString id) {
+	qDebug() << "\nAPIHelper::processSamlRolesQuery(...), orgIndex: " << orgIndex
+			 << "\tid: " << id;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processSamlRolesQuery(...)";
+		return false;
+	}
+
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	int i = 0;
+	int count = jArray.size();
+	if (id.length() > 0) {
+		// only do single id
+		i = parent->orgList[orgIndex]->getIndexOfSamlRole(id);
+		count = i+1;
+	} else {
+		parent->orgList[orgIndex]->setOrgSamlRolesNum(jArray.size());
+	}
+
+
+	for (i; i < count; i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		orgSamlRoles tmpSamlRole;
+
+		tmpSamlRole.id = jObj["id"].toString();
+		tmpSamlRole.role = jObj["role"].toString();
+		tmpSamlRole.orgAccess = jObj["orgAccess"].toString();
+
+		QJsonArray jPerm = jObj["networks"].toArray();		// networks
+		tmpSamlRole.networks.resize(jPerm.size());
+		for (int j = 0; j < jPerm.size(); j++) {
+			adminNetPermission tmpPerm;
+			tmpPerm.netID = jPerm.at(j).toObject()["id"].toString();
+			tmpPerm.accessLevel = jPerm.at(j).toObject()["access"].toString();
+			tmpSamlRole.networks[j] = tmpPerm;
+		}
+
+		QJsonArray jTags = jObj["tags"].toArray();			// tags
+		tmpSamlRole.tags.resize(jTags.size());
+		for (int j = 0; j < jTags.size(); j++) {
+			adminTag tmpTag;
+			tmpTag.tag = jTags.at(j).toObject()["tag"].toString();
+			tmpTag.adminAccessLevel = jTags.at(j).toObject()["access"].toString();
+			tmpSamlRole.tags[j] = tmpTag;
+		}
+
+
+		parent->orgList[orgIndex]->setOrgSamlRole(tmpSamlRole, i);
+
+	}
+
 
 	return true;	// everything went well
 
@@ -1658,6 +1741,46 @@ bool APIHelper::processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex
 		tmpPhoneContact.type = jObj["type"].toString();
 
 		parent->orgList[orgIndex]->setNetworkPhoneContact(netIndex, tmpPhoneContact, i);
+
+	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkPhoneCallgroupsQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id) {
+	qDebug() << "\nAPIHelper::processNetworkPhoneCallgroupsQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex << "\tid: " << id;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkPhoneCallgroupsQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	int i = 0;
+	int count = jArray.size();
+	if (id.length() > 0) {
+		// only do single id
+		i = parent->orgList[orgIndex]->getIndexOfPhoneCallgroupId(netIndex, id);
+		count = i+1;
+	} else {
+		parent->orgList[orgIndex]->setNetworkPhoneCallgroupsNum(netIndex, jArray.size());
+	}
+
+
+	for (i; i < count; i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		netPhoneCallgroup tmpPhoneCGroup;
+
+		tmpPhoneCGroup.id = jObj["id"].toString();
+		tmpPhoneCGroup.name = jObj["name"].toString();
+		tmpPhoneCGroup.publicNumber = jObj["publicNumber"].toString();
+		tmpPhoneCGroup.ext = jObj["ext"].toString();
+
+		parent->orgList[orgIndex]->setNetworkPhoneCallgroupEntry(netIndex, tmpPhoneCGroup, i);
 
 	}
 

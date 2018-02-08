@@ -237,6 +237,13 @@ struct netPhoneContact{
 	QString type;
 };
 
+struct netPhoneCallgroup {
+	QString id;
+	QString name;
+	QString publicNumber;
+	QString ext;
+};
+
 struct networkVars {
 	QString netID;			// network ID
 	QString orgID;			// ID of parent organization
@@ -259,6 +266,7 @@ struct networkVars {
 	netBtoothSettings bToothSettings;				// settings for bluetooth scanning
 	QVector<netPhone> netPhones;					// phones and contact assignments
 	QVector<netPhoneContact> netPhoneContacts;		// phone contacts
+	QVector<netPhoneCallgroup> netPhoneCallgroups;	// call groups
 
 };
 
@@ -364,6 +372,14 @@ struct orgSNMP {
 	QString v3User;			// user when using SNMPv3
 };
 
+struct orgSamlRoles {
+	QString id;
+	QString role;
+	QString orgAccess;
+	QVector<adminNetPermission> networks;	// networks in which SAML role has permissions, (id, access)
+	QVector<adminTag> tags;					// (tag, access)
+};
+
 
 class MOrganization {
 	public:
@@ -387,6 +403,9 @@ class MOrganization {
 		void setLicensePerDevice(licensesPerDevice a, int index);
 		void setAdminsNum(int n);
 		void setAdmin(adminStruct a, int index);
+		void setOrgSamlRolesNum(int n);
+		void setOrgSamlRole(orgSamlRoles s, int index);
+
 		void setOrgInventorySize(int n);
 		void setOrgInventoryDevice(deviceInInventory a, int index);
 		void setSwitchPortNum(int devIndex, int n);
@@ -421,6 +440,8 @@ class MOrganization {
 		void setNetworkPhone(int netIndex, netPhone s, int index);
 		void setNetworkPhoneContactNum(int netIndex, int num);
 		void setNetworkPhoneContact(int netIndex, netPhoneContact s, int index);
+		void setNetworkPhoneCallgroupsNum(int netIndex, int num);
+		void setNetworkPhoneCallgroupEntry(int netIndex, netPhoneCallgroup s, int index);
 
 
 
@@ -430,7 +451,6 @@ class MOrganization {
 		QString getOrgSamlUrl();
 		int getOrgSamlUrlsNum();
 		QString getOrgSamlUrlEntry(int index);
-
 		int getNetworksNum();
 		networkVars getNetwork(int index);
 		QString getLicenseStatus();
@@ -439,6 +459,9 @@ class MOrganization {
 		licensesPerDevice getLicensePerDevice(int index);
 		int getAdminListSize();
 		adminStruct getAdmin(int index);
+		int getOrgSamlRolesNum();
+		orgSamlRoles getOrgSamlRole(int index);
+
 		int getOrgInventorySize();
 		deviceInInventory getOrgInventoryDevice(int index);
 		deviceInInventory getOrgDeviceFromSerial(QString serial);
@@ -474,6 +497,8 @@ class MOrganization {
 		netPhone getNetworkPhone(int netIndex, int index);
 		int getNetworkPhoneContactNum(int netIndex);
 		netPhoneContact getNetworkPhoneContact(int netIndex, int index);
+		int getNetworkPhoneCallgroupsNum(int netIndex);
+		netPhoneCallgroup getNetworkPhoneCallgroupEntry(int netIndex, int index);
 
 
 
@@ -482,6 +507,8 @@ class MOrganization {
 		int getIndexOfClientConnected(QString netID, QString mac);
 		int getIndexOfNetwork(QString netID);
 		int getIndexOfNetworkDevice(QString netID, QString serial);
+		int getIndexOfPhoneCallgroupId(int netIndex, QString id);
+		int getIndexOfSamlRole(QString id);
 
 
 		// debug
@@ -512,6 +539,8 @@ class MOrganization {
 
 		// administrators
 		QVector<adminStruct> adminList;
+		QVector<orgSamlRoles> samlRolesList;
+
 
 };
 

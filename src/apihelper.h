@@ -24,6 +24,7 @@ struct eventRequest {
 	QString deviceSerial = "";	// in case the query is specific to a particular device, i.e. a switch
 	QString clientMac = "";		// client MAC address, i.e. when getting group policies associated to the client
 	QByteArray data = 0;		// data to use in case of a PUT or POST
+	QString id = "";			// generic id, used for admins, contacts, call groups, VLANs, static route, etc.
 
 	bool responseReceived = false;	// indicates whether a response for this request was received
 	bool responseProcessed = false;	// indicates whether this response was processed
@@ -46,6 +47,7 @@ public:
 	bool processNetworkQuery(QJsonDocument doc, int orgIndex, int netIndex = -1);
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex);
+	bool processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString id = "");
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
 	bool processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
 	bool processNetworkDeviceUplinkQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
@@ -68,6 +70,7 @@ public:
 	bool processNetworkBtoothSettingsQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkPhonesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
 	bool processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex, int netIndex);
+	bool processNetworkPhoneCallgroupsQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
 
 
 	// set
