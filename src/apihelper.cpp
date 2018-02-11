@@ -403,7 +403,11 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 76: {
+			// GET /networks/[networkId]/sm/profile/clarity/[id]
 
+			break;
+		}
 
 
 
@@ -415,6 +419,14 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 94: {
+			// GET /networks/[networkId]/sm/profiles
+
+			break;
+		}
+
+
+
 		case 95: {
 			// GET /networks/[networkId]/ssids
 			processNetworkSSIDsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
@@ -423,7 +435,7 @@ void APIHelper::processQuery(QNetworkReply *r) {
 		}
 
 		case 96: {
-			// GET /networks/[networkId]/ssids/[number]
+			// GET /networks/[networkId]/ssids/[id]
 			processNetworkSSIDsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
 									 , queueEventRequests.at(eventIndex).netIndex
 									 , queueEventRequests.at(eventIndex).ssidIndex);
@@ -436,6 +448,46 @@ void APIHelper::processQuery(QNetworkReply *r) {
 								   , queueEventRequests.at(eventIndex).deviceSerial);
 			break;
 		}
+
+		case 99: {
+			// GET /devices/[serial]/switchPorts/[id]
+			processSwitchPortQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+								   , queueEventRequests.at(eventIndex).deviceSerial
+								   , queueEventRequests.at(eventIndex).id);
+			break;
+		}
+
+		case 101: {
+			// GET /networks/[networkId]/staticRoutes
+			processNetworkStaticRoutesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+											, queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
+
+		case 102: {
+			// GET /networks/[networkId]/staticRoutes/[id]
+			processNetworkStaticRoutesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+											, queueEventRequests.at(eventIndex).netIndex
+											, queueEventRequests.at(eventIndex).id);
+			break;
+		}
+
+
+		case 106: {
+			// GET /networks/[networkId]/vlans
+			processNetworkVlansQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									 , queueEventRequests.at(eventIndex).netIndex);
+			break;
+		}
+
+		case 107: {
+			// GET /networks/[networkId]/vlans/[id]
+			processNetworkVlansQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+									 , queueEventRequests.at(eventIndex).netIndex
+									 , queueEventRequests.at(eventIndex).id);
+			break;
+		}
+
 
 	}
 
@@ -1009,7 +1061,7 @@ bool APIHelper::processOrgVPNFirewallRulesQuery(QJsonDocument doc, int orgIndex)
 
 }
 
-bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial) {
+bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial, QString id) {
 	qDebug() << "\nAPIHelper::processSwitchPortQuery(...), orgIndex: "
 			 << orgIndex << "\tdevSerial" << devSerial;
 
@@ -1022,7 +1074,6 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString 
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-
 	// get the index of the device in the organization inventory
 	deviceInInventory tmpDevice = parent->orgList.at(orgIndex)->getOrgDeviceFromSerial(devSerial);
 	int devIndex = parent->orgList.at(orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
@@ -1033,11 +1084,21 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString 
 	}
 
 	qDebug() << devSerial << " is at index: " << devIndex;
-	parent->orgList.at(orgIndex)->setSwitchPortNum(devIndex, jArray.size());
+
+
+	int i = 0;
+	int count = jArray.size();
+	if (id.length() > 0) {
+		// only do single id
+		count = i+1;
+	} else {
+		parent->orgList.at(orgIndex)->setSwitchPortNum(devIndex, jArray.size());
+	}
+
 
 
 	// get switch ports info in the appropriate organization device
-	for (int i = 0; i < jArray.size(); i++) {
+	for (i; i < count; i++) {
 		switchPort tmpPort;
 		QJsonObject jObj = jArray.at(i).toObject();
 
@@ -1781,6 +1842,138 @@ bool APIHelper::processNetworkPhoneCallgroupsQuery(QJsonDocument doc, int orgInd
 		tmpPhoneCGroup.ext = jObj["ext"].toString();
 
 		parent->orgList[orgIndex]->setNetworkPhoneCallgroupEntry(netIndex, tmpPhoneCGroup, i);
+
+	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkStaticRoutesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id) {
+	qDebug() << "\nAPIHelper::processNetworkStaticRoutesQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex << "\tid: " << id;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkStaticRoutesQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	int i = 0;
+	int count = jArray.size();
+	if (id.length() > 0) {
+		// only do single id
+		i = parent->orgList[orgIndex]->getIndexOfNetworkStaticRoute(netIndex, id);
+		count = i+1;
+	} else {
+		parent->orgList[orgIndex]->setNetworkStaticRoutesNum(netIndex, jArray.size());
+	}
+
+
+	for (i; i < count; i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		netStaticRoute tmpRoute;
+
+		tmpRoute.id = jObj["id"].toString();
+		tmpRoute.networkId = jObj["networkId"].toString();
+		tmpRoute.name = jObj["name"].toString();
+		tmpRoute.gatewayIp = jObj["gatewayIp"].toString();
+		tmpRoute.subnet = jObj["subnet"].toString();
+
+		parent->orgList[orgIndex]->setNetworkStaticRoute(netIndex, tmpRoute, i);
+
+	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkVlansQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id) {
+	qDebug() << "\nAPIHelper::processNetworkVlansQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex << "\tid: " << id;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkVlansQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	int i = 0;
+	int count = jArray.size();
+	if (id.length() > 0) {
+		// only do single id
+		i = parent->orgList[orgIndex]->getIndexOfNetworkVlan(netIndex, id);
+		count = i+1;
+	} else {
+		parent->orgList[orgIndex]->setNetworkVlansNum(netIndex, jArray.size());
+	}
+
+
+	for (i; i < count; i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		netVlan tmpVlan;
+
+		tmpVlan.id = jObj["id"].toString();
+		tmpVlan.networkId = jObj["networkId"].toString();
+		tmpVlan.name = jObj["name"].toString();
+		tmpVlan.applianceIp = jObj["applianceIp"].toString();
+		tmpVlan.subnet = jObj["subnet"].toString();
+
+		parent->orgList[orgIndex]->setNetworkVlan(netIndex, tmpVlan, i);
+
+	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkSMProfilesQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+	qDebug() << "\nAPIHelper::processNetworkSMProfilesQuery(...), orgIndex: " << orgIndex
+			 << "\tnetIndex" << netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMProfilesQuery(...)";
+		return false;
+	}
+
+	// for some reason, the response will contain an array called "profiles"
+	QJsonArray jArray = doc.object()["profiles"].toArray();
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		smProfile tmpSMProfile;
+
+		tmpSMProfile.id = jObj["id"].toString();
+		tmpSMProfile.payloadDisplayName = jObj["payloadDisplayName"].toString();
+		tmpSMProfile.payloadIdentifier = jObj["payloadIdentifier"].toString();
+		tmpSMProfile.payloadDescription = jObj["payloadDescription"].toString();
+		tmpSMProfile.scope = jObj["scope"].toString();
+
+		QJsonArray jTags = jObj["tags"].toArray();
+		tmpSMProfile.tags.resize(jTags.size());
+		for (int j = 0; j < jTags.size(); j++) {
+			tmpSMProfile.tags[j] = jTags.at(j).toString();
+		}
+
+		QJsonArray jWifis = jObj["wifis"].toArray();
+		tmpSMProfile.wifis.resize(jTags.size());
+		for (int j = 0; j < jWifis.size(); j++) {
+			tmpSMProfile.wifis[j] = jWifis.at(j).toString();
+		}
+
+		QJsonArray jPayloads = jObj["payload_types"].toArray();
+		tmpSMProfile.payloadTypes.resize(jTags.size());
+		for (int j = 0; j < jPayloads.size(); j++) {
+			tmpSMProfile.payloadTypes[j] = jPayloads.at(j).toString();
+		}
+
+		parent->orgList[orgIndex]->setNetworkSMProfile(netIndex, tmpSMProfile, i);
 
 	}
 

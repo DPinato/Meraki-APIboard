@@ -218,6 +218,30 @@ void MOrganization::setNetworkPhoneCallgroupEntry(int netIndex, netPhoneCallgrou
 	netList[netIndex].netPhoneCallgroups[index] = s;
 }
 
+void MOrganization::setNetworkStaticRoutesNum(int netIndex, int num) {
+	netList[netIndex].netStaticRoutes.resize(num);
+}
+
+void MOrganization::setNetworkStaticRoute(int netIndex, netStaticRoute s, int index) {
+	netList[netIndex].netStaticRoutes[index] = s;
+}
+
+void MOrganization::setNetworkVlansNum(int netIndex, int num) {
+	netList[netIndex].netVlans.resize(num);
+}
+
+void MOrganization::setNetworkVlan(int netIndex, netVlan s, int index) {
+	netList[netIndex].netVlans[index] = s;
+}
+
+void MOrganization::setNetworkSMProfilesNum(int netIndex, int num) {
+	netList[netIndex].smProfiles.resize(num);
+}
+
+void MOrganization::setNetworkSMProfile(int netIndex, smProfile s, int index) {
+	netList[netIndex].smProfiles[index] = s;
+}
+
 
 
 
@@ -440,6 +464,30 @@ netPhoneCallgroup MOrganization::getNetworkPhoneCallgroupEntry(int netIndex, int
 	return netList.at(netIndex).netPhoneCallgroups.at(index);
 }
 
+int MOrganization::getNetworkStaticRoutesNum(int netIndex) {
+	return netList.at(netIndex).netStaticRoutes.size();
+}
+
+netStaticRoute MOrganization::getNetworkStaticRoute(int netIndex, int index) {
+	return netList.at(netIndex).netStaticRoutes.at(index);
+}
+
+int MOrganization::getNetworkVlansNum(int netIndex) {
+	return netList.at(netIndex).netVlans.size();
+}
+
+netVlan MOrganization::getNetworkVlan(int netIndex, int index) {
+	return netList.at(netIndex).netVlans.at(index);
+}
+
+int MOrganization::getNetworkSMProfilesNum(int netIndex) {
+	return netList.at(netIndex).smProfiles.size();
+}
+
+smProfile MOrganization::getNetworkSMProfile(int netIndex, int index) {
+	return netList.at(netIndex).smProfiles.at(index);
+}
+
 
 
 
@@ -454,7 +502,7 @@ int MOrganization::getIndexOfInventoryDevice(QString serial) {
 		}
 	}
 
-	return -1;	// no device was found
+	return -1;	// no entry was found
 }
 
 int MOrganization::getIndexOfClientConnected(QString netID, QString mac) {
@@ -474,7 +522,7 @@ int MOrganization::getIndexOfClientConnected(QString netID, QString mac) {
 
 	}
 
-	return -1;	// no device was found
+	return -1;	// no entry was found
 }
 
 int MOrganization::getIndexOfNetwork(QString netID) {
@@ -486,7 +534,7 @@ int MOrganization::getIndexOfNetwork(QString netID) {
 		}
 	}
 
-	return -1;	// no device was found
+	return -1;	// no entry was found
 }
 
 int MOrganization::getIndexOfNetworkDevice(QString netID, QString serial) {
@@ -500,7 +548,7 @@ int MOrganization::getIndexOfNetworkDevice(QString netID, QString serial) {
 		}
 	}
 
-	return -1;	// no device was found
+	return -1;	// no entry was found
 }
 
 int MOrganization::getIndexOfPhoneCallgroupId(int netIndex, QString id) {
@@ -512,7 +560,7 @@ int MOrganization::getIndexOfPhoneCallgroupId(int netIndex, QString id) {
 		}
 	}
 
-	return -1;	// no device was found
+	return -1;	// no entry was found
 }
 
 int MOrganization::getIndexOfSamlRole(QString id) {
@@ -524,7 +572,32 @@ int MOrganization::getIndexOfSamlRole(QString id) {
 		}
 	}
 
-	return -1;	// no device was found
+	return -1;	// no entry was found
+}
+
+int MOrganization::getIndexOfNetworkStaticRoute(int netIndex, QString id) {
+	// given index of network and id of static route, return index of static route in the vector
+	// returns -1 if it is unable to find it;
+	for (int i = 0; i < netList.at(netIndex).netStaticRoutes.at(i).id; i++) {
+		if (netList.at(netIndex).netStaticRoutes.at(i).id == id) {
+			return i;
+		}
+	}
+
+	return -1;	// no entry was found
+}
+
+int MOrganization::getIndexOfNetworkVlan(int netIndex, QString id) {
+	// given index of network and id of VLAN, return index of VLAN in the vector
+	// returns -1 if it is unable to find it;
+	// TODO: this is virtually the same as getIndexOfNetworkStaticRoute(), do I really need another one?
+	for (int i = 0; i < netList.at(netIndex).netVlans.at(i).id; i++) {
+		if (netList.at(netIndex).netVlans.at(i).id == id) {
+			return i;
+		}
+	}
+
+	return -1;	// no entry was found
 }
 
 

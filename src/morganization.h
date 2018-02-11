@@ -59,6 +59,32 @@ struct smDevice {
 	bool passCodeLock;
 };
 
+struct smClarityVendorConfig {
+	QString key;
+	QString type;
+	QString value;	// this can be an int ???
+};
+
+struct smClarityProfile {
+	int profile_id;
+	QString name;
+	bool filterBrowsers;
+	bool filterSockets;
+	QVector<smClarityVendorConfig> vendorConfig;
+	QString pluginBundleID;
+};
+
+struct smProfile {
+	QString id;
+	QString payloadDisplayName;		// payload_display_name
+	QString payloadIdentifier;		// payload_identifier
+	QString payloadDescription;		// payload_description
+	QString scope;
+	QVector<QString> tags;
+	QVector<QString> wifis;
+	QVector<QString> payloadTypes;	// payload_types;
+};
+
 struct radiusServer {
 	QString host;
 	QString port;
@@ -244,6 +270,22 @@ struct netPhoneCallgroup {
 	QString ext;
 };
 
+struct netStaticRoute {
+	QString id;
+	QString networkId;
+	QString name;
+	QString gatewayIp;
+	QString subnet;
+};
+
+struct netVlan {
+	QString id;
+	QString networkId;
+	QString name;
+	QString applianceIp;
+	QString subnet;
+};
+
 struct networkVars {
 	QString netID;			// network ID
 	QString orgID;			// ID of parent organization
@@ -267,6 +309,11 @@ struct networkVars {
 	QVector<netPhone> netPhones;					// phones and contact assignments
 	QVector<netPhoneContact> netPhoneContacts;		// phone contacts
 	QVector<netPhoneCallgroup> netPhoneCallgroups;	// call groups
+
+	QVector<netStaticRoute> netStaticRoutes;		// static routes in the network
+	QVector<netVlan> netVlans;						// VLANs in the network
+
+	QVector<smProfile> smProfiles;					// Systems Manager profiles in the network
 
 };
 
@@ -405,7 +452,6 @@ class MOrganization {
 		void setAdmin(adminStruct a, int index);
 		void setOrgSamlRolesNum(int n);
 		void setOrgSamlRole(orgSamlRoles s, int index);
-
 		void setOrgInventorySize(int n);
 		void setOrgInventoryDevice(deviceInInventory a, int index);
 		void setSwitchPortNum(int devIndex, int n);
@@ -442,7 +488,12 @@ class MOrganization {
 		void setNetworkPhoneContact(int netIndex, netPhoneContact s, int index);
 		void setNetworkPhoneCallgroupsNum(int netIndex, int num);
 		void setNetworkPhoneCallgroupEntry(int netIndex, netPhoneCallgroup s, int index);
-
+		void setNetworkStaticRoutesNum(int netIndex, int num);
+		void setNetworkStaticRoute(int netIndex, netStaticRoute s, int index);
+		void setNetworkVlansNum(int netIndex, int num);
+		void setNetworkVlan(int netIndex, netVlan s, int index);
+		void setNetworkSMProfilesNum(int netIndex, int num);
+		void setNetworkSMProfile(int netIndex, smProfile s, int index);
 
 
 		// get
@@ -461,7 +512,6 @@ class MOrganization {
 		adminStruct getAdmin(int index);
 		int getOrgSamlRolesNum();
 		orgSamlRoles getOrgSamlRole(int index);
-
 		int getOrgInventorySize();
 		deviceInInventory getOrgInventoryDevice(int index);
 		deviceInInventory getOrgDeviceFromSerial(QString serial);
@@ -499,6 +549,12 @@ class MOrganization {
 		netPhoneContact getNetworkPhoneContact(int netIndex, int index);
 		int getNetworkPhoneCallgroupsNum(int netIndex);
 		netPhoneCallgroup getNetworkPhoneCallgroupEntry(int netIndex, int index);
+		int getNetworkStaticRoutesNum(int netIndex);
+		netStaticRoute getNetworkStaticRoute(int netIndex, int index);
+		int getNetworkVlansNum(int netIndex);
+		netVlan getNetworkVlan(int netIndex, int index);
+		int getNetworkSMProfilesNum(int netIndex);
+		smProfile getNetworkSMProfile(int netIndex, int index);
 
 
 
@@ -509,6 +565,8 @@ class MOrganization {
 		int getIndexOfNetworkDevice(QString netID, QString serial);
 		int getIndexOfPhoneCallgroupId(int netIndex, QString id);
 		int getIndexOfSamlRole(QString id);
+		int getIndexOfNetworkStaticRoute(int netIndex, QString id);
+		int getIndexOfNetworkVlan(int netIndex, QString id);
 
 
 		// debug

@@ -54,7 +54,7 @@ public:
 	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNFirewallRulesQuery(QJsonDocument doc, int orgIndex);
-	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial);
+	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial, QString id = "");
 	bool processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 	bool processNetworkCellularFirewallQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex);
@@ -71,6 +71,9 @@ public:
 	bool processNetworkPhonesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
 	bool processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkPhoneCallgroupsQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
+	bool processNetworkStaticRoutesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
+	bool processNetworkVlansQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
+	bool processNetworkSMProfilesQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
 
 	// set

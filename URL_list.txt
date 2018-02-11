@@ -114,12 +114,12 @@ PUT /networks/[networkId]/sm/devices/move
 GET /networks/[networkId]/sm/profiles
 
 GET /networks/[networkId]/ssids
-GET /networks/[networkId]/ssids/[number]
-PUT /networks/[networkId]/ssids/[number]
+GET /networks/[networkId]/ssids/[id]
+PUT /networks/[networkId]/ssids/[id]
 
 GET /devices/[serial]/switchPorts
-GET /devices/[serial]/switchPorts/[number]
-PUT /devices/[serial]/switchPorts/[number]
+GET /devices/[serial]/switchPorts/[id]
+PUT /devices/[serial]/switchPorts/[id]
 
 GET /networks/[networkId]/staticRoutes
 GET /networks/[networkId]/staticRoutes/[id]
