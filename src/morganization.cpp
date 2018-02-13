@@ -492,6 +492,17 @@ smProfile MOrganization::getNetworkSMProfile(int netIndex, int index) {
 
 
 
+int MOrganization::getIndexOfOrgAdmin(QString id) {
+	// given id of administrator, returns the index of it in the list of administrators
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < adminList.size(); i++) {
+		if (adminList.at(i).id == id) {
+			return i;
+		}
+	}
+
+	return -1;	// no entry was found
+}
 
 int MOrganization::getIndexOfInventoryDevice(QString serial) {
 	// given the serial number of a device, returns the index of it in the inventory vector

@@ -182,6 +182,20 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 1: {
+			// POST /organizations/[organizationId]/admins
+			processOrgAdminsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			break;
+		}
+
+		case 2: {
+			// PUT /organizations/[organizationId]/admins/[id]
+
+			break;
+		}
+
+
+
 		case 4: {
 			// GET /devices/[serial]/clients
 			processClientsConnectedQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
@@ -405,6 +419,15 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 		case 76: {
 			// GET /networks/[networkId]/sm/profile/clarity/[id]
+			// figure out how to treat this, since an id needs to be presented
+			// are there multiple clarity profiles in the network?
+			// are the IDs of the profile the same ones as normal SM profiles?
+
+			break;
+		}
+
+		case 81: {
+			// GET /networks/[networkId]/sm/profile/umbrella/[id]
 
 			break;
 		}
@@ -663,10 +686,11 @@ bool APIHelper::processLicenseQuery(QJsonDocument doc, int orgIndex) {
 	return true;		// everything ok
 }
 
-bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex) {
+bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex, QString id) {
 	// process list of administrators in organization obtained through
 	// GET /organizations/[organizationId]/admins
-	qDebug() << "\nAPIHelper::processOrgAdminsQuery(...), orgIndex: " << orgIndex;
+	qDebug() << "\nAPIHelper::processOrgAdminsQuery(...), orgIndex: " << orgIndex
+			 << "\tid: " << id;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgAdminsQuery(...)";
@@ -675,12 +699,27 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex) {
 
 
 	QJsonArray jArray = doc.array();
-	parent->orgList[orgIndex]->setAdminsNum(jArray.size());
 
 	qDebug() << jArray << "\t" << jArray.size();
 
+	int i = 0;
+	int count = jArray.size();
+	if (id.length() > 0) {
+		// only do single id
+		i = parent->orgList[orgIndex]->getIndexOfOrgAdmin(id);
+		if (i == -1) {
+			// a new administrator needs to be created, increment the vector size
+			i = parent->orgList[orgIndex]->getAdminListSize();
+			parent->orgList[orgIndex]->setAdminsNum(i+1);
+		}
 
-	for (int i = 0; i < jArray.size(); i++) {
+		count = i+1;
+	} else {
+		parent->orgList[orgIndex]->setAdminsNum(jArray.size());
+	}
+
+
+	for (i; i < count; i++) {
 		adminStruct tmpAdmin;	// this is here since it needs to completely reset at every iteration
 		QJsonObject jObj = jArray.at(i).toObject();
 

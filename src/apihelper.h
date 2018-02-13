@@ -46,7 +46,7 @@ public:
 	bool processOrgQuery(QJsonDocument doc, int orgIndex = -1);
 	bool processNetworkQuery(QJsonDocument doc, int orgIndex, int netIndex = -1);
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
-	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex);
+	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex, QString id = "");
 	bool processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString id = "");
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
 	bool processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");

@@ -559,6 +559,7 @@ class MOrganization {
 
 
 		// functions to help navigating lists and vectors
+		int getIndexOfOrgAdmin(QString id);
 		int getIndexOfInventoryDevice(QString serial);
 		int getIndexOfClientConnected(QString netID, QString mac);
 		int getIndexOfNetwork(QString netID);
