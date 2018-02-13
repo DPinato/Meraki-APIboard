@@ -57,7 +57,11 @@ public:
 
 	bool processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString id = "");
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
-	bool processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
+
+//	bool processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
+	bool processNetworkDevicesQuery(QJsonDocument doc, eventRequest event);
+
+
 	bool processNetworkDeviceUplinkQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
 	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);

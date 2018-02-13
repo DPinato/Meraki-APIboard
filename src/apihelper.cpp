@@ -217,21 +217,31 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+
+
+
+
 		case 11: {
-			// GET /networks/[networkId]/devices
-			// Meraki devices in the network
-			processNetworkDevicesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									   , queueEventRequests.at(eventIndex).netIndex);
+			// GET /networks/[networkId]/devices, Meraki devices in the network
+			processNetworkDevicesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 12: {
 			// GET /networks/[networkId]/devices/[serial]
-			processNetworkDevicesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									   , queueEventRequests.at(eventIndex).netIndex
-									   , queueEventRequests.at(eventIndex).deviceSerial);
+			processNetworkDevicesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
+
+		case 14: {
+			// PUT /networks/[networkId]/devices/[serial]
+			processNetworkDevicesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+
+
+
 
 		case 13: {
 			 // GET /networks/[networkId]/devices/[serial]/uplink
@@ -240,6 +250,13 @@ void APIHelper::processQuery(QNetworkReply *r) {
 											, queueEventRequests.at(eventIndex).deviceSerial);
 			break;
 		}
+
+
+
+
+
+
+
 
 		case 17: {
 			// GET /networks/[networkId]/devices/[serial]/lldp_cdp
@@ -880,34 +897,43 @@ bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
 
 }
 
-bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial) {
+bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, eventRequest event) {
 	// if serial is present, it means that the query was run for a single device
 	// if serial is empty, get all devices in the network
 	// this should probably be run with a serial number only after it is run without it, to avoid
 	// QVector out of bounds accesses
-	qDebug() << "\nAPIHelper::processNetworkDevicesQuery(...), orgIndex: "
-			 << orgIndex << "\tnetIndex" << netIndex << "\tserial: " << serial;
+	// TODO: beaconIdParams are also returned
+	qDebug() << "\nAPIHelper::processNetworkDevicesQuery(...), orgIndex: " << event.orgIndex
+			 << "\tnetIndex" << event.netIndex << "\tserial: " << event.deviceSerial;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkDevicesQuery(...)";
 		return false;
 	}
 
-
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
+
+	// urlList 11 returns all the devices in a network, GET
+	// urlList 12 returns a single device in the network, GET
+	// urlList 14 returns a single device in the network, PUT
+	int devIndex = parent->orgList[event.orgIndex]->getIndexOfInventoryDevice(event.deviceSerial);
 	int i = 0;
-	if (serial.length() > 0) {
-		// only do single serial
-		i = parent->orgList[orgIndex]->getIndexOfInventoryDevice(serial);
-	} else {
-		parent->orgList[orgIndex]->setNetworkDevicesNum(netIndex, jArray.size());
+	int count = jArray.size();
+
+	if (event.urlListIndex == 11) {
+		// process all serials in the network
+		parent->orgList[event.orgIndex]->setNetworkDevicesNum(event.netIndex, jArray.size());
+	} else if (event.urlListIndex == 12 || event.urlListIndex == 14) {
+		// process data for single serial in network
+		i = devIndex;
+		count = i+1;
 	}
 
 
 	// this will make it run at least once
-	do {
+	for (i; i < count; i++) {
 		QJsonObject jObj = jArray.at(i).toObject();
 		deviceInNetwork tmpNetDev;
 
@@ -923,9 +949,9 @@ bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int 
 		tmpNetDev.wan1Ip = jObj["wan1Ip"].toString();
 		tmpNetDev.wan2Ip = jObj["wan2Ip"].toString();
 
-		parent->orgList[orgIndex]->setNetworkDevice(netIndex, tmpNetDev, i);
+		parent->orgList[event.orgIndex]->setNetworkDevice(event.netIndex, tmpNetDev, i);
 
-	} while (i++ < jArray.size());
+	}
 
 
 	return true;	// everything went well
