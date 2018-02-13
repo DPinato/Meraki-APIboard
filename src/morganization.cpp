@@ -490,6 +490,17 @@ smProfile MOrganization::getNetworkSMProfile(int netIndex, int index) {
 
 
 
+bool MOrganization::removeOrgAdmin(int index) {
+	if (adminList.size() > index) {
+		adminList.remove(index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+
 
 
 int MOrganization::getIndexOfOrgAdmin(QString id) {

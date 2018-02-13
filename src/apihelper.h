@@ -15,8 +15,14 @@ class MOrganization;
 #define APIHELPER_H
 
 
+struct urlRequest {
+	int reqType = 0;	// 1: GET, 2: PUT, 3: POST, 4: DELETE
+	QString url = "";
+};
+
 struct eventRequest {
 	// used to maintain a queue for HTTP requests to make
+	urlRequest req;
 	int urlListIndex;			// which index in the urlList it corresponds to
 	int orgIndex;				// organization index in orgList
 	int netIndex = -1;			// network index in the orgList object
@@ -46,7 +52,9 @@ public:
 	bool processOrgQuery(QJsonDocument doc, int orgIndex = -1);
 	bool processNetworkQuery(QJsonDocument doc, int orgIndex, int netIndex = -1);
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
-	bool processOrgAdminsQuery(QJsonDocument doc, int orgIndex, QString id = "");
+
+	bool processOrgAdminsQuery(QJsonDocument doc, eventRequest event);
+
 	bool processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString id = "");
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
 	bool processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
@@ -59,7 +67,10 @@ public:
 	bool processNetworkCellularFirewallQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex);
-	bool processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QString devSerial);
+
+//	bool processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QString devSerial);
+	bool processClientsConnectedQuery(QJsonDocument doc, eventRequest event);
+
 	bool processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex, QString clientMac);
 	bool processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
 	bool processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int netIndex, int ssidIndex = -1);
@@ -121,10 +132,6 @@ private:
 
 	// read the URLs from file
 	QString baseURL;
-	struct urlRequest {
-		int reqType;	// 1: GET, 2: PUT, 3: POST, 4: DELETE
-		QString url;
-	};
 	QVector<urlRequest> urlList;
 
 };

@@ -558,6 +558,13 @@ class MOrganization {
 
 
 
+		// remove functions
+		bool removeOrgAdmin(int index);
+
+
+
+
+
 		// functions to help navigating lists and vectors
 		int getIndexOfOrgAdmin(QString id);
 		int getIndexOfInventoryDevice(QString serial);

@@ -971,6 +971,7 @@ void MainWindow::on_tabWidget_currentChanged(int index) {
 		case 0: {
 			// Administration tab
 			tmp.urlListIndex = 0;	// GET /organizations/[organizationId]/admins
+			tmp.req.reqType = 1;
 			apiHelpObj->putEventInQueue(tmp);
 
 			break;

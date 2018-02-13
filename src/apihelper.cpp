@@ -178,28 +178,33 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 		case 0: {
 			// GET /organizations/[organizationId]/admins
-			processOrgAdminsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processOrgAdminsQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 1: {
 			// POST /organizations/[organizationId]/admins
-			processOrgAdminsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processOrgAdminsQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 2: {
 			// PUT /organizations/[organizationId]/admins/[id]
-
+			processOrgAdminsQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
-
+		case 3: {
+			// DELETE /organizations/[organizationId]/admins/[id]
+			processOrgAdminsQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
 		case 4: {
 			// GET /devices/[serial]/clients
-			processClientsConnectedQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-										 , queueEventRequests.at(eventIndex).deviceSerial);
+//			processClientsConnectedQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
+//										 , queueEventRequests.at(eventIndex).deviceSerial);
+			processClientsConnectedQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
@@ -686,11 +691,11 @@ bool APIHelper::processLicenseQuery(QJsonDocument doc, int orgIndex) {
 	return true;		// everything ok
 }
 
-bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex, QString id) {
+bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest event) {
 	// process list of administrators in organization obtained through
 	// GET /organizations/[organizationId]/admins
-	qDebug() << "\nAPIHelper::processOrgAdminsQuery(...), orgIndex: " << orgIndex
-			 << "\tid: " << id;
+	qDebug() << "\nAPIHelper::processOrgAdminsQuery(...), orgIndex: " << event.orgIndex
+			 << "\treqType: " << event.req.reqType << "\tid: " << event.id;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgAdminsQuery(...)";
@@ -699,23 +704,30 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex, QString i
 
 
 	QJsonArray jArray = doc.array();
-
 	qDebug() << jArray << "\t" << jArray.size();
 
+	// urlList 0 returns all the admins in the org, GET
+	// urlList 1 returns the admin created, POST
+	// urlList 2 returns the admin updated, PUT
+	// urlList 3 returns nothing, DELETE
+	int adminIndex = parent->orgList[event.orgIndex]->getIndexOfOrgAdmin(event.id);
 	int i = 0;
 	int count = jArray.size();
-	if (id.length() > 0) {
+
+	if (event.req.reqType == 2 || event.req.reqType == 3) {
 		// only do single id
-		i = parent->orgList[orgIndex]->getIndexOfOrgAdmin(id);
+		i = adminIndex;
 		if (i == -1) {
 			// a new administrator needs to be created, increment the vector size
-			i = parent->orgList[orgIndex]->getAdminListSize();
-			parent->orgList[orgIndex]->setAdminsNum(i+1);
+			i = parent->orgList[event.orgIndex]->getAdminListSize();
+			parent->orgList[event.orgIndex]->setAdminsNum(i+1);
 		}
 
 		count = i+1;
-	} else {
-		parent->orgList[orgIndex]->setAdminsNum(jArray.size());
+	} else if (event.req.reqType == 1) {
+		parent->orgList[event.orgIndex]->setAdminsNum(jArray.size());
+	} else if (event.req.reqType == 4) {
+		return parent->orgList[event.orgIndex]->removeOrgAdmin(i);
 	}
 
 
@@ -759,12 +771,12 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, int orgIndex, QString i
 		}
 
 
-		parent->orgList[orgIndex]->setAdmin(tmpAdmin, i);
+		parent->orgList[event.orgIndex]->setAdmin(tmpAdmin, i);
 
 	}
 
 
-	parent->displayAdminStuff(orgIndex);
+	parent->displayAdminStuff(event.orgIndex);
 
 	return true;	// everything went well
 
@@ -1363,9 +1375,9 @@ bool APIHelper::processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, 
 
 }
 
-bool APIHelper::processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QString devSerial) {
-	qDebug() << "\nAPIHelper::processClientsConnectedQuery(...), orgIndex: "
-			 << orgIndex << "\tdevSerial" << devSerial;
+bool APIHelper::processClientsConnectedQuery(QJsonDocument doc, eventRequest event) {
+	qDebug() << "\nAPIHelper::processClientsConnectedQuery(...), orgIndex: " << event.orgIndex
+			 << "\tdevSerial" << event.deviceSerial;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processClientsConnectedQuery(...)";
@@ -1377,16 +1389,16 @@ bool APIHelper::processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QS
 
 
 	// get the index of the device in the organization inventory
-	deviceInInventory tmpDevice = parent->orgList.at(orgIndex)->getOrgDeviceFromSerial(devSerial);
-	int devIndex = parent->orgList.at(orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
+	deviceInInventory tmpDevice = parent->orgList.at(event.orgIndex)->getOrgDeviceFromSerial(event.deviceSerial);
+	int devIndex = parent->orgList.at(event.orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
 
 	if (devIndex == -1) {
-		qDebug() << "Could not find " << devSerial << " in orgIndex " << orgIndex;
+		qDebug() << "Could not find " << event.deviceSerial << " in orgIndex " << event.orgIndex;
 		return false;
 	}
 
-	qDebug() << devSerial << " is at index: " << devIndex;
-	parent->orgList.at(orgIndex)->setClientsConnectedNum(devIndex, jArray.size());
+	qDebug() << event.deviceSerial << " is at index: " << devIndex;
+	parent->orgList.at(event.orgIndex)->setClientsConnectedNum(devIndex, jArray.size());
 
 
 	// get clients connected info in the appropriate organization device
@@ -1406,7 +1418,7 @@ bool APIHelper::processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QS
 		tmpClient.vlan = jObj["vlan"].toInt();
 		tmpClient.switchport = jObj["switchport"].toString();
 
-		parent->orgList.at(orgIndex)->setClientConnected(devIndex, tmpClient, i);
+		parent->orgList.at(event.orgIndex)->setClientConnected(devIndex, tmpClient, i);
 
 	}
 
