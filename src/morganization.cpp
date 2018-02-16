@@ -82,6 +82,14 @@ void MOrganization::setOrgInventoryDevice(deviceInInventory a, int index) {
 	orgInventory[index] = a;
 }
 
+void MOrganization::setOrgConfigTemplatesNum(int n) {
+	configTemplates.resize(n);
+}
+
+void MOrganization::setOrgConfigTemplate(configTemplate n, int index) {
+	configTemplates[index] = n;
+}
+
 void MOrganization::setSwitchPortNum(int devIndex, int n) {
 	orgInventory[devIndex].ports.resize(n);
 }
@@ -328,6 +336,14 @@ deviceInInventory MOrganization::getOrgDeviceFromSerial(QString serial) {
 
 }
 
+int MOrganization::getConfigTemplatesNum() {
+	return configTemplates.size();
+}
+
+configTemplate MOrganization::getConfigTemplate(int index) {
+	return configTemplates.at(index);
+}
+
 int MOrganization::getSwitchPortNum(int devIndex) {
 	return orgInventory.at(devIndex).ports.size();
 }
@@ -491,8 +507,17 @@ smProfile MOrganization::getNetworkSMProfile(int netIndex, int index) {
 
 
 bool MOrganization::removeOrgAdmin(int index) {
-	if (adminList.size() > index) {
+	if (index != -1 && adminList.size() > index) {
 		adminList.remove(index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool MOrganization::removeOrgConfigTemplate(int index) {
+	if (index != -1 && configTemplates.size() > index) {
+		configTemplates.remove(index);
 		return true;
 	} else {
 		return false;
@@ -508,6 +533,18 @@ int MOrganization::getIndexOfOrgAdmin(QString id) {
 	// returns -1 if it is unable to find it
 	for (int i = 0; i < adminList.size(); i++) {
 		if (adminList.at(i).id == id) {
+			return i;
+		}
+	}
+
+	return -1;	// no entry was found
+}
+
+int MOrganization::getIndexOfConfigTemplate(QString id) {
+	// given id of configuration template, returns the index of it in the list of config templates
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < configTemplates.size(); i++) {
+		if (configTemplates.at(i).id == id) {
 			return i;
 		}
 	}

@@ -209,17 +209,31 @@ void APIHelper::processQuery(QNetworkReply *r) {
 		}
 
 		case 5: {
-			// GET /networks/[networkId]/clients/[mac]/policy
-			// TODO: FINISH THIS
-			processClientGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-										  , queueEventRequests.at(eventIndex).netIndex
-										  , queueEventRequests.at(eventIndex).clientMac);
+			// GET /networks/[networkId]/clients/[mac]/policy, FINISH IT
+			processClientGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 6: {
+			// PUT /networks/[networkId]/clients/[mac]/policy, FINISH IT
+			processClientGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 
 
 
+		case 9: {
+			// GET /organizations/[organizationId]/configTemplates
+			processOrgConfigTemplatesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 10: {
+			// DELETE /organizations/[organizationId]/configTemplates/[id]
+			processOrgConfigTemplatesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
 		case 11: {
 			// GET /networks/[networkId]/devices, Meraki devices in the network
@@ -749,8 +763,8 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest event) {
 
 
 	for (i; i < count; i++) {
-		adminStruct tmpAdmin;	// this is here since it needs to completely reset at every iteration
 		QJsonObject jObj = jArray.at(i).toObject();
+		adminStruct tmpAdmin;	// this is here since it needs to completely reset at every iteration
 
 		tmpAdmin.name = jObj["name"].toString();
 		tmpAdmin.email = jObj["email"].toString();
@@ -799,6 +813,46 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest event) {
 
 }
 
+bool APIHelper::processOrgConfigTemplatesQuery(QJsonDocument doc, eventRequest event) {
+	qDebug() << "\nAPIHelper::processOrgConfigTemplatesQuery(...), orgIndex: " << event.orgIndex
+			 << "\tid: " << event.id;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgConfigTemplatesQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+	// urlList 9 returns all the configuration templates in the org, GET
+	// urlList 10 returns nothing, DELETE
+	int templateIndex = parent->orgList[event.orgIndex]->getIndexOfConfigTemplate(event.id);
+	if (event.urlListIndex == 9) {
+		parent->orgList[event.orgIndex]->setOrgConfigTemplatesNum(jArray.size());
+
+	} else if (event.urlListIndex == 10) {
+		return parent->orgList[event.orgIndex]->removeOrgConfigTemplate(templateIndex);
+	}
+
+
+	for (i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		configTemplate tmpTemplate;
+
+		tmpTemplate.id = jObj["id"].toString();
+		tmpTemplate.name = jObj["name"].toString();
+
+		parent->orgList[event.orgIndex]->setOrgConfigTemplate(tmpTemplate, i);
+
+	}
+
+
+	return true;	// everything went well
+
+}
+
 bool APIHelper::processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString id) {
 	qDebug() << "\nAPIHelper::processSamlRolesQuery(...), orgIndex: " << orgIndex
 			 << "\tid: " << id;
@@ -807,7 +861,6 @@ bool APIHelper::processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString i
 		qDebug() << "JSON IS NOT VALID, APIHelper::processSamlRolesQuery(...)";
 		return false;
 	}
-
 
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
@@ -1453,9 +1506,11 @@ bool APIHelper::processClientsConnectedQuery(QJsonDocument doc, eventRequest eve
 
 }
 
-bool APIHelper::processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex, QString clientMac) {
-	qDebug() << "\nAPIHelper::processClientGroupPolicyQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex << "\tclientMac" << clientMac;
+bool APIHelper::processClientGroupPolicyQuery(QJsonDocument doc, eventRequest event) {
+	// TODO: finish this, the tricky part is how to store the network ID and the MAC address
+	// of the client queried
+	qDebug() << "\nAPIHelper::processClientGroupPolicyQuery(...), orgIndex: " << event.orgIndex
+			 << "\tnetIndex" << event.netIndex << "\tclientMac" << event.clientMac;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processClientGroupPolicyQuery(...)";
@@ -1464,9 +1519,6 @@ bool APIHelper::processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, i
 
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
-
-
-
 
 
 

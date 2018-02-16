@@ -133,6 +133,7 @@ struct merakiVPN {
 };
 
 struct networkGroupPolicy {
+	// group policies in a network
 	QString name;		// name of group policy
 	int groupPolicyId;	// id of group policy
 };
@@ -162,7 +163,7 @@ struct deviceLLDP {
 };
 
 struct deviceInNetwork {
-	// this is for the devices in the particular network
+	// this is for the Meraki devices in the particular network
 	QString lanIp;
 	QString serial;
 	QString mac;
@@ -312,7 +313,6 @@ struct networkVars {
 
 	QVector<netStaticRoute> netStaticRoutes;		// static routes in the network
 	QVector<netVlan> netVlans;						// VLANs in the network
-
 	QVector<smProfile> smProfiles;					// Systems Manager profiles in the network
 
 };
@@ -339,6 +339,7 @@ struct switchPort {
 };
 
 struct clientGroupPolicy {
+	// group policy assigned to a client in a network
 	QString mac;				// mac address of client
 	QString type;				// I suppose this will either be "Group policy" if applied from dashboard, or 802.1X if from RADIUS
 	int groupPolicyId = -1;		// group policy ID, this is only returned if a group policy is assigned to the client
@@ -427,6 +428,11 @@ struct orgSamlRoles {
 	QVector<adminTag> tags;					// (tag, access)
 };
 
+struct configTemplate{
+	QString id;		// network ID
+	QString name;	// name of configuration template
+};
+
 
 class MOrganization {
 	public:
@@ -454,6 +460,9 @@ class MOrganization {
 		void setOrgSamlRole(orgSamlRoles s, int index);
 		void setOrgInventorySize(int n);
 		void setOrgInventoryDevice(deviceInInventory a, int index);
+		void setOrgConfigTemplatesNum(int n);
+		void setOrgConfigTemplate(configTemplate n, int index);
+
 		void setSwitchPortNum(int devIndex, int n);
 		void setSwitchPort(int devIndex, switchPort s, int index);
 		void setMXL3RulesNum(int devIndex, int n);
@@ -473,6 +482,7 @@ class MOrganization {
 		void setClientConnected(int devIndex, clientConnected s, int index);
 		void setNetworkDevicesNum(int netIndex, int n);
 		void setNetworkDevice(int netIndex, deviceInNetwork s, int index);
+
 		void setNetworkSSID(int netIndex, ssid s, int index);
 		void setNetworkS2SVPN(int netIndex, merakiVPN s);
 		void setNetworkTrafficFlowsNum(int netIndex, int num);
@@ -515,6 +525,9 @@ class MOrganization {
 		int getOrgInventorySize();
 		deviceInInventory getOrgInventoryDevice(int index);
 		deviceInInventory getOrgDeviceFromSerial(QString serial);
+		int getConfigTemplatesNum();
+		configTemplate getConfigTemplate(int index);
+
 		int getSwitchPortNum(int devIndex);
 		switchPort getSwitchport(int devIndex, int index);
 		int getMXL3RulesNum(int devIndex);
@@ -560,13 +573,13 @@ class MOrganization {
 
 		// remove functions
 		bool removeOrgAdmin(int index);
-
-
+		bool removeOrgConfigTemplate(int index);
 
 
 
 		// functions to help navigating lists and vectors
 		int getIndexOfOrgAdmin(QString id);
+		int getIndexOfConfigTemplate(QString id);
 		int getIndexOfInventoryDevice(QString serial);
 		int getIndexOfClientConnected(QString netID, QString mac);
 		int getIndexOfNetwork(QString netID);
@@ -575,6 +588,7 @@ class MOrganization {
 		int getIndexOfSamlRole(QString id);
 		int getIndexOfNetworkStaticRoute(int netIndex, QString id);
 		int getIndexOfNetworkVlan(int netIndex, QString id);
+
 
 
 		// debug
@@ -593,11 +607,9 @@ class MOrganization {
 		QString licExpireDate;		// licensing expiration date
 		QVector<licensesPerDevice> licenseList;
 
-		// organization inventory
 		QVector<deviceInInventory> orgInventory;	// organization inventory
-
-		// organization SNMP
-		orgSNMP snmpSettings;
+		orgSNMP snmpSettings;						// organization SNMP
+		QVector<configTemplate> configTemplates;	// configuration templates in organization
 
 		// non-Meraki site-to-site VPN
 		QVector<nonMerakiVPNPeer> nonMerakiVPNs;	// holds list of non-Meraki site-to-site VPN peers
