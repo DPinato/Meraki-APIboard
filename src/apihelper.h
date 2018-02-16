@@ -53,37 +53,30 @@ public:
 	bool processNetworkQuery(QJsonDocument doc, int orgIndex, int netIndex = -1);
 	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
 
-	bool processOrgAdminsQuery(QJsonDocument doc, eventRequest event);
-	bool processOrgConfigTemplatesQuery(QJsonDocument doc, eventRequest event);
+	bool processOrgAdminsQuery(QJsonDocument doc, eventRequest e);
+	bool processOrgConfigTemplatesQuery(QJsonDocument doc, eventRequest e);
 
 	bool processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString id = "");
 	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
+	bool processNetworkDevicesQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkDeviceUplinkQuery(QJsonDocument doc, eventRequest e);
 
-//	bool processNetworkDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
-	bool processNetworkDevicesQuery(QJsonDocument doc, eventRequest event);
-
-	bool processNetworkDeviceUplinkQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
 	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNFirewallRulesQuery(QJsonDocument doc, int orgIndex);
 	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial, QString id = "");
 	bool processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
-	bool processNetworkCellularFirewallQuery(QJsonDocument doc, int orgIndex, int netIndex);
+
+	bool processNetworkCellularFirewallQuery(QJsonDocument doc, eventRequest e);
+
 	bool processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
 	bool processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
-//	bool processClientsConnectedQuery(QJsonDocument doc, int orgIndex, QString devSerial);
-	bool processClientsConnectedQuery(QJsonDocument doc, eventRequest event);
+	bool processClientsConnectedQuery(QJsonDocument doc, eventRequest e);
+	bool processClientGroupPolicyQuery(QJsonDocument doc, eventRequest e);
+	bool processDeviceLLDPCDPQuery(QJsonDocument doc, eventRequest e);
 
-//	bool processClientGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex, QString clientMac);
-	bool processClientGroupPolicyQuery(QJsonDocument doc, eventRequest event);
-
-
-
-
-
-	bool processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial);
 	bool processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int netIndex, int ssidIndex = -1);
 	bool processMerakiS2SVPNQuery(QJsonDocument doc, int orgIndex, int netIndex);
 	bool processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int netIndex);
@@ -96,6 +89,9 @@ public:
 	bool processNetworkStaticRoutesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
 	bool processNetworkVlansQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
 	bool processNetworkSMProfilesQuery(QJsonDocument doc, int orgIndex, int netIndex);
+
+	bool processNetworkDeviceClaimed(QJsonDocument doc, eventRequest e);
+
 
 
 	// set

@@ -202,8 +202,6 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 		case 4: {
 			// GET /devices/[serial]/clients
-//			processClientsConnectedQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-//										 , queueEventRequests.at(eventIndex).deviceSerial);
 			processClientsConnectedQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
@@ -253,39 +251,44 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
-
-
-
-
 		case 13: {
 			 // GET /networks/[networkId]/devices/[serial]/uplink
-			processNetworkDeviceUplinkQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-											, queueEventRequests.at(eventIndex).netIndex
-											, queueEventRequests.at(eventIndex).deviceSerial);
+			processNetworkDeviceUplinkQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
+		case 15: {
+			// POST /networks/[networkId]/devices/claim
+			processNetworkDeviceClaimed(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
-
-
-
-
-
+		case 16: {
+			// POST /networks/[networkId]/devices/[serial]/remove
+			processNetworkDeviceClaimed(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
 		case 17: {
 			// GET /networks/[networkId]/devices/[serial]/lldp_cdp
-			processDeviceLLDPCDPQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									  , queueEventRequests.at(eventIndex).netIndex
-									  , queueEventRequests.at(eventIndex).deviceSerial);
+			processDeviceLLDPCDPQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 18: {
 			// GET /networks/[networkId]/cellularFirewallRules
-			processNetworkCellularFirewallQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-												, queueEventRequests.at(eventIndex).netIndex);
+			processNetworkCellularFirewallQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
+
+		case 19: {
+			// PUT /networks/[networkId]/cellularFirewallRules
+			processNetworkCellularFirewallQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+
+
 
 		case 20: {
 			// GET /networks/[networkId]/l3FirewallRules
@@ -722,11 +725,11 @@ bool APIHelper::processLicenseQuery(QJsonDocument doc, int orgIndex) {
 	return true;		// everything ok
 }
 
-bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest event) {
+bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest e) {
 	// process list of administrators in organization obtained through
 	// GET /organizations/[organizationId]/admins
-	qDebug() << "\nAPIHelper::processOrgAdminsQuery(...), orgIndex: " << event.orgIndex
-			 << "\treqType: " << event.req.reqType << "\tid: " << event.id;
+	qDebug() << "\nAPIHelper::processOrgAdminsQuery(...), orgIndex: " << e.orgIndex
+			 << "\treqType: " << e.req.reqType << "\tid: " << e.id;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgAdminsQuery(...)";
@@ -741,24 +744,24 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest event) {
 	// urlList 1 returns the admin created, POST
 	// urlList 2 returns the admin updated, PUT
 	// urlList 3 returns nothing, DELETE
-	int adminIndex = parent->orgList[event.orgIndex]->getIndexOfOrgAdmin(event.id);
+	int adminIndex = parent->orgList[e.orgIndex]->getIndexOfOrgAdmin(e.id);
 	int i = 0;
 	int count = jArray.size();
 
-	if (event.req.reqType == 2 || event.req.reqType == 3) {
+	if (e.req.reqType == 2 || e.req.reqType == 3) {
 		// only do single id
 		i = adminIndex;
 		if (i == -1) {
 			// a new administrator needs to be created, increment the vector size
-			i = parent->orgList[event.orgIndex]->getAdminListSize();
-			parent->orgList[event.orgIndex]->setAdminsNum(i+1);
+			i = parent->orgList[e.orgIndex]->getAdminListSize();
+			parent->orgList[e.orgIndex]->setAdminsNum(i+1);
 		}
 
 		count = i+1;
-	} else if (event.req.reqType == 1) {
-		parent->orgList[event.orgIndex]->setAdminsNum(jArray.size());
-	} else if (event.req.reqType == 4) {
-		return parent->orgList[event.orgIndex]->removeOrgAdmin(i);
+	} else if (e.req.reqType == 1) {
+		parent->orgList[e.orgIndex]->setAdminsNum(jArray.size());
+	} else if (e.req.reqType == 4) {
+		return parent->orgList[e.orgIndex]->removeOrgAdmin(i);
 	}
 
 
@@ -802,20 +805,20 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest event) {
 		}
 
 
-		parent->orgList[event.orgIndex]->setAdmin(tmpAdmin, i);
+		parent->orgList[e.orgIndex]->setAdmin(tmpAdmin, i);
 
 	}
 
 
-	parent->displayAdminStuff(event.orgIndex);
+	parent->displayAdminStuff(e.orgIndex);
 
 	return true;	// everything went well
 
 }
 
-bool APIHelper::processOrgConfigTemplatesQuery(QJsonDocument doc, eventRequest event) {
-	qDebug() << "\nAPIHelper::processOrgConfigTemplatesQuery(...), orgIndex: " << event.orgIndex
-			 << "\tid: " << event.id;
+bool APIHelper::processOrgConfigTemplatesQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processOrgConfigTemplatesQuery(...), orgIndex: " << e.orgIndex
+			 << "\tid: " << e.id;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgConfigTemplatesQuery(...)";
@@ -828,23 +831,23 @@ bool APIHelper::processOrgConfigTemplatesQuery(QJsonDocument doc, eventRequest e
 
 	// urlList 9 returns all the configuration templates in the org, GET
 	// urlList 10 returns nothing, DELETE
-	int templateIndex = parent->orgList[event.orgIndex]->getIndexOfConfigTemplate(event.id);
-	if (event.urlListIndex == 9) {
-		parent->orgList[event.orgIndex]->setOrgConfigTemplatesNum(jArray.size());
+	int templateIndex = parent->orgList[e.orgIndex]->getIndexOfConfigTemplate(e.id);
+	if (e.urlListIndex == 9) {
+		parent->orgList[e.orgIndex]->setOrgConfigTemplatesNum(jArray.size());
 
-	} else if (event.urlListIndex == 10) {
-		return parent->orgList[event.orgIndex]->removeOrgConfigTemplate(templateIndex);
+	} else if (e.urlListIndex == 10) {
+		return parent->orgList[e.orgIndex]->removeOrgConfigTemplate(templateIndex);
 	}
 
 
-	for (i = 0; i < jArray.size(); i++) {
+	for (int i = 0; i < jArray.size(); i++) {
 		QJsonObject jObj = jArray.at(i).toObject();
 		configTemplate tmpTemplate;
 
 		tmpTemplate.id = jObj["id"].toString();
 		tmpTemplate.name = jObj["name"].toString();
 
-		parent->orgList[event.orgIndex]->setOrgConfigTemplate(tmpTemplate, i);
+		parent->orgList[e.orgIndex]->setOrgConfigTemplate(tmpTemplate, i);
 
 	}
 
@@ -1011,9 +1014,9 @@ bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, eventRequest event
 
 }
 
-bool APIHelper::processNetworkDeviceUplinkQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial) {
+bool APIHelper::processNetworkDeviceUplinkQuery(QJsonDocument doc, eventRequest e) {
 	qDebug() << "\nAPIHelper::processNetworkDeviceUplinkQuery(...), orgIndex: "
-			 << orgIndex << "\tnetIndex" << netIndex << "\tdevSerial: " << devSerial;
+			 << e.orgIndex << "\tnetIndex" << e.netIndex << "\tdevSerial: " << e.deviceSerial;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkDeviceUplinkQuery(...)";
@@ -1026,9 +1029,9 @@ bool APIHelper::processNetworkDeviceUplinkQuery(QJsonDocument doc, int orgIndex,
 
 	// the idea here is that the deviceInNetwork in the networkVars, will be overwritten with the
 	// uplink information added to it
-	networkVars tmpNet = parent->orgList[orgIndex]->getNetwork(netIndex);
-	int netDevIndex = parent->orgList.at(orgIndex)->getIndexOfNetworkDevice(tmpNet.netID, devSerial);
-	deviceInNetwork tmpNetDev = parent->orgList.at(orgIndex)->getNetworkDevice(netIndex, netDevIndex);
+	networkVars tmpNet = parent->orgList[e.orgIndex]->getNetwork(e.netIndex);
+	int netDevIndex = parent->orgList.at(e.orgIndex)->getIndexOfNetworkDevice(tmpNet.netID, e.deviceSerial);
+	deviceInNetwork tmpNetDev = parent->orgList.at(e.orgIndex)->getNetworkDevice(e.netIndex, netDevIndex);
 
 
 	// read uplink info
@@ -1054,7 +1057,7 @@ bool APIHelper::processNetworkDeviceUplinkQuery(QJsonDocument doc, int orgIndex,
 	// update networkVars netDevices element
 	// this should only run if netDevices.size() > 0
 	// so this function should probably be used only after
-	parent->orgList[orgIndex]->setNetworkDevice(netIndex, tmpNetDev, netDevIndex);
+	parent->orgList[e.orgIndex]->setNetworkDevice(e.netIndex, tmpNetDev, netDevIndex);
 
 	return true;	// everything went well
 
@@ -1301,9 +1304,9 @@ bool APIHelper::processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString 
 
 }
 
-bool APIHelper::processNetworkCellularFirewallQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processNetworkCellularFirewallQuery(...), orgIndex: "
-			 << orgIndex << "\tnetIndex" << netIndex;
+bool APIHelper::processNetworkCellularFirewallQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkCellularFirewallQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkCellularFirewallQuery(...)";
@@ -1313,7 +1316,10 @@ bool APIHelper::processNetworkCellularFirewallQuery(QJsonDocument doc, int orgIn
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList[orgIndex]->setNetworkCellularRulesNum(netIndex, jArray.size());
+	// urlList 18 returns a list of all the cellular firewall rules, GET
+	// urlList 19 returns a list of all the cellular firewall rules, PUT
+	// no need for any special processing here, since an array will be returned anyway
+	parent->orgList[e.orgIndex]->setNetworkCellularRulesNum(e.netIndex, jArray.size());
 
 	for (int i = 0; i < jArray.size(); i++) {
 		QJsonObject jObj = jArray.at(i).toObject();
@@ -1328,7 +1334,7 @@ bool APIHelper::processNetworkCellularFirewallQuery(QJsonDocument doc, int orgIn
 		tmpRule.srcCidr = jObj["srcCidr"].toString();
 		tmpRule.syslogEnabled = jObj["syslogEnabled"].toBool();
 
-		parent->orgList[orgIndex]->setNetworkCellularRule(netIndex, tmpRule, i);
+		parent->orgList[e.orgIndex]->setNetworkCellularRule(e.netIndex, tmpRule, i);
 
 	}
 
@@ -1506,11 +1512,11 @@ bool APIHelper::processClientsConnectedQuery(QJsonDocument doc, eventRequest eve
 
 }
 
-bool APIHelper::processClientGroupPolicyQuery(QJsonDocument doc, eventRequest event) {
+bool APIHelper::processClientGroupPolicyQuery(QJsonDocument doc, eventRequest e) {
 	// TODO: finish this, the tricky part is how to store the network ID and the MAC address
 	// of the client queried
-	qDebug() << "\nAPIHelper::processClientGroupPolicyQuery(...), orgIndex: " << event.orgIndex
-			 << "\tnetIndex" << event.netIndex << "\tclientMac" << event.clientMac;
+	qDebug() << "\nAPIHelper::processClientGroupPolicyQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex << "\tclientMac" << e.clientMac;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processClientGroupPolicyQuery(...)";
@@ -1527,9 +1533,9 @@ bool APIHelper::processClientGroupPolicyQuery(QJsonDocument doc, eventRequest ev
 
 }
 
-bool APIHelper::processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int netIndex, QString devSerial) {
-	qDebug() << "\nAPIHelper::processDeviceLLDPCDPQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex << "\tdevSerial" << devSerial;
+bool APIHelper::processDeviceLLDPCDPQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processDeviceLLDPCDPQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex << "\tdevSerial" << e.deviceSerial;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processDeviceLLDPCDPQuery(...)";
@@ -1545,9 +1551,9 @@ bool APIHelper::processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int n
 
 	// the idea here is that the deviceInNetwork in the networkVars, will be overwritten with the
 	// uplink information added to it
-	networkVars tmpNet = parent->orgList[orgIndex]->getNetwork(netIndex);
-	int netDevIndex = parent->orgList.at(orgIndex)->getIndexOfNetworkDevice(tmpNet.netID, devSerial);
-	deviceInNetwork tmpNetDev = parent->orgList.at(orgIndex)->getNetworkDevice(netIndex, netDevIndex);
+	networkVars tmpNet = parent->orgList[e.orgIndex]->getNetwork(e.netIndex);
+	int netDevIndex = parent->orgList.at(e.orgIndex)->getIndexOfNetworkDevice(tmpNet.netID, e.deviceSerial);
+	deviceInNetwork tmpNetDev = parent->orgList.at(e.orgIndex)->getNetworkDevice(e.netIndex, netDevIndex);
 
 	int portCount = jObj.keys().size();
 
@@ -1577,7 +1583,7 @@ bool APIHelper::processDeviceLLDPCDPQuery(QJsonDocument doc, int orgIndex, int n
 	}
 
 	// update the network device
-	parent->orgList[orgIndex]->setNetworkDevice(netIndex, tmpNetDev, netDevIndex);
+	parent->orgList[e.orgIndex]->setNetworkDevice(e.netIndex, tmpNetDev, netDevIndex);
 
 
 	return true;	// everything went well
@@ -2106,6 +2112,25 @@ bool APIHelper::processNetworkSMProfilesQuery(QJsonDocument doc, int orgIndex, i
 
 	}
 
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkDeviceClaimed(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkDeviceClaimed(...), netIndex: " << e.netIndex
+			 << "\tserial: " << e.deviceSerial;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkDeviceClaimed(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+	// urlList 15 returns nothing, POST
+	// urlList 16 returns nothing, POST
 	return true;	// everything went well
 
 }
