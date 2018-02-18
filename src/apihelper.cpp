@@ -287,21 +287,32 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
-
-
-
 		case 20: {
 			// GET /networks/[networkId]/l3FirewallRules
-			processl3FirewallQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									 , queueEventRequests.at(eventIndex).deviceSerial);
+			processl3FirewallQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
+
+		case 21: {
+			// PUT /networks/[networkId]/l3FirewallRules
+			processl3FirewallQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+
+
+
+
 
 		case 22: {
 			// GET /organizations/[organizationId]/vpnFirewallRules
 			processOrgVPNFirewallRulesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
 			break;
 		}
+
+
+
+
 
 		case 26: {
 			// GET /networks/[networkId]/groupPolicies
@@ -1260,9 +1271,9 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString 
 
 }
 
-bool APIHelper::processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial) {
-	qDebug() << "\nAPIHelper::processl3FirewallQuery(...), orgIndex: "
-			 << orgIndex << "\tdevSerial" << devSerial;
+bool APIHelper::processl3FirewallQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processl3FirewallQuery(...), orgIndex: "<< e.orgIndex
+			 << "\tdeviceSerial" << e.deviceSerial;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processl3FirewallQuery(...)";
@@ -1272,11 +1283,15 @@ bool APIHelper::processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString 
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
+	// urlList 20 returns a list of all the MX firewall rules, GET
+	// urlList 21 returns a list of all the MX firewall rules, PUT
+	// no need for any special processing here, since an array will be returned anyway
+
 
 	// get the index of the device in the organization inventory
-	deviceInInventory tmpDevice = parent->orgList.at(orgIndex)->getOrgDeviceFromSerial(devSerial);
-	int devIndex = parent->orgList.at(orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
-	parent->orgList.at(orgIndex)->setMXL3RulesNum(devIndex, jArray.size());
+	deviceInInventory tmpDevice = parent->orgList.at(e.orgIndex)->getOrgDeviceFromSerial(e.deviceSerial);
+	int devIndex = parent->orgList.at(e.orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
+	parent->orgList.at(e.orgIndex)->setMXL3RulesNum(devIndex, jArray.size());
 
 
 	// get MX L3 firewall rule info in the appropriate organization device
@@ -1293,12 +1308,12 @@ bool APIHelper::processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString 
 		tmpRule.destCidr = jObj["destCidr"].toString();
 		tmpRule.syslogEnabled = jObj["syslogEnabled"].toBool();
 
-		parent->orgList.at(orgIndex)->setMXL3Rule(devIndex, tmpRule, i);
+		parent->orgList.at(e.orgIndex)->setMXL3Rule(devIndex, tmpRule, i);
 
 	}
 
 
-	parent->displayMXL3Rules(devIndex, orgIndex);	// display things in the table
+	parent->displayMXL3Rules(devIndex, e.orgIndex);	// display things in the table
 
 	return true;	// everything went ok
 

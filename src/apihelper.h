@@ -65,7 +65,10 @@ public:
 	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
 	bool processOrgVPNFirewallRulesQuery(QJsonDocument doc, int orgIndex);
 	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial, QString id = "");
-	bool processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
+
+//	bool processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
+	bool processl3FirewallQuery(QJsonDocument doc,eventRequest e);
+
 
 	bool processNetworkCellularFirewallQuery(QJsonDocument doc, eventRequest e);
 
