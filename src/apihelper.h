@@ -23,8 +23,8 @@ struct urlRequest {
 struct eventRequest {
 	// used to maintain a queue for HTTP requests to make
 	urlRequest req;
-	int urlListIndex;			// which index in the urlList it corresponds to
-	int orgIndex;				// organization index in orgList
+	int urlListIndex = -1;		// which index in the urlList it corresponds to
+	int orgIndex = -1;			// organization index in orgList
 	int netIndex = -1;			// network index in the orgList object
 	int ssidIndex = -1;			// SSID index for queries at index 90 and 91
 	QString deviceSerial = "";	// in case the query is specific to a particular device, i.e. a switch
@@ -48,50 +48,56 @@ public:
 	void processQuery(QNetworkReply *r);
 	void putEventInQueue(eventRequest e, bool force = false);
 
-	// functions to process data returned from queries
-	bool processOrgQuery(QJsonDocument doc, int orgIndex = -1);
-	bool processNetworkQuery(QJsonDocument doc, int orgIndex, int netIndex = -1);
-	bool processLicenseQuery(QJsonDocument doc, int orgIndex);
 
+	// functions to process data returned from queries
+	bool processOrgQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkBindToTemplateQuery(QJsonDocument doc, eventRequest e);
+	bool processSerialKeyOrderClaimQuery(QJsonDocument doc, eventRequest e);
+	bool processLicenseQuery(QJsonDocument doc, eventRequest e);
 	bool processOrgAdminsQuery(QJsonDocument doc, eventRequest e);
 	bool processOrgConfigTemplatesQuery(QJsonDocument doc, eventRequest e);
+	bool processSamlRolesQuery(QJsonDocument doc, eventRequest e);
 
-	bool processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString id = "");
-	bool processOrgInventoryQuery(QJsonDocument doc, int orgIndex);
+	bool processOrgInventoryQuery(QJsonDocument doc, eventRequest e);
 	bool processNetworkDevicesQuery(QJsonDocument doc, eventRequest e);
 	bool processNetworkDeviceUplinkQuery(QJsonDocument doc, eventRequest e);
+	bool processOrgSNMPQuery(QJsonDocument doc, eventRequest e);
+	bool processOrgVPNQuery(QJsonDocument doc, eventRequest e);
+	bool processOrgVPNFirewallRulesQuery(QJsonDocument doc, eventRequest e);
 
-	bool processOrgSNMPQuery(QJsonDocument doc, int orgIndex);
-	bool processOrgVPNQuery(QJsonDocument doc, int orgIndex);
-	bool processOrgVPNFirewallRulesQuery(QJsonDocument doc, int orgIndex);
 	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial, QString id = "");
 
-//	bool processl3FirewallQuery(QJsonDocument doc, int orgIndex, QString devSerial);
 	bool processl3FirewallQuery(QJsonDocument doc,eventRequest e);
-
-
 	bool processNetworkCellularFirewallQuery(QJsonDocument doc, eventRequest e);
 
 	bool processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
-	bool processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex);
-
+	bool processNetworkGroupPolicyQuery(QJsonDocument doc, eventRequest e);
 	bool processClientsConnectedQuery(QJsonDocument doc, eventRequest e);
 	bool processClientGroupPolicyQuery(QJsonDocument doc, eventRequest e);
 	bool processDeviceLLDPCDPQuery(QJsonDocument doc, eventRequest e);
 
 	bool processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int netIndex, int ssidIndex = -1);
-	bool processMerakiS2SVPNQuery(QJsonDocument doc, int orgIndex, int netIndex);
-	bool processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int netIndex);
-	bool processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgIndex, int netIndex);
-	bool processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, int netIndex);
-	bool processNetworkBtoothSettingsQuery(QJsonDocument doc, int orgIndex, int netIndex);
-	bool processNetworkPhonesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial = "");
-	bool processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex, int netIndex);
-	bool processNetworkPhoneCallgroupsQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
+
+	bool processMerakiS2SVPNQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkTrafficQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkAccessPoliciesQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkAirMarshalQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkBtoothSettingsQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkPhonesQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkPhoneContactsQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkPhoneCallgroupsQuery(QJsonDocument doc, eventRequest e);
+
+	bool processNetworkPhoneNumbersQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkAvailablePhoneNumbersQuery(QJsonDocument doc, eventRequest e);
+
+
 	bool processNetworkStaticRoutesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
 	bool processNetworkVlansQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
 	bool processNetworkSMProfilesQuery(QJsonDocument doc, int orgIndex, int netIndex);
+
+	bool processNetworkSSIDFirewallRulesQuery(QJsonDocument doc, eventRequest e);
 
 	bool processNetworkDeviceClaimed(QJsonDocument doc, eventRequest e);
 

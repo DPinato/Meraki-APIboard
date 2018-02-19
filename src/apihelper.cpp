@@ -299,173 +299,320 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
-
-
-
-
-
 		case 22: {
 			// GET /organizations/[organizationId]/vpnFirewallRules
-			processOrgVPNFirewallRulesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processOrgVPNFirewallRulesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
+		case 23: {
+			// PUT /organizations/[organizationId]/vpnFirewallRules
+			processOrgVPNFirewallRulesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
+		case 24: {
+			// GET /networks/[networkId]/ssids/[number]/l3FirewallRules
+			processNetworkSSIDFirewallRulesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
-
+		case 25: {
+			// PUT /networks/[networkId]/ssids/[number]/l3FirewallRules
+			processNetworkSSIDFirewallRulesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
 		case 26: {
 			// GET /networks/[networkId]/groupPolicies
-			processNetworkGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									, queueEventRequests.at(eventIndex).netIndex);
+			processNetworkGroupPolicyQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 27: {
 			// GET /organizations/[organizationId]/networks
-			processNetworkQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processNetworkQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 28: {
 			// GET /networks/[networkId]
-			processNetworkQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-								, queueEventRequests.at(eventIndex).netIndex);
+			processNetworkQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 29: {
+			// PUT /networks/[networkId]
+			processNetworkQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 30: {
+			// POST /organizations/[organizationId]/networks
+			processNetworkQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 31: {
+			// DELETE /networks/[networkId]
+			processNetworkQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 32: {
+			// POST /networks/[networkId]/bind
+			processNetworkBindToTemplateQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 33: {
+			// POST /networks/[networkId]/unbind
+			processNetworkBindToTemplateQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 34: {
 			// GET /networks/[networkId]/siteToSiteVpn
-			processMerakiS2SVPNQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									 , queueEventRequests.at(eventIndex).netIndex);
+			processMerakiS2SVPNQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 35: {
+			// PUT /networks/[networkId]/siteToSiteVpn
+			processMerakiS2SVPNQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 36: {
 			// GET /networks/[networkId]/traffic
-			processNetworkTrafficQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									   , queueEventRequests.at(eventIndex).netIndex);
+			processNetworkTrafficQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 37: {
 			// GET /networks/[networkId]/accessPolicies
-			processNetworkAccessPoliciesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-											  , queueEventRequests.at(eventIndex).netIndex);
+			processNetworkAccessPoliciesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 38: {
 			// GET /networks/[networkId]/airMarshal
-			processNetworkAirMarshalQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-											  , queueEventRequests.at(eventIndex).netIndex);
+			processNetworkAirMarshalQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 39: {
 			// GET /networks/[networkId]/bluetoothSettings
-			processNetworkBtoothSettingsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-											  , queueEventRequests.at(eventIndex).netIndex);
+			processNetworkBtoothSettingsQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 40: {
+			// GET /networks/[networkId]/bluetoothSettings
+			processNetworkBtoothSettingsQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 41: {
 			// GET /organizations
-			processOrgQuery(jDoc);
+			processOrgQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 42: {
 			// GET /organizations/[organizationId]
-			processOrgQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processOrgQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 43: {
+			// PUT /organizations/[organizationId]
+			processOrgQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 44: {
+			// POST /organizations
+			processOrgQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 45: {
+			// POST /organizations/[organizationId]/clone
+			processOrgQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 46: {
+			// POST /organizations/[organizationId]/claim
+			processSerialKeyOrderClaimQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 47: {
 			// GET /organizations/[organizationId]/licenseState
-			processLicenseQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processLicenseQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 48: {
 			// GET /organizations/[organizationId]/inventory
-			processOrgInventoryQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processOrgInventoryQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 49: {
 			// GET /organizations/[organizationId]/snmp
-			processOrgSNMPQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processOrgSNMPQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 50: {
+			// PUT /organizations/[organizationId]/snmp
+			processOrgSNMPQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 51: {
 			// GET /organizations/[organizationId]/thirdPartyVPNPeers
-			processOrgVPNQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processOrgVPNQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 52: {
+			// PUT /organizations/[organizationId]/thirdPartyVPNPeers
+			processOrgVPNQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 53: {
 			// GET /networks/[networkId]/phoneAssignments
-			processNetworkPhonesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-								  , queueEventRequests.at(eventIndex).netIndex);
+			processNetworkPhonesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 54: {
 			// GET /networks/[networkId]/phoneAssignments/[serial]
-			processNetworkPhonesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									  , queueEventRequests.at(eventIndex).netIndex
-									  , queueEventRequests.at(eventIndex).deviceSerial);
+			processNetworkPhonesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 55: {
+			// PUT /networks/[networkId]/phoneAssignments/[serial]
+			processNetworkPhonesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 56: {
+			// DELETE /networks/[networkId]/phoneAssignments/[serial]
+			processNetworkPhonesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 57: {
 			// GET /networks/[networkId]/phoneCallgroups
-			processNetworkPhoneCallgroupsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-											   , queueEventRequests.at(eventIndex).netIndex);
+			processNetworkPhoneCallgroupsQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 58: {
 			// GET /networks/[networkId]/phoneCallgroups/[id]
-			processNetworkPhoneCallgroupsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-											   , queueEventRequests.at(eventIndex).netIndex
-											   , queueEventRequests.at(eventIndex).id);
+			processNetworkPhoneCallgroupsQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 59: {
+			// POST /networks/[networkId]/phoneCallgroups/
+			processNetworkPhoneCallgroupsQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 60: {
+			// PUT /networks/[networkId]/phoneCallgroups/[id]
+			processNetworkPhoneCallgroupsQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 61: {
+			// DELETE /networks/[networkId]/phoneCallgroups/[id]
+			processNetworkPhoneCallgroupsQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 62: {
 			// GET /networks/[networkId]/phoneContacts
-			processNetworkPhoneContactsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-								  , queueEventRequests.at(eventIndex).netIndex);
+			processNetworkPhoneContactsQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 63: {
+			// POST /networks/[networkId]/phoneContacts
+			processNetworkPhoneContactsQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 64: {
+			// PUT /networks/[networkId]/phoneContacts/[contactId]
+			processNetworkPhoneContactsQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 65: {
+			// DELETE /networks/[networkId]/phoneContacts/[contactId]
+			processNetworkPhoneContactsQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 66: {
 			// GET /networks/[networkId]/phoneNumbers
-			// ???????
+			processNetworkPhoneNumbersQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 67: {
 			// GET /networks/[networkId]/phoneNumbers/available
-			// ???????
+			processNetworkAvailablePhoneNumbersQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
+
+
+
+
 		case 68: {
 			// GET /organizations/[organizationId]/samlRoles
-			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex);
+			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 69: {
 			// GET /organizations/[organizationId]/samlRoles/[id]
-			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-								  , queueEventRequests.at(eventIndex).id);
+			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
+
+		case 70: {
+			// PUT /organizations/[organizationId]/samlRoles/[id]
+			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 71: {
+			// POST /organizations/[organizationId]/samlRoles
+			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 72: {
+			// DELETE /organizations/[organizationId]/samlRoles/[id]
+			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+
+
+
+
 
 		case 76: {
 			// GET /networks/[networkId]/sm/profile/clarity/[id]
@@ -607,10 +754,10 @@ void APIHelper::putEventInQueue(eventRequest e, bool force) {
 
 }
 
-bool APIHelper::processOrgQuery(QJsonDocument doc, int orgIndex) {
+bool APIHelper::processOrgQuery(QJsonDocument doc, eventRequest e) {
 	// call this after querying list of organizations
 	// if orgIndex is not -1, it means that a particular org was queried
-	qDebug() << "\nAPIHelper::processOrgQuery(...)";
+	qDebug() << "\nAPIHelper::processOrgQuery(...), orgIndex: " << e.orgIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgQuery(...)";
@@ -621,18 +768,34 @@ bool APIHelper::processOrgQuery(QJsonDocument doc, int orgIndex) {
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	int i = orgIndex;
-	int count = orgIndex+1;	// makes it so that the for-loop will do at least 1 iteration
-	if (orgIndex == -1) {
-		i = 0;		// update all the orgs
-		count = jArray.size();
+	// urlList 41 returns all orgs for API key, GET
+	// urlList 42 returns a single organization, GET
+	// urlList 43 returns a single organization, PUT
+	// urlList 44 returns a single organization, POST
+	// urlList 45 returns a single organization, POST
+	int i = e.orgIndex;
+	int count = e.orgIndex+1;	// makes it so that the for-loop will do at least 1 iteration
 
-		// TODO: consider deleting all the MOrganization objects before this
-		parent->orgList.resize(jArray.size());
+	if (e.urlListIndex == 41) {
+		if (e.orgIndex == -1) {
+			i = 0;		// update all the orgs
+			count = jArray.size();
+			parent->orgList.resize(jArray.size());
+		}
+
+	} else if (e.urlListIndex == 42 || e.urlListIndex == 43) {
+		// only get data for one organization, do nothing
+
+	} else if (e.urlListIndex == 44 || e.urlListIndex == 45) {
+		// a new org needs to be added
+		i = parent->orgList.size();
+		count = i+1;
+		parent->orgList.resize(count);
 	}
 
 
 	for (i; i < count; i++) {
+		qDebug() << i;
 		QJsonObject jObj = jArray.at(i).toObject();
 		parent->orgList[i] = new MOrganization();
 		parent->orgList[i]->setOrgID(jObj["id"].toVariant().toString());
@@ -641,46 +804,63 @@ bool APIHelper::processOrgQuery(QJsonDocument doc, int orgIndex) {
 		parent->orgList[i]->setOrgSamlUrl(jObj["samlConsumerUrl"].toString());
 
 		QJsonArray jSaml = jObj["samlConsumerUrls"].toArray();
-//		parent->orgList[i]->
-
-
+		parent->orgList[i]->setOrgSamlUrlsNum(jSaml.size());
+		for (int j = 0; j < jSaml.size(); j++) {
+			QString tmpUrl = jSaml.at(j).toString();
+			parent->orgList[i]->setOrgSamlUrlEntry(tmpUrl, j);
+		}
 	}
 
 
-
-
-	parent->updateOrgUI(-1);
+	parent->updateOrgUI(e.orgIndex);
 
 	return true;	// everything OK
 
 }
 
-bool APIHelper::processNetworkQuery(QJsonDocument doc, int orgIndex, int netIndex) {
+bool APIHelper::processNetworkQuery(QJsonDocument doc, eventRequest e) {
 	// if a netIndex is returned, the query was run for a single network in the organization
-	qDebug() << "\nAPIHelper::processNetworkQuery(), netIndex: " << netIndex;
+	qDebug() << "\nAPIHelper::processNetworkQuery(), netIndex: " << e.netIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkQuery(...)";
 		return false;
 	}
 
-
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	int i = netIndex;
-	int count = netIndex+1;	// makes it so that the for-loop will do at least 1 iteration
-	if (netIndex == -1) {
-		i = 0;		// update all the networks in the organization
-		count = jArray.size();
-		parent->orgList[orgIndex]->setNetworksNum(count);
+	// urlList 27 returns all networks in the org, GET
+	// urlList 28 returns a single network in the org, GET
+	// urlList 29 returns a single network in the org, PUT
+	// urlList 30 returns a single network in the org, POST
+	// urlList 31 returns nothing, DELETE
+	int i = 0;
+	int count = jArray.size();
+
+	if (e.urlListIndex == 27) {
+		parent->orgList[e.orgIndex]->setNetworksNum(count);
+
+	} else if (e.urlListIndex == 28 || e.urlListIndex == 29) {
+		i = e.netIndex;
+		count = i+1;
+
+	} else if (e.urlListIndex == 30) {
+		// a new network needs to be created, increment the vector size and
+		// put the new network at the end of the vector
+		i = parent->orgList[e.orgIndex]->getNetworksNum();
+		count = i+1;
+		parent->orgList[e.orgIndex]->setNetworksNum(count);
+
+	} else if (e.urlListIndex == 31) {
+		return parent->orgList[e.orgIndex]->removeNetwork(e.netIndex);
 	}
 
 
 	for (i; i < count; i++) {
 		// this loop assumes that the whole list of networks in an org was queried, before a single network
 		QJsonObject jObj = jArray.at(i).toObject();
-		networkVars tmpNetVar = parent->orgList[orgIndex]->getNetwork(i);
+		networkVars tmpNetVar = parent->orgList[e.orgIndex]->getNetwork(i);
 
 		tmpNetVar.netID = jObj["id"].toString();
 		tmpNetVar.netName = jObj["name"].toString();
@@ -689,56 +869,92 @@ bool APIHelper::processNetworkQuery(QJsonDocument doc, int orgIndex, int netInde
 		tmpNetVar.netType = jObj["type"].toString();
 		tmpNetVar.netTags = (jObj["tags"].toString());
 
-
-		// increase number of networks in org
-		parent->orgList[orgIndex]->setNetwork(tmpNetVar, i);
+		parent->orgList[e.orgIndex]->setNetwork(tmpNetVar, i);
 
 	}
 
-
 	parent->updateOrgUI(-1);
-	parent->updateOrgUI(orgIndex);
+	parent->updateOrgUI(e.orgIndex);
 
 	return true;	// everything OK
 
 }
 
-bool APIHelper::processLicenseQuery(QJsonDocument doc, int orgIndex) {
-	qDebug() << "\nAPIHelper::processLicenseQuery(...), orgIndex: " << orgIndex;
+bool APIHelper::processNetworkBindToTemplateQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkBindToTemplateQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex: " << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkBindToTemplateQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	// urlList 32 returns nothing, POST
+	// urlList 33 returns nothing, POST
+
+
+	return true;	// everything OK
+
+}
+
+bool APIHelper::processSerialKeyOrderClaimQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processSerialKeyOrderClaimQuery(...), orgIndex: " << e.orgIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgAdminsQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	// urlList 46 returns nothing, POST
+
+
+	return true;	// everything OK
+
+}
+
+bool APIHelper::processLicenseQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processLicenseQuery(...), orgIndex: " << e.orgIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processLicenseQuery(...)";
 		return false;
 	}
 
-	licensesPerDevice tmpVar;
 	QJsonObject jObj = doc.object();
 	qDebug() << jObj << "\t" << jObj.size() << "\n";
 
-
+	// urlList 47 returns JSON object with license info for org, GET
 	// save info for licensing status of organization
-	parent->orgList[orgIndex]->setLicenseExpDate(jObj["expirationDate"].toString());
-	parent->orgList[orgIndex]->setLicenseStatus(jObj["status"].toString());
+	parent->orgList[e.orgIndex]->setLicenseExpDate(jObj["expirationDate"].toString());
+	parent->orgList[e.orgIndex]->setLicenseStatus(jObj["status"].toString());
 
 	// get list of licensedDeviceCounts
 	QJsonObject jObjCounts = jObj["licensedDeviceCounts"].toObject();	// makes it easier to work with it
-	parent->orgList[orgIndex]->setLicenseDeviceNum(jObjCounts.keys().size());
+	parent->orgList[e.orgIndex]->setLicenseDeviceNum(jObjCounts.keys().size());
 
 	for (int i = 0; i < jObjCounts.size(); i++) {
+		licensesPerDevice tmpVar;
+
 		tmpVar.deviceType = jObjCounts.keys().at(i);
 		tmpVar.count = jObjCounts[jObjCounts.keys().at(i)].toInt();
-		parent->orgList[orgIndex]->setLicensePerDevice(tmpVar, i);
+		parent->orgList[e.orgIndex]->setLicensePerDevice(tmpVar, i);
 	}
 
 //	parent->updateOrgUI(orgIndex);
-	parent->displayLicenseInfo(orgIndex);
+	parent->displayLicenseInfo(e.orgIndex);
 
 	return true;		// everything ok
+
 }
 
 bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest e) {
-	// process list of administrators in organization obtained through
-	// GET /organizations/[organizationId]/admins
+	// process list of administrators in organization
 	qDebug() << "\nAPIHelper::processOrgAdminsQuery(...), orgIndex: " << e.orgIndex
 			 << "\treqType: " << e.req.reqType << "\tid: " << e.id;
 
@@ -746,7 +962,6 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest e) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgAdminsQuery(...)";
 		return false;
 	}
-
 
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
@@ -759,19 +974,21 @@ bool APIHelper::processOrgAdminsQuery(QJsonDocument doc, eventRequest e) {
 	int i = 0;
 	int count = jArray.size();
 
-	if (e.req.reqType == 2 || e.req.reqType == 3) {
-		// only do single id
-		i = adminIndex;
-		if (i == -1) {
-			// a new administrator needs to be created, increment the vector size
-			i = parent->orgList[e.orgIndex]->getAdminListSize();
-			parent->orgList[e.orgIndex]->setAdminsNum(i+1);
-		}
+	if (e.urlListIndex == 0) {
+		parent->orgList[e.orgIndex]->setAdminsNum(count);
 
+	} else if (e.urlListIndex == 1) {
+		// a new administrator needs to be created, increment the vector size
+		// and put the new admin at the end of the network
+		i = parent->orgList[e.orgIndex]->getAdminListSize();
 		count = i+1;
-	} else if (e.req.reqType == 1) {
-		parent->orgList[e.orgIndex]->setAdminsNum(jArray.size());
-	} else if (e.req.reqType == 4) {
+		parent->orgList[e.orgIndex]->setAdminsNum(count);
+
+	} else if (e.urlListIndex == 2) {
+		i = adminIndex;
+		count = i+1;
+
+	} else if (e.urlListIndex == 3) {
 		return parent->orgList[e.orgIndex]->removeOrgAdmin(i);
 	}
 
@@ -867,9 +1084,9 @@ bool APIHelper::processOrgConfigTemplatesQuery(QJsonDocument doc, eventRequest e
 
 }
 
-bool APIHelper::processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString id) {
-	qDebug() << "\nAPIHelper::processSamlRolesQuery(...), orgIndex: " << orgIndex
-			 << "\tid: " << id;
+bool APIHelper::processSamlRolesQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processSamlRolesQuery(...), orgIndex: " << e.orgIndex
+			 << "\tid: " << e.id;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processSamlRolesQuery(...)";
@@ -879,14 +1096,21 @@ bool APIHelper::processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString i
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
+	// urlList 68 returns JSON array with list of all SAML roles for the org, GET
+	// urlList 68 returns JSON object with SAML role, GET
+	// urlList 68 returns JSON object with SAML role, PUT
+	// urlList 68 returns JSON object with SAML role created, POST
+	// urlList 68 nothing after deleting SAML role, DELETE
+
+
 	int i = 0;
 	int count = jArray.size();
 	if (id.length() > 0) {
 		// only do single id
-		i = parent->orgList[orgIndex]->getIndexOfSamlRole(id);
+		i = parent->orgList[e.orgIndex]->getIndexOfSamlRole(e.id);
 		count = i+1;
 	} else {
-		parent->orgList[orgIndex]->setOrgSamlRolesNum(jArray.size());
+		parent->orgList[e.orgIndex]->setOrgSamlRolesNum(jArray.size());
 	}
 
 
@@ -917,7 +1141,7 @@ bool APIHelper::processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString i
 		}
 
 
-		parent->orgList[orgIndex]->setOrgSamlRole(tmpSamlRole, i);
+		parent->orgList[e.orgIndex]->setOrgSamlRole(tmpSamlRole, i);
 
 	}
 
@@ -926,10 +1150,10 @@ bool APIHelper::processSamlRolesQuery(QJsonDocument doc, int orgIndex, QString i
 
 }
 
-bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
+bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, eventRequest e) {
 	// process inventory for an organization
 	// GET /organizations/[organizationId]/inventory
-	qDebug() << "\nAPIHelper::processOrgInventoryQuery(...), orgIndex: " << orgIndex;
+	qDebug() << "\nAPIHelper::processOrgInventoryQuery(...), orgIndex: " << e.orgIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgInventoryQuery(...)";
@@ -940,7 +1164,8 @@ bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList[orgIndex]->setOrgInventorySize(jArray.size());
+	// urlList 48 returns array with list of devices in org inventory, GET
+	parent->orgList[e.orgIndex]->setOrgInventorySize(jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
@@ -954,24 +1179,24 @@ bool APIHelper::processOrgInventoryQuery(QJsonDocument doc, int orgIndex) {
 		tmpDevice.publicIP = jObj["publicIp"].toString();
 		tmpDevice.serial = jObj["serial"].toString();
 
-		parent->orgList[orgIndex]->setOrgInventoryDevice(tmpDevice, i);
+		parent->orgList[e.orgIndex]->setOrgInventoryDevice(tmpDevice, i);
 
 	}
 
-	parent->displayInventory(orgIndex);
+	parent->displayInventory(e.orgIndex);
 
 	return true;	// everything went well
 
 }
 
-bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, eventRequest event) {
+bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, eventRequest e) {
 	// if serial is present, it means that the query was run for a single device
 	// if serial is empty, get all devices in the network
 	// this should probably be run with a serial number only after it is run without it, to avoid
 	// QVector out of bounds accesses
 	// TODO: beaconIdParams are also returned
-	qDebug() << "\nAPIHelper::processNetworkDevicesQuery(...), orgIndex: " << event.orgIndex
-			 << "\tnetIndex" << event.netIndex << "\tserial: " << event.deviceSerial;
+	qDebug() << "\nAPIHelper::processNetworkDevicesQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex << "\tserial: " << e.deviceSerial;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkDevicesQuery(...)";
@@ -985,14 +1210,14 @@ bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, eventRequest event
 	// urlList 11 returns all the devices in a network, GET
 	// urlList 12 returns a single device in the network, GET
 	// urlList 14 returns a single device in the network, PUT
-	int devIndex = parent->orgList[event.orgIndex]->getIndexOfInventoryDevice(event.deviceSerial);
+	int devIndex = parent->orgList[e.orgIndex]->getIndexOfInventoryDevice(e.deviceSerial);
 	int i = 0;
 	int count = jArray.size();
 
-	if (event.urlListIndex == 11) {
+	if (e.urlListIndex == 11) {
 		// process all serials in the network
-		parent->orgList[event.orgIndex]->setNetworkDevicesNum(event.netIndex, jArray.size());
-	} else if (event.urlListIndex == 12 || event.urlListIndex == 14) {
+		parent->orgList[e.orgIndex]->setNetworkDevicesNum(e.netIndex, jArray.size());
+	} else if (e.urlListIndex == 12 || e.urlListIndex == 14) {
 		// process data for single serial in network
 		i = devIndex;
 		count = i+1;
@@ -1016,10 +1241,9 @@ bool APIHelper::processNetworkDevicesQuery(QJsonDocument doc, eventRequest event
 		tmpNetDev.wan1Ip = jObj["wan1Ip"].toString();
 		tmpNetDev.wan2Ip = jObj["wan2Ip"].toString();
 
-		parent->orgList[event.orgIndex]->setNetworkDevice(event.netIndex, tmpNetDev, i);
+		parent->orgList[e.orgIndex]->setNetworkDevice(e.netIndex, tmpNetDev, i);
 
 	}
-
 
 	return true;	// everything went well
 
@@ -1074,8 +1298,8 @@ bool APIHelper::processNetworkDeviceUplinkQuery(QJsonDocument doc, eventRequest 
 
 }
 
-bool APIHelper::processOrgSNMPQuery(QJsonDocument doc, int orgIndex) {
-	qDebug() << "\nAPIHelper::processOrgSNMPQuery(...), orgIndex: " << orgIndex;
+bool APIHelper::processOrgSNMPQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processOrgSNMPQuery(...), orgIndex: " << e.orgIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgSNMPQuery(...)";
@@ -1085,6 +1309,9 @@ bool APIHelper::processOrgSNMPQuery(QJsonDocument doc, int orgIndex) {
 
 	QJsonObject jObj = doc.object();
 	qDebug() << jObj << "\t" << jObj.size();
+
+	// urlList 49 returns JSON object of SNMP configuration for the organisation, GET
+	// urlList 50 returns JSON object of SNMP configuration for the organization, PUT
 
 	orgSNMP tmpSNMP;
 
@@ -1119,15 +1346,15 @@ bool APIHelper::processOrgSNMPQuery(QJsonDocument doc, int orgIndex) {
 
 	tmpSNMP.snmpPeerIPs.append(tmp);
 
-	parent->orgList.at(orgIndex)->setOrgSNMPSettings(tmpSNMP);
-	parent->displayOrgSNMP(orgIndex);
+	parent->orgList.at(e.orgIndex)->setOrgSNMPSettings(tmpSNMP);
+	parent->displayOrgSNMP(e.orgIndex);
 
 	return true;	// everything went ok
 
 }
 
-bool APIHelper::processOrgVPNQuery(QJsonDocument doc, int orgIndex) {
-	qDebug() << "\nAPIHelper::processOrgVPNQuery(...), orgIndex: " << orgIndex;
+bool APIHelper::processOrgVPNQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processOrgVPNQuery(...), orgIndex: " << e.orgIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgVPNQuery(...)";
@@ -1138,7 +1365,9 @@ bool APIHelper::processOrgVPNQuery(QJsonDocument doc, int orgIndex) {
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList[orgIndex]->setOrgVPNPeerNum(jArray.size());
+	// urlList 51 returns JSON array of 3rd party site-to-site VPN peers in org, GET
+	// urlList 52 returns JSON array of 3rd party site-to-site VPN peers in org, PUT
+	parent->orgList[e.orgIndex]->setOrgVPNPeerNum(jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
@@ -1159,29 +1388,32 @@ bool APIHelper::processOrgVPNQuery(QJsonDocument doc, int orgIndex) {
 			tmpVPN.tags.append(jArr2.at(j).toString());
 		}
 
-		parent->orgList.at(orgIndex)->setOrgVPNPeer(tmpVPN, i);
+		parent->orgList.at(e.orgIndex)->setOrgVPNPeer(tmpVPN, i);
 
 	}
 
-	parent->displayOrgVPN(orgIndex);
+	parent->displayOrgVPN(e.orgIndex);
 
 	return true;	// everything went ok
 
 }
 
-bool APIHelper::processOrgVPNFirewallRulesQuery(QJsonDocument doc, int orgIndex) {
-	qDebug() << "\nAPIHelper::processOrgVPNFirewallRulesQuery(...), orgIndex: " << orgIndex;
+bool APIHelper::processOrgVPNFirewallRulesQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processOrgVPNFirewallRulesQuery(...), orgIndex: " << e.orgIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgVPNFirewallRulesQuery(...)";
 		return false;
 	}
 
-
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList[orgIndex]->setOrgVPNFirewallRulesNum(jArray.size());
+	// urlList 22 returns a list of all firewall rules for org site-to-site VPN, GET
+	// urlList 23 returns a list of all firewall rules for org site-to-site VPN, PUT
+	// no need for any special processing here, since an array will be returned anyway
+
+	parent->orgList[e.orgIndex]->setOrgVPNFirewallRulesNum(jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
@@ -1197,7 +1429,7 @@ bool APIHelper::processOrgVPNFirewallRulesQuery(QJsonDocument doc, int orgIndex)
 		tmpRule.destCidr = jObj["destCidr"].toString();
 		tmpRule.syslogEnabled = jObj["syslogEnabled"].toBool();
 
-		parent->orgList.at(orgIndex)->setOrgVPNFirewallRule(tmpRule, i);
+		parent->orgList.at(e.orgIndex)->setOrgVPNFirewallRule(tmpRule, i);
 
 	}
 
@@ -1445,9 +1677,9 @@ bool APIHelper::processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIn
 
 }
 
-bool APIHelper::processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processGroupPolicyQuery(...), orgIndex: "
-			 << orgIndex << "\tnetIndex" << netIndex;
+bool APIHelper::processNetworkGroupPolicyQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processGroupPolicyQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processGroupPolicyQuery(...)";
@@ -1457,7 +1689,7 @@ bool APIHelper::processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, 
 	QJsonArray jArray = doc.array();	// the reply contains an array containing the group policies
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList.at(orgIndex)->setNetworkGroupPolicyNum(netIndex, jArray.size());
+	parent->orgList.at(e.orgIndex)->setNetworkGroupPolicyNum(e.netIndex, jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
@@ -1467,7 +1699,7 @@ bool APIHelper::processNetworkGroupPolicyQuery(QJsonDocument doc, int orgIndex, 
 		tmpGPolicy.name = jObj["name"].toString();
 		tmpGPolicy.groupPolicyId = jObj["groupPolicyId"].toInt();
 
-		parent->orgList.at(orgIndex)->setNetworkGroupPolicy(netIndex, tmpGPolicy, i);
+		parent->orgList.at(e.orgIndex)->setNetworkGroupPolicy(e.netIndex, tmpGPolicy, i);
 
 	}
 
@@ -1663,9 +1895,9 @@ bool APIHelper::processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int ne
 
 }
 
-bool APIHelper::processMerakiS2SVPNQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processMerakiS2SVPNQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex;
+bool APIHelper::processMerakiS2SVPNQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processMerakiS2SVPNQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processMerakiS2SVPNQuery(...)";
@@ -1675,7 +1907,9 @@ bool APIHelper::processMerakiS2SVPNQuery(QJsonDocument doc, int orgIndex, int ne
 	QJsonObject jObj = doc.object();
 	qDebug() << jObj << "\t" << jObj.size();
 
-
+	// urlList 34 returns Meraki site-to-site autoVPN settings for the network, GET
+	// urlList 35 returns Meraki site-to-site autoVPN settings for the network, PUT
+	// no need for any special processing here, since an single JSON object will be returned anyway
 	merakiVPN tmpVPN;
 	tmpVPN.mode = jObj["mode"].toString();
 
@@ -1694,15 +1928,15 @@ bool APIHelper::processMerakiS2SVPNQuery(QJsonDocument doc, int orgIndex, int ne
 	}
 
 
-	parent->orgList[orgIndex]->setNetworkS2SVPN(netIndex, tmpVPN);
+	parent->orgList[e.orgIndex]->setNetworkS2SVPN(e.netIndex, tmpVPN);
 
 	return true;	// everything went well
 
 }
 
-bool APIHelper::processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processNetworkTrafficQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex;
+bool APIHelper::processNetworkTrafficQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkTrafficQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkTrafficQuery(...)";
@@ -1712,7 +1946,7 @@ bool APIHelper::processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int 
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList[orgIndex]->setNetworkTrafficFlowsNum(netIndex, jArray.size());
+	parent->orgList[e.orgIndex]->setNetworkTrafficFlowsNum(e.netIndex, jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
@@ -1729,7 +1963,7 @@ bool APIHelper::processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int 
 		tmpTraffic.activeTime = jObj["activeTime"].toDouble();
 		tmpTraffic.numClients = jObj["numClients"].toInt();
 
-		parent->orgList[orgIndex]->setNetworkTrafficFlow(netIndex, tmpTraffic, i);
+		parent->orgList[e.orgIndex]->setNetworkTrafficFlow(e.netIndex, tmpTraffic, i);
 
 	}
 
@@ -1737,9 +1971,9 @@ bool APIHelper::processNetworkTrafficQuery(QJsonDocument doc, int orgIndex, int 
 
 }
 
-bool APIHelper::processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processNetworkAccessPoliciesQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex;
+bool APIHelper::processNetworkAccessPoliciesQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkAccessPoliciesQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkAccessPoliciesQuery(...)";
@@ -1749,7 +1983,7 @@ bool APIHelper::processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgInde
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList[orgIndex]->setNetworkAccessPoliciesNum(netIndex, jArray.size());
+	parent->orgList[e.orgIndex]->setNetworkAccessPoliciesNum(e.netIndex, jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
@@ -1770,7 +2004,7 @@ bool APIHelper::processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgInde
 			tmpPolicy.radiusServers[j] = tmpRadius;
 		}
 
-		parent->orgList[orgIndex]->setNetworkAccessPolicy(netIndex, tmpPolicy, i);
+		parent->orgList[e.orgIndex]->setNetworkAccessPolicy(e.netIndex, tmpPolicy, i);
 
 	}
 
@@ -1778,9 +2012,9 @@ bool APIHelper::processNetworkAccessPoliciesQuery(QJsonDocument doc, int orgInde
 
 }
 
-bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processNetworkAirMarshalQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex;
+bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkAirMarshalQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkAirMarshalQuery(...)";
@@ -1790,7 +2024,7 @@ bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, i
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList[orgIndex]->setNetworkAirMarshalEntriesNum(netIndex, jArray.size());
+	parent->orgList[e.orgIndex]->setNetworkAirMarshalEntriesNum(e.netIndex, jArray.size());
 
 
 	for (int i = 0; i < jArray.size(); i++) {
@@ -1850,7 +2084,7 @@ bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, i
 
 		tmpAirMarshal.wiredLastSeen = jObj["wiredLastSeen"].toDouble();
 
-		parent->orgList[orgIndex]->setNetworkAirMarshalEntry(netIndex, tmpAirMarshal, i);
+		parent->orgList[e.orgIndex]->setNetworkAirMarshalEntry(e.netIndex, tmpAirMarshal, i);
 
 	}
 
@@ -1858,9 +2092,9 @@ bool APIHelper::processNetworkAirMarshalQuery(QJsonDocument doc, int orgIndex, i
 
 }
 
-bool APIHelper::processNetworkBtoothSettingsQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processNetworkBtoothSettingsQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex;
+bool APIHelper::processNetworkBtoothSettingsQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkBtoothSettingsQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkBtoothSettingsQuery(...)";
@@ -1870,6 +2104,9 @@ bool APIHelper::processNetworkBtoothSettingsQuery(QJsonDocument doc, int orgInde
 	QJsonObject jObj = doc.object();
 	qDebug() << jObj << "\t" << jObj.size();
 
+	// urlList 39 returns bluetooth settings for the network, GET
+	// urlList 40 returns bluetooth settings for the network, PUT
+	// no need for any special processing here, since an single JSON object will be returned anyway
 	netBtoothSettings tmpBtooth;
 	tmpBtooth.id = jObj["id"].toString();	// this may not even be returned
 	tmpBtooth.scanningEnabled = jObj["scanningEnabled"].toBool();
@@ -1879,13 +2116,15 @@ bool APIHelper::processNetworkBtoothSettingsQuery(QJsonDocument doc, int orgInde
 	tmpBtooth.major = jObj["major"].toInt();
 	tmpBtooth.minor = jObj["minor"].toInt();
 
+	parent->orgList[e.orgIndex]->setNetworkBtoothSettings(e.netIndex, tmpBtooth);
+
 	return true;	// everything went well
 
 }
 
-bool APIHelper::processNetworkPhonesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString serial) {
-	qDebug() << "\nAPIHelper::processNetworkPhonesQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex << "\tserial: " << serial;
+bool APIHelper::processNetworkPhonesQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkPhonesQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex << "\tserial: " << e.deviceSerial;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkPhonesQuery(...)";
@@ -1895,14 +2134,23 @@ bool APIHelper::processNetworkPhonesQuery(QJsonDocument doc, int orgIndex, int n
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
+	// urlList 53 returns JSON array of phones in a network and contact assignment, GET
+	// urlList 54 returns JSON object of phone and its contact assignment, GET
+	// urlList 55 returns JSON object of phone and its contact assignment, PUT
+	// urlList 56 returns nothing, DELETE
+	int phoneIndex = parent->orgList[e.orgIndex]->getIndexOfNetworkPhone(e.netIndex, e.deviceSerial);
 	int i = 0;
 	int count = jArray.size();
-	if (serial.length() > 0) {
-		// only do single serial
-		i = parent->orgList[orgIndex]->getIndexOfInventoryDevice(serial);
+
+	if (e.urlListIndex == 53) {
+		parent->orgList[e.orgIndex]->setNetworkPhoneNum(e.netIndex, jArray.size());
+
+	} else if (e.urlListIndex == 54 || e.urlListIndex == 55) {
+		i = phoneIndex;
 		count = i+1;
-	} else {
-		parent->orgList[orgIndex]->setNetworkPhoneNum(netIndex, jArray.size());
+
+	} else if (e.urlListIndex == 56) {
+		return parent->orgList[e.orgIndex]->removeNetworkPhoneAssignment(e.netIndex, phoneIndex);
 	}
 
 
@@ -1921,7 +2169,7 @@ bool APIHelper::processNetworkPhonesQuery(QJsonDocument doc, int orgIndex, int n
 			tmpPhone.publicNumber[j] = jPublicNumber.at(j).toString();
 		}
 
-		parent->orgList[orgIndex]->setNetworkPhone(netIndex, tmpPhone, i);
+		parent->orgList[e.orgIndex]->setNetworkPhone(e.netIndex, tmpPhone, i);
 
 	}
 
@@ -1929,9 +2177,9 @@ bool APIHelper::processNetworkPhonesQuery(QJsonDocument doc, int orgIndex, int n
 
 }
 
-bool APIHelper::processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processNetworkPhoneContactsQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex;
+bool APIHelper::processNetworkPhoneContactsQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkPhoneContactsQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkPhoneContactsQuery(...)";
@@ -1941,9 +2189,32 @@ bool APIHelper::processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList[orgIndex]->setNetworkPhoneContactNum(netIndex, jArray.size());
+	// urlList 62 returns JSON array of phone contacts in network, GET
+	// urlList 63 returns JSON object of phone contact just added, POST
+	// urlList 64 returns JSON object of phone contact updated, PUT
+	// urlList 65 returns nothing, DELETE
+	int phoneContactIndex = parent->orgList[e.orgIndex]->getIndexOfPhoneContact(e.netIndex, e.id);
+	int i = 0;
+	int count = jArray.size();
 
-	for (int i = 0; i < jArray.size(); i++) {
+	if (e.urlListIndex == 62) {
+		parent->orgList[e.orgIndex]->setNetworkPhoneContactNum(e.netIndex, jArray.size());
+
+	} else if (e.urlListIndex == 63) {
+		// add element to the vector
+		i = parent->orgList[e.orgIndex]->getNetworkPhoneContactNum(e.netIndex);
+		count = i+1;
+		parent->orgList[e.orgIndex]->setNetworkPhoneContactNum(e.netIndex, count);
+	} else if (e.urlListIndex == 64) {
+		i = phoneContactIndex;
+		count = i+1;
+	} else if (e.urlListIndex == 65) {
+		return parent->orgList[e.orgIndex]->removeNetworkPhoneContact(e.netIndex, phoneContactIndex);
+	}
+
+
+
+	for (i = 0; i < count; i++) {
 		QJsonObject jObj = jArray.at(i).toObject();
 		netPhoneContact tmpPhoneContact;
 
@@ -1951,7 +2222,7 @@ bool APIHelper::processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex
 		tmpPhoneContact.name = jObj["name"].toString();
 		tmpPhoneContact.type = jObj["type"].toString();
 
-		parent->orgList[orgIndex]->setNetworkPhoneContact(netIndex, tmpPhoneContact, i);
+		parent->orgList[e.orgIndex]->setNetworkPhoneContact(e.netIndex, tmpPhoneContact, i);
 
 	}
 
@@ -1959,9 +2230,9 @@ bool APIHelper::processNetworkPhoneContactsQuery(QJsonDocument doc, int orgIndex
 
 }
 
-bool APIHelper::processNetworkPhoneCallgroupsQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id) {
-	qDebug() << "\nAPIHelper::processNetworkPhoneCallgroupsQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex << "\tid: " << id;
+bool APIHelper::processNetworkPhoneCallgroupsQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkPhoneCallgroupsQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex << "\tid: " << e.id;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkPhoneCallgroupsQuery(...)";
@@ -1971,14 +2242,31 @@ bool APIHelper::processNetworkPhoneCallgroupsQuery(QJsonDocument doc, int orgInd
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
+	// urlList 57 returns JSON array of the list of call groups in the network, GET
+	// urlList 58 returns JSON object of call group in network, GET
+	// urlList 59 returns JSON object of call group created in network, POST
+	// urlList 60 returns JSON object of call group updated in network, PUT
+	// urlList 61 returns nothing, DELETE
+	int callGroupIndex = parent->orgList[e.orgIndex]->getIndexOfPhoneCallgroupId(e.netIndex, e.id);
 	int i = 0;
 	int count = jArray.size();
-	if (id.length() > 0) {
+
+	if (e.urlListIndex == 57) {
+		parent->orgList[e.orgIndex]->setNetworkPhoneCallgroupsNum(e.netIndex, jArray.size());
+
+	} else if (e.urlListIndex == 58 || e.urlListIndex == 60) {
 		// only do single id
-		i = parent->orgList[orgIndex]->getIndexOfPhoneCallgroupId(netIndex, id);
+		i = callGroupIndex;
 		count = i+1;
-	} else {
-		parent->orgList[orgIndex]->setNetworkPhoneCallgroupsNum(netIndex, jArray.size());
+
+	} else if (e.urlListIndex == 59) {
+		// create a new element in the vector
+		i = parent->orgList[e.orgIndex]->getNetworkPhoneCallgroupsNum(e.netIndex);
+		count = i+1;
+		parent->orgList[e.orgIndex]->setNetworkPhoneCallgroupsNum(e.netIndex, count);
+
+	} else if (e.urlListIndex == 61) {
+		return parent->orgList[e.orgIndex]->removeNetworkPhoneCallGroup(e.netIndex, callGroupIndex);
 	}
 
 
@@ -1991,11 +2279,74 @@ bool APIHelper::processNetworkPhoneCallgroupsQuery(QJsonDocument doc, int orgInd
 		tmpPhoneCGroup.publicNumber = jObj["publicNumber"].toString();
 		tmpPhoneCGroup.ext = jObj["ext"].toString();
 
-		parent->orgList[orgIndex]->setNetworkPhoneCallgroupEntry(netIndex, tmpPhoneCGroup, i);
+		parent->orgList[e.orgIndex]->setNetworkPhoneCallgroupEntry(e.netIndex, tmpPhoneCGroup, i);
 
 	}
 
 	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkPhoneNumbersQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkPhoneNumbersQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkPhoneNumbersQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	// urlList 66 returns JSON array of the list of all phone numbers in the network, GET
+	// no special processing needed here
+	parent->orgList[e.orgIndex]->setNetworkPublicNumbersNum(e.netIndex, jArray.size());
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QString tmpPhoneNum;
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		tmpPhoneNum = jObj["publicNumber"].toString();
+
+		parent->orgList[e.orgIndex]->setNetworkPublicNumberEntry(e.netIndex, tmpPhoneNum, i);
+
+	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkAvailablePhoneNumbersQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkAvailablePhoneNumbersQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkAvailablePhoneNumbersQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	// urlList 67 according to the documentation, returns a single JSON object with the available number, GET
+	// I will treat it as if an array was returned, since it does not make sense
+	// no special processing needed here
+	parent->orgList[e.orgIndex]->setNetworkAvailablePublicNumbersNum(e.netIndex, jArray.size());
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QString tmpPhoneNum;
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		tmpPhoneNum = jObj["publicNumber"].toString();
+
+		parent->orgList[e.orgIndex]->setNetworkAvailablePublicNumberEntry(e.netIndex, tmpPhoneNum, i);
+
+	}
+
+	return true;	// everything went well
+
+
 
 }
 
@@ -2128,6 +2479,42 @@ bool APIHelper::processNetworkSMProfilesQuery(QJsonDocument doc, int orgIndex, i
 	}
 
 	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkSSIDFirewallRulesQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkSSIDFirewallRulesQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex: " << e.netIndex << "\tssidIndex: " << e.ssidIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSSIDFirewallRulesQuery(...)";
+		return false;
+	}
+
+	QJsonArray jArray = doc.array();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	// urlList 24 returns a list of all firewall rules for a network SSID, GET
+	// urlList 25 returns a list of all firewall rules for a network SSID, PUT
+	// no need for any special processing here, since an array will be returned anyway
+
+	parent->orgList[e.orgIndex]->setNetworkSSIDFwRulesNum(e.netIndex, e.ssidIndex, jArray.size());
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		l3Firewall tmpRule;
+
+		tmpRule.comment = jObj["comment"].toString();
+		tmpRule.policy = jObj["policy"].toString();
+		tmpRule.protocol = jObj["protocol"].toString();
+		tmpRule.destPort = jObj["destPort"].toString();
+		tmpRule.destCidr = jObj["destCidr"].toString();
+
+		parent->orgList.at(e.orgIndex)->setNetworkSSIDFwRule(e.netIndex, e.ssidIndex, tmpRule, i);
+
+	}
+
+	return true;	// everything went ok
 
 }
 

@@ -90,32 +90,6 @@ struct radiusServer {
 	QString port;
 };
 
-struct ssid {
-	// TODO: I am sure that is radiusAccountingEnabled is true, there are more settings
-	// the API endpoint always reports all 15 configurable SSIDs, even if some were never configured
-	int number;
-	QString name;
-	bool enabled;
-	QString splashPage;
-	bool ssidAdminAccessible;
-	QString authMode;
-	QString psk;
-	QString encryptionMode;
-	QString wpaEncryptionMode;
-
-	QVector<radiusServer> radiusServers;
-	bool radiusAccountingEnabled;
-	bool radiusCoaEnabled;
-	QString radiusAttributeForGroupPolicies;
-
-	QString ipAssignmentMode;
-	bool useVlanTagging;
-	int minBitrate;
-	QString bandSelection;
-	double perClientBandwidthLimitUp;
-	double perClientBandwidthLimitDown;
-};
-
 struct merakiVPNHub {
 	QString hubId;			// network ID of the hub the spoke is pointing to
 	bool useDefaultRoute;	// true if full-tunnel site-to-site VPN
@@ -195,6 +169,34 @@ struct l3Firewall {
 	QString srcPort;		// L4 source port
 	QString srcCidr;		// source subnet (needs to be either a local or Meraki VPN subnet)
 	bool syslogEnabled;		// Syslog logging enabled
+};
+
+struct ssid {
+	// TODO: I am sure that is radiusAccountingEnabled is true, there are more settings
+	// the API endpoint always reports all 15 configurable SSIDs, even if some were never configured
+	int number;
+	QString name;
+	bool enabled;
+	QString splashPage;
+	bool ssidAdminAccessible;
+	QString authMode;
+	QString psk;
+	QString encryptionMode;
+	QString wpaEncryptionMode;
+
+	QVector<radiusServer> radiusServers;
+	bool radiusAccountingEnabled;
+	bool radiusCoaEnabled;
+	QString radiusAttributeForGroupPolicies;
+
+	QString ipAssignmentMode;
+	bool useVlanTagging;
+	int minBitrate;
+	QString bandSelection;
+	double perClientBandwidthLimitUp;
+	double perClientBandwidthLimitDown;
+
+	QVector<l3Firewall> fwRules;		// L3 firewall rules of an SSID
 };
 
 struct netTraffic {
@@ -295,21 +297,24 @@ struct networkVars {
 	QString netTimezone;	// timezone given to network
 	QString netTags;		// tags assigned to network, these are returned as a single string
 
-	QVector<smDevice> smDevices;	// if SM network, put SM devices here
+	QVector<smDevice> smDevices;			// if SM network, put SM devices here
 	QVector<networkGroupPolicy> gPolicies;	// group policies in the network
 	QVector<deviceInNetwork> netDevices;	// devices in network
-	QVector<ssid> netSSIDs;			// SSIDs in the network
+	QVector<ssid> netSSIDs;					// SSIDs in the network
 	QVector<l3Firewall> cellularRules;	// if there is an MX in the network, list cellular rules. no need to
 										//  have another struct, it returns the same variables that are in l3Firewall
-	merakiVPN s2sMerakiVPN;			// site-to-site auto-VPN
-	QVector<netTraffic> netFlows;	// network flows seen by traffic analytics
-									// TODO: what is being returned if traffic analytics is disabled?
+	merakiVPN s2sMerakiVPN;				// site-to-site auto-VPN
+	QVector<netTraffic> netFlows;		// network flows seen by traffic analytics
+										// TODO: what is being returned if traffic analytics is disabled?
 	QVector<netAccessPolicy> accessPolicies;		// access policies in the MS network
 	QVector<netAirMarshal> airMarshalEntries;		// list of entries detected by air marshal
 	netBtoothSettings bToothSettings;				// settings for bluetooth scanning
 	QVector<netPhone> netPhones;					// phones and contact assignments
 	QVector<netPhoneContact> netPhoneContacts;		// phone contacts
 	QVector<netPhoneCallgroup> netPhoneCallgroups;	// call groups
+
+	QVector<QString> publicNumbers;					// list of the phone numbers in the network
+	QVector<QString> availablePublicNumbers;		// list of the available phone numbers in the network
 
 	QVector<netStaticRoute> netStaticRoutes;		// static routes in the network
 	QVector<netVlan> netVlans;						// VLANs in the network
@@ -462,7 +467,6 @@ class MOrganization {
 		void setOrgInventoryDevice(deviceInInventory a, int index);
 		void setOrgConfigTemplatesNum(int n);
 		void setOrgConfigTemplate(configTemplate n, int index);
-
 		void setSwitchPortNum(int devIndex, int n);
 		void setSwitchPort(int devIndex, switchPort s, int index);
 		void setMXL3RulesNum(int devIndex, int n);
@@ -482,8 +486,9 @@ class MOrganization {
 		void setClientConnected(int devIndex, clientConnected s, int index);
 		void setNetworkDevicesNum(int netIndex, int n);
 		void setNetworkDevice(int netIndex, deviceInNetwork s, int index);
-
-		void setNetworkSSID(int netIndex, ssid s, int index);
+		void setNetworkSSID(int netIndex, ssid s, int ssidIndex);
+		void setNetworkSSIDFwRulesNum(int netIndex, int ssidIndex, int n);
+		void setNetworkSSIDFwRule(int netIndex, int ssidIndex, l3Firewall f, int index);
 		void setNetworkS2SVPN(int netIndex, merakiVPN s);
 		void setNetworkTrafficFlowsNum(int netIndex, int num);
 		void setNetworkTrafficFlow(int netIndex, netTraffic s, int index);
@@ -498,6 +503,12 @@ class MOrganization {
 		void setNetworkPhoneContact(int netIndex, netPhoneContact s, int index);
 		void setNetworkPhoneCallgroupsNum(int netIndex, int num);
 		void setNetworkPhoneCallgroupEntry(int netIndex, netPhoneCallgroup s, int index);
+
+		void setNetworkPublicNumbersNum(int netIndex, int num);
+		void setNetworkPublicNumberEntry(int netIndex, QString n, int index);
+		void setNetworkAvailablePublicNumbersNum(int netIndex, int num);
+		void setNetworkAvailablePublicNumberEntry(int netIndex, QString n, int index);
+
 		void setNetworkStaticRoutesNum(int netIndex, int num);
 		void setNetworkStaticRoute(int netIndex, netStaticRoute s, int index);
 		void setNetworkVlansNum(int netIndex, int num);
@@ -527,7 +538,6 @@ class MOrganization {
 		deviceInInventory getOrgDeviceFromSerial(QString serial);
 		int getConfigTemplatesNum();
 		configTemplate getConfigTemplate(int index);
-
 		int getSwitchPortNum(int devIndex);
 		switchPort getSwitchport(int devIndex, int index);
 		int getMXL3RulesNum(int devIndex);
@@ -547,7 +557,9 @@ class MOrganization {
 		clientConnected getClientConnected(int devIndex, int index);
 		int getNetworkDevicesNum(int netIndex);
 		deviceInNetwork getNetworkDevice(int netIndex, int index);
-		ssid getNetworkSSID(int netIndex, int index);
+		ssid getNetworkSSID(int netIndex, int ssidIndex);
+		int getNetworkSSIDFwRulesNum(int netIndex, int ssidIndex);
+		l3Firewall getNetworkSSIDFwRule(int netIndex, int ssidIndex, int index);
 		merakiVPN getNetworkS2SVPN(int netIndex);
 		int getNetworkTrafficFlowsNum(int netIndex);
 		netTraffic getNetworkTrafficFlow(int netIndex, int index);
@@ -562,6 +574,13 @@ class MOrganization {
 		netPhoneContact getNetworkPhoneContact(int netIndex, int index);
 		int getNetworkPhoneCallgroupsNum(int netIndex);
 		netPhoneCallgroup getNetworkPhoneCallgroupEntry(int netIndex, int index);
+
+		int getNetworkPublicNumbersNum(int netIndex);
+		QString getNetworkPublicNumberEntry(int netIndex, int index);
+		int getNetworkAvailablePublicNumbersNum(int netIndex);
+		QString getNetworkAvailablePublicNumberEntry(int netIndex, int index);
+
+
 		int getNetworkStaticRoutesNum(int netIndex);
 		netStaticRoute getNetworkStaticRoute(int netIndex, int index);
 		int getNetworkVlansNum(int netIndex);
@@ -573,8 +592,11 @@ class MOrganization {
 
 		// remove functions
 		bool removeOrgAdmin(int index);
+		bool removeNetwork(int index);
 		bool removeOrgConfigTemplate(int index);
-
+		bool removeNetworkPhoneAssignment(int netIndex, int index);
+		bool removeNetworkPhoneCallGroup(int netIndex, int index);
+		bool removeNetworkPhoneContact(int netIndex, int index);
 
 
 		// functions to help navigating lists and vectors
@@ -585,9 +607,11 @@ class MOrganization {
 		int getIndexOfNetwork(QString netID);
 		int getIndexOfNetworkDevice(QString netID, QString serial);
 		int getIndexOfPhoneCallgroupId(int netIndex, QString id);
+		int getIndexOfPhoneContact(int netIndex, QString id);
 		int getIndexOfSamlRole(QString id);
 		int getIndexOfNetworkStaticRoute(int netIndex, QString id);
 		int getIndexOfNetworkVlan(int netIndex, QString id);
+		int getIndexOfNetworkPhone(int netIndex, QString serial);
 
 
 

@@ -26,7 +26,7 @@ void MOrganization::setOrgSamlUrl(QString url) {
 }
 
 void MOrganization::setOrgSamlUrlsNum(int num) {
-	samlConsumerUrls.reserve(num);
+	samlConsumerUrls.resize(num);
 }
 
 void MOrganization::setOrgSamlUrlEntry(QString s, int index) {
@@ -166,8 +166,16 @@ void MOrganization::setNetworkDevice(int netIndex, deviceInNetwork s, int index)
 	netList[netIndex].netDevices[index] = s;
 }
 
-void MOrganization::setNetworkSSID(int netIndex, ssid s, int index) {
-	netList[netIndex].netSSIDs[index] = s;
+void MOrganization::setNetworkSSID(int netIndex, ssid s, int ssidIndex) {
+	netList[netIndex].netSSIDs[ssidIndex] = s;
+}
+
+void MOrganization::setNetworkSSIDFwRulesNum(int netIndex, int ssidIndex, int n) {
+	netList[netIndex].netSSIDs[ssidIndex].fwRules.resize(n);
+}
+
+void MOrganization::setNetworkSSIDFwRule(int netIndex, int ssidIndex, l3Firewall f, int index) {
+	netList[netIndex].netSSIDs[ssidIndex].fwRules[index] = f;
 }
 
 void MOrganization::setNetworkS2SVPN(int netIndex, merakiVPN s) {
@@ -224,6 +232,22 @@ void MOrganization::setNetworkPhoneCallgroupsNum(int netIndex, int num) {
 
 void MOrganization::setNetworkPhoneCallgroupEntry(int netIndex, netPhoneCallgroup s, int index) {
 	netList[netIndex].netPhoneCallgroups[index] = s;
+}
+
+void MOrganization::setNetworkPublicNumbersNum(int netIndex, int num) {
+	netList[netIndex].publicNumbers.resize(num);
+}
+
+void MOrganization::setNetworkPublicNumberEntry(int netIndex, QString n, int index) {
+	netList[netIndex].publicNumbers[index] = n;
+}
+
+void MOrganization::setNetworkAvailablePublicNumbersNum(int netIndex, int num) {
+	netList[netIndex].availablePublicNumbers.resize(num);
+}
+
+void MOrganization::setNetworkAvailablePublicNumberEntry(int netIndex, QString n, int index) {
+	netList[netIndex].availablePublicNumbers[index] = n;
 }
 
 void MOrganization::setNetworkStaticRoutesNum(int netIndex, int num) {
@@ -420,8 +444,16 @@ deviceInNetwork MOrganization::getNetworkDevice(int netIndex, int index) {
 	return netList.at(netIndex).netDevices.at(index);
 }
 
-ssid MOrganization::getNetworkSSID(int netIndex, int index) {
-	return netList.at(netIndex).netSSIDs.at(index);
+ssid MOrganization::getNetworkSSID(int netIndex, int ssidIndex) {
+	return netList.at(netIndex).netSSIDs.at(ssidIndex);
+}
+
+int MOrganization::getNetworkSSIDFwRulesNum(int netIndex, int ssidIndex) {
+	return netList.at(netIndex).netSSIDs.at(ssidIndex).fwRules.size();
+}
+
+l3Firewall MOrganization::getNetworkSSIDFwRule(int netIndex, int ssidIndex, int index) {
+	return netList.at(netIndex).netSSIDs.at(ssidIndex).fwRules.at(index);
 }
 
 merakiVPN MOrganization::getNetworkS2SVPN(int netIndex) {
@@ -480,6 +512,22 @@ netPhoneCallgroup MOrganization::getNetworkPhoneCallgroupEntry(int netIndex, int
 	return netList.at(netIndex).netPhoneCallgroups.at(index);
 }
 
+int MOrganization::getNetworkPublicNumbersNum(int netIndex) {
+	return netList.at(netIndex).publicNumbers.size();
+}
+
+QString MOrganization::getNetworkPublicNumberEntry(int netIndex, int index) {
+	return netList.at(netIndex).publicNumbers.at(index);
+}
+
+int MOrganization::getNetworkAvailablePublicNumbersNum(int netIndex) {
+	return netList.at(netIndex).availablePublicNumbers.size();
+}
+
+QString MOrganization::getNetworkAvailablePublicNumberEntry(int netIndex, int index) {
+	return netList.at(netIndex).availablePublicNumbers.at(index);
+}
+
 int MOrganization::getNetworkStaticRoutesNum(int netIndex) {
 	return netList.at(netIndex).netStaticRoutes.size();
 }
@@ -515,9 +563,45 @@ bool MOrganization::removeOrgAdmin(int index) {
 	}
 }
 
+bool MOrganization::removeNetwork(int index) {
+	if (index != -1 && netList.size() > index) {
+		netList.remove(index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
 bool MOrganization::removeOrgConfigTemplate(int index) {
 	if (index != -1 && configTemplates.size() > index) {
 		configTemplates.remove(index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool MOrganization::removeNetworkPhoneAssignment(int netIndex, int index) {
+	if (index != -1 && netList[netIndex].netPhones.size() > index) {
+		netList[netIndex].netPhones.remove(index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool MOrganization::removeNetworkPhoneCallGroup(int netIndex, int index) {
+	if (index != -1 && netList[netIndex].netPhoneCallgroups.size() > index) {
+		netList[netIndex].netPhoneCallgroups.remove(index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool MOrganization::removeNetworkPhoneContact(int netIndex, int index) {
+	if (index != -1 && netList[netIndex].netPhoneContacts.size() > index) {
+		netList[netIndex].netPhoneContacts.remove(index);
 		return true;
 	} else {
 		return false;
@@ -622,6 +706,18 @@ int MOrganization::getIndexOfPhoneCallgroupId(int netIndex, QString id) {
 	return -1;	// no entry was found
 }
 
+int MOrganization::getIndexOfPhoneContact(int netIndex, QString id) {
+	// given network index and phone contact id, return index of contact
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < netList.at(netIndex).netPhoneContacts.size(); i++) {
+		if (netList.at(netIndex).netPhoneCallgroups.at(i).id == id) {
+			return i;
+		}
+	}
+
+	return -1;	// no entry was found
+}
+
 int MOrganization::getIndexOfSamlRole(QString id) {
 	// given id of SAML role, return index of SAML role
 	// returns -1 if it is unable to find it
@@ -650,8 +746,20 @@ int MOrganization::getIndexOfNetworkVlan(int netIndex, QString id) {
 	// given index of network and id of VLAN, return index of VLAN in the vector
 	// returns -1 if it is unable to find it;
 	// TODO: this is virtually the same as getIndexOfNetworkStaticRoute(), do I really need another one?
-	for (int i = 0; i < netList.at(netIndex).netVlans.at(i).id; i++) {
+	for (int i = 0; i < netList.at(netIndex).netVlans.size(); i++) {
 		if (netList.at(netIndex).netVlans.at(i).id == id) {
+			return i;
+		}
+	}
+
+	return -1;	// no entry was found
+}
+
+int MOrganization::getIndexOfNetworkPhone(int netIndex, QString serial) {
+	// given index of network and serial number of phone, return index of phone in netPhones QVector
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < netList.at(netIndex).netPhones.size(); i++) {
+		if (netList.at(netIndex).netPhones.at(i).serial == serial) {
 			return i;
 		}
 	}
