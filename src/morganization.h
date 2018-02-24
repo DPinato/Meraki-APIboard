@@ -74,6 +74,24 @@ struct smClarityProfile {
 	QString pluginBundleID;
 };
 
+struct smWifiPayload {
+	// :(
+	QString id;
+	QString configuration;
+	bool isManualConfig;		// is_manual_config
+	bool hiddenNetwork;			// HIDDEN_NETWORK
+	QString encryptionType;		// EncryptionType
+	QString password;			// Password
+	QString ssidStr;			// SSID_STR
+	bool autoJoin;				// AutoJoin
+	QString payloadUUID;		// PayloadUUID
+	QString proxyType;			// ProxyType
+	QString pccMobileConfigId;	// pcc_mobile_config_id
+	QString qosEnable;			// QoSEnable
+	bool useUsernameAsCn;		// use_username_as_cn
+
+};
+
 struct smProfile {
 	QString id;
 	QString payloadDisplayName;		// payload_display_name
@@ -81,7 +99,7 @@ struct smProfile {
 	QString payloadDescription;		// payload_description
 	QString scope;
 	QVector<QString> tags;
-	QVector<QString> wifis;
+	QVector<smWifiPayload> wifis;	// if profile has a wifi payload
 	QVector<QString> payloadTypes;	// payload_types;
 };
 
@@ -478,8 +496,12 @@ class MOrganization {
 		void setOrgVPNPeer(nonMerakiVPNPeer p, int index);
 		void setOrgVPNFirewallRulesNum(int n);
 		void setOrgVPNFirewallRule(l3Firewall s, int index);
-		void setSMDevicesNum(int netIndex, int n);
-		void setSMDevice(int netIndex, smDevice s, int index);
+		void setNetworkSMDevicesNum(int netIndex, int n);
+		void setNetworkSMDevice(int netIndex, smDevice s, int index);
+		void setNetworkSMProfilesNum(int netIndex, int n);
+		void setNetworkSMProfile(int netIndex, smProfile s, int index);
+
+
 		void setNetworkGroupPolicyNum(int netIndex, int n);
 		void setNetworkGroupPolicy(int netIndex, networkGroupPolicy s, int index);
 		void setClientsConnectedNum(int devIndex, int n);
@@ -503,18 +525,15 @@ class MOrganization {
 		void setNetworkPhoneContact(int netIndex, netPhoneContact s, int index);
 		void setNetworkPhoneCallgroupsNum(int netIndex, int num);
 		void setNetworkPhoneCallgroupEntry(int netIndex, netPhoneCallgroup s, int index);
-
 		void setNetworkPublicNumbersNum(int netIndex, int num);
 		void setNetworkPublicNumberEntry(int netIndex, QString n, int index);
 		void setNetworkAvailablePublicNumbersNum(int netIndex, int num);
 		void setNetworkAvailablePublicNumberEntry(int netIndex, QString n, int index);
-
 		void setNetworkStaticRoutesNum(int netIndex, int num);
 		void setNetworkStaticRoute(int netIndex, netStaticRoute s, int index);
 		void setNetworkVlansNum(int netIndex, int num);
 		void setNetworkVlan(int netIndex, netVlan s, int index);
-		void setNetworkSMProfilesNum(int netIndex, int num);
-		void setNetworkSMProfile(int netIndex, smProfile s, int index);
+
 
 
 		// get
@@ -549,8 +568,11 @@ class MOrganization {
 		nonMerakiVPNPeer getOrgVPNPeer(int index);
 		int getOrgVPNFirewallRulesNum();
 		l3Firewall getOrgVPNFirewallRule(int index);
-		int getSMDevicesNum(int netIndex);
-		smDevice getSMDevice(int netIndex, int index);
+		int getNetworkSMDevicesNum(int netIndex);
+		smDevice getNetworkSMDevice(int netIndex, int index);
+		int getNetworkSMProfilesNum(int netIndex);
+		smProfile getNetworkSMProfile(int netIndex, int index);
+
 		int getNetworkGroupPolicyNum(int netIndex);
 		networkGroupPolicy getNetworkGroupPolicy(int netIndex, int index);
 		int getClientsConnectedNum(int devIndex);
@@ -585,8 +607,7 @@ class MOrganization {
 		netStaticRoute getNetworkStaticRoute(int netIndex, int index);
 		int getNetworkVlansNum(int netIndex);
 		netVlan getNetworkVlan(int netIndex, int index);
-		int getNetworkSMProfilesNum(int netIndex);
-		smProfile getNetworkSMProfile(int netIndex, int index);
+
 
 
 
@@ -594,6 +615,7 @@ class MOrganization {
 		bool removeOrgAdmin(int index);
 		bool removeNetwork(int index);
 		bool removeOrgConfigTemplate(int index);
+		bool removeOrgSamlAdminRole(int index);
 		bool removeNetworkPhoneAssignment(int netIndex, int index);
 		bool removeNetworkPhoneCallGroup(int netIndex, int index);
 		bool removeNetworkPhoneContact(int netIndex, int index);
@@ -612,6 +634,8 @@ class MOrganization {
 		int getIndexOfNetworkStaticRoute(int netIndex, QString id);
 		int getIndexOfNetworkVlan(int netIndex, QString id);
 		int getIndexOfNetworkPhone(int netIndex, QString serial);
+
+		int getIndexOfNetworkSMDevice(int netIndex, QString id);
 
 
 

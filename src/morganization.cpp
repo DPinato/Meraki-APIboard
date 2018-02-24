@@ -134,11 +134,11 @@ void MOrganization::setOrgVPNFirewallRule(l3Firewall s, int index) {
 	vpnFirewallRules[index] = s;
 }
 
-void MOrganization::setSMDevicesNum(int netIndex, int n) {
+void MOrganization::setNetworkSMDevicesNum(int netIndex, int n) {
 	netList[netIndex].smDevices.resize(n);
 }
 
-void MOrganization::setSMDevice(int netIndex, smDevice s, int index) {
+void MOrganization::setNetworkSMDevice(int netIndex, smDevice s, int index) {
 	netList[netIndex].smDevices[index] = s;
 }
 
@@ -266,8 +266,8 @@ void MOrganization::setNetworkVlan(int netIndex, netVlan s, int index) {
 	netList[netIndex].netVlans[index] = s;
 }
 
-void MOrganization::setNetworkSMProfilesNum(int netIndex, int num) {
-	netList[netIndex].smProfiles.resize(num);
+void MOrganization::setNetworkSMProfilesNum(int netIndex, int n) {
+	netList[netIndex].smProfiles.resize(n);
 }
 
 void MOrganization::setNetworkSMProfile(int netIndex, smProfile s, int index) {
@@ -412,12 +412,20 @@ l3Firewall MOrganization::getOrgVPNFirewallRule(int index) {
 	return vpnFirewallRules.at(index);
 }
 
-int MOrganization::getSMDevicesNum(int netIndex) {
+int MOrganization::getNetworkSMDevicesNum(int netIndex) {
 	return netList.at(netIndex).smDevices.size();
 }
 
-smDevice MOrganization::getSMDevice(int netIndex, int index) {
+smDevice MOrganization::getNetworkSMDevice(int netIndex, int index) {
 	return netList.at(netIndex).smDevices.at(index);
+}
+
+int MOrganization::getNetworkSMProfilesNum(int netIndex) {
+	return netList.at(netIndex).smProfiles.size();
+}
+
+smProfile MOrganization::getNetworkSMProfile(int netIndex, int index) {
+	return netList.at(netIndex).smProfiles.at(index);
 }
 
 int MOrganization::getNetworkGroupPolicyNum(int netIndex) {
@@ -544,14 +552,6 @@ netVlan MOrganization::getNetworkVlan(int netIndex, int index) {
 	return netList.at(netIndex).netVlans.at(index);
 }
 
-int MOrganization::getNetworkSMProfilesNum(int netIndex) {
-	return netList.at(netIndex).smProfiles.size();
-}
-
-smProfile MOrganization::getNetworkSMProfile(int netIndex, int index) {
-	return netList.at(netIndex).smProfiles.at(index);
-}
-
 
 
 bool MOrganization::removeOrgAdmin(int index) {
@@ -575,6 +575,15 @@ bool MOrganization::removeNetwork(int index) {
 bool MOrganization::removeOrgConfigTemplate(int index) {
 	if (index != -1 && configTemplates.size() > index) {
 		configTemplates.remove(index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool MOrganization::removeOrgSamlAdminRole(int index) {
+	if (index != -1 && samlRolesList.size() > index) {
+		samlRolesList.remove(index);
 		return true;
 	} else {
 		return false;
@@ -760,6 +769,18 @@ int MOrganization::getIndexOfNetworkPhone(int netIndex, QString serial) {
 	// returns -1 if it is unable to find it
 	for (int i = 0; i < netList.at(netIndex).netPhones.size(); i++) {
 		if (netList.at(netIndex).netPhones.at(i).serial == serial) {
+			return i;
+		}
+	}
+
+	return -1;	// no entry was found
+}
+
+int MOrganization::getIndexOfNetworkSMDevice(int netIndex, QString id) {
+	// given index of network and id of SM device, return index of SM device in smDevices QVector
+	// returns -1 if it is unable to find it
+	for (int i = 0; i < netList.at(netIndex).smDevices.size(); i++) {
+		if (netList.at(netIndex).smDevices.at(i).id == id) {
 			return i;
 		}
 	}

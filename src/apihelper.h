@@ -71,7 +71,10 @@ public:
 	bool processl3FirewallQuery(QJsonDocument doc,eventRequest e);
 	bool processNetworkCellularFirewallQuery(QJsonDocument doc, eventRequest e);
 
-	bool processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex);
+	bool processNetworkSMDevicesQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkSMProfilesQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkSMTagsUpdateQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkSMFieldsUpdateQuery(QJsonDocument doc, eventRequest e);
 
 	bool processNetworkGroupPolicyQuery(QJsonDocument doc, eventRequest e);
 	bool processClientsConnectedQuery(QJsonDocument doc, eventRequest e);
@@ -95,7 +98,6 @@ public:
 
 	bool processNetworkStaticRoutesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
 	bool processNetworkVlansQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id = "");
-	bool processNetworkSMProfilesQuery(QJsonDocument doc, int orgIndex, int netIndex);
 
 	bool processNetworkSSIDFirewallRulesQuery(QJsonDocument doc, eventRequest e);
 

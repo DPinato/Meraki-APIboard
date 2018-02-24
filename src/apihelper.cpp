@@ -575,10 +575,6 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
-
-
-
-
 		case 68: {
 			// GET /organizations/[organizationId]/samlRoles
 			processSamlRolesQuery(jDoc, queueEventRequests.at(eventIndex));
@@ -612,8 +608,6 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 
 
-
-
 		case 76: {
 			// GET /networks/[networkId]/sm/profile/clarity/[id]
 			// figure out how to treat this, since an id needs to be presented
@@ -634,14 +628,31 @@ void APIHelper::processQuery(QNetworkReply *r) {
 
 		case 87: {
 			// GET /networks/[networkId]/sm/devices
-			processSMDevicesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-								  , queueEventRequests.at(eventIndex).netIndex);
+			// TODO: I do not do the batchToken yet
+			processNetworkSMDevicesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
+		case 88: {
+			// PUT /networks/[networkId]/sm/devices/tags
+			processNetworkSMTagsUpdateQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 89: {
+			// PUT /networks/[networkId]/sm/device/fields
+			processNetworkSMFieldsUpdateQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+
+
+
+
+
 		case 94: {
 			// GET /networks/[networkId]/sm/profiles
-
+			processNetworkSMProfilesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
@@ -1097,20 +1108,26 @@ bool APIHelper::processSamlRolesQuery(QJsonDocument doc, eventRequest e) {
 	qDebug() << jArray << "\t" << jArray.size();
 
 	// urlList 68 returns JSON array with list of all SAML roles for the org, GET
-	// urlList 68 returns JSON object with SAML role, GET
-	// urlList 68 returns JSON object with SAML role, PUT
-	// urlList 68 returns JSON object with SAML role created, POST
-	// urlList 68 nothing after deleting SAML role, DELETE
-
-
+	// urlList 69 returns JSON object with SAML role, GET
+	// urlList 70 returns JSON object with SAML role, PUT
+	// urlList 71 returns JSON object with SAML role created, POST
+	// urlList 72 nothing after deleting SAML role, DELETE
+	int samlIndex = parent->orgList[e.orgIndex]->getIndexOfSamlRole(e.id);
 	int i = 0;
 	int count = jArray.size();
-	if (id.length() > 0) {
-		// only do single id
-		i = parent->orgList[e.orgIndex]->getIndexOfSamlRole(e.id);
-		count = i+1;
-	} else {
+
+	if (e.urlListIndex == 68) {
 		parent->orgList[e.orgIndex]->setOrgSamlRolesNum(jArray.size());
+	} else if (e.urlListIndex == 69 || e.urlListIndex == 70) {
+		i = samlIndex;
+		count = i+1;
+	} else if (e.urlListIndex == 71) {
+		// create a new element in the vector
+		i = parent->orgList[e.orgIndex]->getOrgSamlRolesNum();
+		count = i+1;
+		parent->orgList[e.orgIndex]->setOrgSamlRolesNum(count);
+	} else if (e.urlListIndex == 72) {
+		return parent->orgList[e.orgIndex]->removeOrgSamlAdminRole(samlIndex);
 	}
 
 
@@ -1590,19 +1607,19 @@ bool APIHelper::processNetworkCellularFirewallQuery(QJsonDocument doc, eventRequ
 
 }
 
-bool APIHelper::processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processSMDevicesQuery(...), orgIndex: "
-			 << orgIndex << "\tnetIndex" << netIndex;
+bool APIHelper::processNetworkSMDevicesQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkSMDevicesQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
 
 	if (doc.isNull()) {
-		qDebug() << "JSON IS NOT VALID, APIHelper::processSMDevicesQuery(...)";
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMDevicesQuery(...)";
 		return false;
 	}
 
 	QJsonArray jArray = doc.object()["devices"].toArray();	// the reply contains an array called devices[]
 	qDebug() << jArray << "\t" << jArray.size();
 
-	parent->orgList.at(orgIndex)->setSMDevicesNum(netIndex, jArray.size());
+	parent->orgList.at(e.orgIndex)->setNetworkSMDevicesNum(e.netIndex, jArray.size());
 
 	for (int i = 0; i < jArray.size(); i++) {
 		smDevice tmpSMDevice;
@@ -1667,13 +1684,143 @@ bool APIHelper::processSMDevicesQuery(QJsonDocument doc, int orgIndex, int netIn
 		tmpSMDevice.hardwareEncryptionCaps = jObj["hardwareEncryptionCaps"].toString();
 		tmpSMDevice.passCodeLock = jObj["passCodeLock"].toBool();
 
-		parent->orgList.at(orgIndex)->setSMDevice(netIndex, tmpSMDevice, i);
+		parent->orgList.at(e.orgIndex)->setNetworkSMDevice(e.netIndex, tmpSMDevice, i);
 
 	}
 
-	parent->displaySMDevices(orgIndex);
+	parent->displaySMDevices(e.orgIndex);
 
 	return true;	// everything went ok
+
+}
+
+
+
+bool APIHelper::processNetworkSMProfilesQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkSMProfilesQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMProfilesQuery(...)";
+		return false;
+	}
+
+	// for some reason, the response will contain an array called "profiles"
+	QJsonArray jArray = doc.object()["profiles"].toArray();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	parent->orgList[e.orgIndex]->setNetworkSMProfilesNum(e.netIndex, jArray.size());
+
+
+	for (int i = 0; i < jArray.size(); i++) {
+		QJsonObject jObj = jArray.at(i).toObject();
+		smProfile tmpSMProfile;
+
+		tmpSMProfile.id = jObj["id"].toString();
+		tmpSMProfile.payloadDisplayName = jObj["payloadDisplayName"].toString();
+		tmpSMProfile.payloadIdentifier = jObj["payloadIdentifier"].toString();
+		tmpSMProfile.payloadDescription = jObj["payloadDescription"].toString();
+		tmpSMProfile.scope = jObj["scope"].toString();
+
+		QJsonArray jTags = jObj["tags"].toArray();
+		tmpSMProfile.tags.resize(jTags.size());
+		for (int j = 0; j < jTags.size(); j++) {
+			tmpSMProfile.tags[j] = jTags.at(j).toString();
+		}
+
+
+		// use the smWifiPayload struct here
+		QJsonArray jWifis = jObj["wifis"].toArray();
+		tmpSMProfile.wifis.resize(jWifis.size());
+		for (int j = 0; j < jWifis.size(); j++) {
+			QJsonObject jWifi = jWifis.at(j).toObject();
+			smWifiPayload tmpWifi;
+
+			tmpWifi.id = jWifi["id"].toString();
+			tmpWifi.configuration = jWifi["configuration"].toString();
+			tmpWifi.isManualConfig = jWifi["is_manual_config"].toBool();
+			tmpWifi.hiddenNetwork = jWifi["HIDDEN_NETWORK"].toBool();
+			tmpWifi.encryptionType = jWifi["EncryptionType"].toString();
+			tmpWifi.password = jWifi["Password"].toString();
+			tmpWifi.ssidStr = jWifi["SSID_STR"].toString();
+			tmpWifi.autoJoin = jWifi["AutoJoin"].toBool();
+			tmpWifi.payloadUUID = jWifi["PayloadUUID"].toString();
+			tmpWifi.proxyType = jWifi["ProxyType"].toString();
+			tmpWifi.pccMobileConfigId = jWifi["pcc_mobile_config_id"].toString();
+			tmpWifi.qosEnable = jWifi["QoSEnable"].toString();
+			tmpWifi.useUsernameAsCn = jWifi["use_username_as_cn"].toBool();
+
+			tmpSMProfile.wifis[j] = tmpWifi;
+
+		}
+
+		QJsonArray jPayloads = jObj["payload_types"].toArray();
+		tmpSMProfile.payloadTypes.resize(jTags.size());
+		for (int j = 0; j < jPayloads.size(); j++) {
+			tmpSMProfile.payloadTypes[j] = jPayloads.at(j).toString();
+		}
+
+		parent->orgList[e.orgIndex]->setNetworkSMProfile(e.netIndex, tmpSMProfile, i);
+
+	}
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkSMTagsUpdateQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkSMTagsUpdateQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMTagsUpdateQuery(...)";
+		return false;
+	}
+
+	// the response will contain an array called "success" or "errors"
+	QJsonArray jArray = doc.object()["success"].toArray();
+	qDebug() << jArray << "\t" << jArray.size();
+
+	// all the devices matching the scope, serials or wifiMacs are returned
+	for (int i = 0; i < jArray.size(); i++) {
+		// get device index to modify tags
+		int smDeviceIndex = parent->orgList[e.orgIndex]->getIndexOfNetworkSMDevice(e.netIndex, e.id);
+		smDevice tmpSMDevice = parent->orgList[e.orgIndex]->getNetworkSMDevice(e.netIndex, smDeviceIndex);
+		QJsonObject jObj = jArray.at(i).toObject();
+
+		QJsonArray jTags = jObj["tags"].toArray();
+		tmpSMDevice.tags.resize(jTags.size());
+		for (int j = 0; j < jTags.size(); j++) {
+			tmpSMDevice.tags[j] = jTags.at(j).toString();
+		}
+
+
+		parent->orgList[e.orgIndex]->setNetworkSMDevice(e.netIndex, tmpSMDevice, i);
+
+	}
+
+
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkSMFieldsUpdateQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkSMFieldsUpdateQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMFieldsUpdateQuery(...)";
+		return false;
+	}
+
+	// the response will contain an array called "success" or "errors"
+	QJsonArray jArray = doc.object()["success"].toArray();
+	qDebug() << jArray << "\t" << jArray.size();
+
+
+
+
 
 }
 
@@ -2258,13 +2405,11 @@ bool APIHelper::processNetworkPhoneCallgroupsQuery(QJsonDocument doc, eventReque
 		// only do single id
 		i = callGroupIndex;
 		count = i+1;
-
 	} else if (e.urlListIndex == 59) {
 		// create a new element in the vector
 		i = parent->orgList[e.orgIndex]->getNetworkPhoneCallgroupsNum(e.netIndex);
 		count = i+1;
 		parent->orgList[e.orgIndex]->setNetworkPhoneCallgroupsNum(e.netIndex, count);
-
 	} else if (e.urlListIndex == 61) {
 		return parent->orgList[e.orgIndex]->removeNetworkPhoneCallGroup(e.netIndex, callGroupIndex);
 	}
@@ -2425,56 +2570,6 @@ bool APIHelper::processNetworkVlansQuery(QJsonDocument doc, int orgIndex, int ne
 		tmpVlan.subnet = jObj["subnet"].toString();
 
 		parent->orgList[orgIndex]->setNetworkVlan(netIndex, tmpVlan, i);
-
-	}
-
-	return true;	// everything went well
-
-}
-
-bool APIHelper::processNetworkSMProfilesQuery(QJsonDocument doc, int orgIndex, int netIndex) {
-	qDebug() << "\nAPIHelper::processNetworkSMProfilesQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex;
-
-	if (doc.isNull()) {
-		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMProfilesQuery(...)";
-		return false;
-	}
-
-	// for some reason, the response will contain an array called "profiles"
-	QJsonArray jArray = doc.object()["profiles"].toArray();
-	qDebug() << jArray << "\t" << jArray.size();
-
-
-	for (int i = 0; i < jArray.size(); i++) {
-		QJsonObject jObj = jArray.at(i).toObject();
-		smProfile tmpSMProfile;
-
-		tmpSMProfile.id = jObj["id"].toString();
-		tmpSMProfile.payloadDisplayName = jObj["payloadDisplayName"].toString();
-		tmpSMProfile.payloadIdentifier = jObj["payloadIdentifier"].toString();
-		tmpSMProfile.payloadDescription = jObj["payloadDescription"].toString();
-		tmpSMProfile.scope = jObj["scope"].toString();
-
-		QJsonArray jTags = jObj["tags"].toArray();
-		tmpSMProfile.tags.resize(jTags.size());
-		for (int j = 0; j < jTags.size(); j++) {
-			tmpSMProfile.tags[j] = jTags.at(j).toString();
-		}
-
-		QJsonArray jWifis = jObj["wifis"].toArray();
-		tmpSMProfile.wifis.resize(jTags.size());
-		for (int j = 0; j < jWifis.size(); j++) {
-			tmpSMProfile.wifis[j] = jWifis.at(j).toString();
-		}
-
-		QJsonArray jPayloads = jObj["payload_types"].toArray();
-		tmpSMProfile.payloadTypes.resize(jTags.size());
-		for (int j = 0; j < jPayloads.size(); j++) {
-			tmpSMProfile.payloadTypes[j] = jPayloads.at(j).toString();
-		}
-
-		parent->orgList[orgIndex]->setNetworkSMProfile(netIndex, tmpSMProfile, i);
 
 	}
 
