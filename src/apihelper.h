@@ -14,6 +14,9 @@ class MOrganization;
 #ifndef APIHELPER_H
 #define APIHELPER_H
 
+#define MAX_SSID_NUM 15			// maximum number of configurable SSIDs
+#define MAX_SWITCH_PORTS 54		// 48 LAN ports + 4 uplinks + 2 stack ports
+
 
 struct urlRequest {
 	int reqType = 0;	// 1: GET, 2: PUT, 3: POST, 4: DELETE
@@ -27,6 +30,7 @@ struct eventRequest {
 	int orgIndex = -1;			// organization index in orgList
 	int netIndex = -1;			// network index in the orgList object
 	int ssidIndex = -1;			// SSID index for queries at index 90 and 91
+	int portIndex = -1;			// switch port index for queries like 99 and 100
 	QString deviceSerial = "";	// in case the query is specific to a particular device, i.e. a switch
 	QString clientMac = "";		// client MAC address, i.e. when getting group policies associated to the client
 	QByteArray data = 0;		// data to use in case of a PUT or POST
@@ -66,22 +70,29 @@ public:
 	bool processOrgVPNQuery(QJsonDocument doc, eventRequest e);
 	bool processOrgVPNFirewallRulesQuery(QJsonDocument doc, eventRequest e);
 
-	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial, QString id = "");
+//	bool processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial, QString id = "");
+	bool processSwitchPortQuery(QJsonDocument doc, eventRequest e);
 
-	bool processl3FirewallQuery(QJsonDocument doc,eventRequest e);
+	bool processl3FirewallQuery(QJsonDocument doc, eventRequest e);
 	bool processNetworkCellularFirewallQuery(QJsonDocument doc, eventRequest e);
 
 	bool processNetworkSMDevicesQuery(QJsonDocument doc, eventRequest e);
 	bool processNetworkSMProfilesQuery(QJsonDocument doc, eventRequest e);
 	bool processNetworkSMTagsUpdateQuery(QJsonDocument doc, eventRequest e);
 	bool processNetworkSMFieldsUpdateQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkSMDeviceLockQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkSMDeviceWipeQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkSMDeviceCheckinQuery(QJsonDocument doc, eventRequest e);
+	bool processNetworkSMDeviceMoveQuery(QJsonDocument doc, eventRequest e);
 
 	bool processNetworkGroupPolicyQuery(QJsonDocument doc, eventRequest e);
 	bool processClientsConnectedQuery(QJsonDocument doc, eventRequest e);
 	bool processClientGroupPolicyQuery(QJsonDocument doc, eventRequest e);
 	bool processDeviceLLDPCDPQuery(QJsonDocument doc, eventRequest e);
 
-	bool processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int netIndex, int ssidIndex = -1);
+//	bool processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int netIndex, int ssidIndex = -1);
+	bool processNetworkSSIDsQuery(QJsonDocument doc, eventRequest e);
+
 
 	bool processMerakiS2SVPNQuery(QJsonDocument doc, eventRequest e);
 	bool processNetworkTrafficQuery(QJsonDocument doc, eventRequest e);

@@ -645,10 +645,29 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
+		case 90: {
+			// PUT /networks/[networkId]/sm/devices/lock
+			processNetworkSMDeviceLockQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
+		case 91: {
+			// PUT /networks/[networkId]/sm/device/wipe
+			processNetworkSMDeviceWipeQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
+		case 92: {
+			// PUT /networks/[networkId]/sm/devices/checkin
+			processNetworkSMDeviceCheckinQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
-
+		case 93: {
+			// PUT /networks/[networkId]/sm/devices/move
+			processNetworkSMDeviceMoveQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
 
 		case 94: {
 			// GET /networks/[networkId]/sm/profiles
@@ -656,37 +675,44 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
-
-
 		case 95: {
 			// GET /networks/[networkId]/ssids
-			processNetworkSSIDsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									 , queueEventRequests.at(eventIndex).netIndex);
+			processNetworkSSIDsQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 96: {
 			// GET /networks/[networkId]/ssids/[id]
-			processNetworkSSIDsQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									 , queueEventRequests.at(eventIndex).netIndex
-									 , queueEventRequests.at(eventIndex).ssidIndex);
+			processNetworkSSIDsQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 97: {
+			// PUT /networks/[networkId]/ssids/[id]
+			processNetworkSSIDsQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 98: {
 			// GET /devices/[serial]/switchPorts
-			processSwitchPortQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-								   , queueEventRequests.at(eventIndex).deviceSerial);
+			processSwitchPortQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 99: {
 			// GET /devices/[serial]/switchPorts/[id]
-			processSwitchPortQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-								   , queueEventRequests.at(eventIndex).deviceSerial
-								   , queueEventRequests.at(eventIndex).id);
+			processSwitchPortQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
+
+		case 100: {
+			// PUT /devices/[serial]/switchPorts/[id]
+			processSwitchPortQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+
+
 
 		case 101: {
 			// GET /networks/[networkId]/staticRoutes
@@ -1454,40 +1480,41 @@ bool APIHelper::processOrgVPNFirewallRulesQuery(QJsonDocument doc, eventRequest 
 
 }
 
-bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString devSerial, QString id) {
-	qDebug() << "\nAPIHelper::processSwitchPortQuery(...), orgIndex: "
-			 << orgIndex << "\tdevSerial" << devSerial;
+bool APIHelper::processSwitchPortQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processSwitchPortQuery(...), orgIndex: " << e.orgIndex
+			 << "\tdevSerial" << e.deviceSerial;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processOrgVPNQuery(...)";
 		return false;
 	}
 
-
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
 	// get the index of the device in the organization inventory
-	deviceInInventory tmpDevice = parent->orgList.at(orgIndex)->getOrgDeviceFromSerial(devSerial);
-	int devIndex = parent->orgList.at(orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
+	deviceInInventory tmpDevice = parent->orgList.at(e.orgIndex)->getOrgDeviceFromSerial(e.deviceSerial);
+	int devIndex = parent->orgList.at(e.orgIndex)->getIndexOfInventoryDevice(tmpDevice.serial);
 
 	if (devIndex == -1) {
-		qDebug() << "Could not find " << devSerial << " in orgIndex " << orgIndex;
+		qDebug() << "Could not find " << e.deviceSerial << " in orgIndex " << e.orgIndex;
 		return false;
 	}
 
-	qDebug() << devSerial << " is at index: " << devIndex;
+	qDebug() << e.deviceSerial << " is at index: " << devIndex;
 
 
+	// urlList 98 returns a JSON array with config of all switch ports on a switch, GET
+	// urlList 99 returns a JSON object with config of the switch port, GET
+	// urlList 100 returns a JSON object with config of the switch port to be updated, PUT
 	int i = 0;
 	int count = jArray.size();
-	if (id.length() > 0) {
-		// only do single id
+	if (e.urlListIndex == 98) {
+		parent->orgList.at(e.orgIndex)->setSwitchPortNum(devIndex, jArray.size());
+	} else if (e.urlListIndex == 99 || e.urlListIndex == 100) {
+		i = e.portIndex;
 		count = i+1;
-	} else {
-		parent->orgList.at(orgIndex)->setSwitchPortNum(devIndex, jArray.size());
 	}
-
 
 
 	// get switch ports info in the appropriate organization device
@@ -1509,12 +1536,12 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, int orgIndex, QString 
 		tmpPort.stpGuard = jObj["stpGuard"].toString();
 		tmpPort.accessPolicyNumber = jObj["accessPolicyNumber"].toString();
 
-		parent->orgList.at(orgIndex)->setSwitchPort(devIndex, tmpPort, i);
+		parent->orgList.at(e.orgIndex)->setSwitchPort(devIndex, tmpPort, i);
 
 	}
 
 
-	parent->displayMSPort(devIndex, orgIndex);	// display things in the table
+	parent->displayMSPort(devIndex, e.orgIndex);	// display things in the table
 
 	return true;	// everything went ok
 
@@ -1795,7 +1822,7 @@ bool APIHelper::processNetworkSMTagsUpdateQuery(QJsonDocument doc, eventRequest 
 		}
 
 
-		parent->orgList[e.orgIndex]->setNetworkSMDevice(e.netIndex, tmpSMDevice, i);
+		parent->orgList[e.orgIndex]->setNetworkSMDevice(e.netIndex, tmpSMDevice, smDeviceIndex);
 
 	}
 
@@ -1818,10 +1845,87 @@ bool APIHelper::processNetworkSMFieldsUpdateQuery(QJsonDocument doc, eventReques
 	QJsonArray jArray = doc.object()["success"].toArray();
 	qDebug() << jArray << "\t" << jArray.size();
 
+	// all the devices matching the scope, serial or wifiMac are returned
+	for (int i = 0; i < jArray.size(); i++) {
+		int smDeviceIndex = parent->orgList[e.orgIndex]->getIndexOfNetworkSMDevice(e.netIndex, e.id);
+		smDevice tmpSMDevice = parent->orgList[e.orgIndex]->getNetworkSMDevice(e.netIndex, smDeviceIndex);
+		QJsonObject jObj = jArray.at(i).toObject();
 
+		tmpSMDevice.name = jObj["name"].toString();
+		tmpSMDevice.notes = jObj["notes"].toString();
 
+		parent->orgList[e.orgIndex]->setNetworkSMDevice(e.netIndex, tmpSMDevice, smDeviceIndex);
+	}
 
+	return true;	// everything went well
 
+}
+
+bool APIHelper::processNetworkSMDeviceLockQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkSMDeviceLockQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMDeviceLockQuery(...)";
+		return false;
+	}
+
+	// the response will contain an object "success" indicating whether the lock command returned
+	// true of false
+	// TODO: figure out some sort of integration or some message to give to the user
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkSMDeviceWipeQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkSMDeviceWipeQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMDeviceWipeQuery(...)";
+		return false;
+	}
+
+	// the response will contain an object "success" indicating whether the lock command returned
+	// true of false
+	// TODO: figure out some sort of integration or some message to give to the user
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkSMDeviceCheckinQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkSMDeviceCheckinQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMDeviceCheckinQuery(...)";
+		return false;
+	}
+
+	// the response will contain an object "success" indicating whether the lock command returned
+	// true of false
+	// TODO: figure out some sort of integration or some message to give to the user
+
+	return true;	// everything went well
+
+}
+
+bool APIHelper::processNetworkSMDeviceMoveQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkSMDeviceMoveQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex;
+
+	if (doc.isNull()) {
+		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSMDeviceMoveQuery(...)";
+		return false;
+	}
+
+	// the response will contain an object "success" indicating whether the lock command returned
+	// true of false
+	// TODO: figure out some sort of integration or some message to give to the user
+
+	return true;	// everything went well
 }
 
 bool APIHelper::processNetworkGroupPolicyQuery(QJsonDocument doc, eventRequest e) {
@@ -1952,9 +2056,8 @@ bool APIHelper::processDeviceLLDPCDPQuery(QJsonDocument doc, eventRequest e) {
 	int portCount = jObj.keys().size();
 
 	// this is a workaround, since there are no devices with more than 54 ports
-	// 48 LAN ports + 4 SFP + 2 stack ports
-	tmpNetDev.devCDP.resize(54);
-	tmpNetDev.devLLDP.resize(54);
+	tmpNetDev.devCDP.resize(MAX_SWITCH_PORTS);
+	tmpNetDev.devLLDP.resize(MAX_SWITCH_PORTS);
 
 	for (int i = 0; i < portCount; i++) {
 		// this is not great since it will still go through portCount iterations
@@ -1984,10 +2087,10 @@ bool APIHelper::processDeviceLLDPCDPQuery(QJsonDocument doc, eventRequest e) {
 
 }
 
-bool APIHelper::processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int netIndex, int ssidIndex) {
+bool APIHelper::processNetworkSSIDsQuery(QJsonDocument doc, eventRequest e) {
 	// if ssidIndex is -1, a query for all the SSIDs in the network was made
-	qDebug() << "\nAPIHelper::processNetworkSSIDsQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex << "\tssidIndex" << ssidIndex;
+	qDebug() << "\nAPIHelper::processNetworkSSIDsQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex << "\tssidIndex" << e.ssidIndex;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkSSIDsQuery(...)";
@@ -1997,12 +2100,19 @@ bool APIHelper::processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int ne
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
-	int i = ssidIndex;
-	int count = ssidIndex+1;	// makes it so that the for-loop will do at least 1 iteration
-	if (ssidIndex == -1) {
-		i = 0;		// update all the SSIDs in the network
-		count = jArray.size();
+
+	// urlList 95 returns a JSON array with config of all the SSIDs in the network, GET
+	// urlList 96 returns a JSON object with the SSID configuration, GET
+	// urlList 97 returns a JSON object with the SSID configuration, PUT
+	int i = 0;
+	int count = jArray.size();
+	if (e.urlListIndex == 95) {
+//		count = MAX_SSID_NUM;		// there is a fixed number of SSIDs
+	} else if (e.urlListIndex == 96 || e.urlListIndex == 97) {
+		i = e.ssidIndex;
+		count = e.ssidIndex+1;
 	}
+
 
 	for (i; i < count; i++) {
 		QJsonObject jObj = jArray.at(i).toObject();
@@ -2034,7 +2144,10 @@ bool APIHelper::processNetworkSSIDsQuery(QJsonDocument doc, int orgIndex, int ne
 		tmpSSID.perClientBandwidthLimitUp = jObj["perClientBandwidthLimitUp"].toDouble();
 		tmpSSID.perClientBandwidthLimitDown = jObj["perClientBandwidthLimitDown"].toDouble();
 
-		parent->orgList[orgIndex]->setNetworkSSID(netIndex, tmpSSID, i);
+		tmpSSID.walledGardenEnabled = jObj["walledGardenEnabled"].toBool();
+		tmpSSID.walledGardenRanges = jObj["walledGardenRanges"].toString();
+
+		parent->orgList[e.orgIndex]->setNetworkSSID(e.netIndex, tmpSSID, i);
 
 	}
 

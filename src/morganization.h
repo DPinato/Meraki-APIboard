@@ -15,6 +15,7 @@ struct smDevice {
 	QString systemModel;
 	QString uuid;
 	QString serialNumber;
+	QString notes;	// from PUT /networks/[network_id]/sm/device/fields
 
 	// optional fields
 	QString ip;
@@ -213,6 +214,9 @@ struct ssid {
 	QString bandSelection;
 	double perClientBandwidthLimitUp;
 	double perClientBandwidthLimitDown;
+
+	bool walledGardenEnabled;
+	QString walledGardenRanges;
 
 	QVector<l3Firewall> fwRules;		// L3 firewall rules of an SSID
 };
