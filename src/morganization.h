@@ -614,7 +614,6 @@ class MOrganization {
 
 
 
-
 		// remove functions
 		bool removeOrgAdmin(int index);
 		bool removeNetwork(int index);
@@ -623,6 +622,9 @@ class MOrganization {
 		bool removeNetworkPhoneAssignment(int netIndex, int index);
 		bool removeNetworkPhoneCallGroup(int netIndex, int index);
 		bool removeNetworkPhoneContact(int netIndex, int index);
+		bool removeNetworkStaticRoute(int netIndex, int index);
+		bool removeNetworkVlan(int netIndex, int index);
+
 
 
 		// functions to help navigating lists and vectors
@@ -638,9 +640,7 @@ class MOrganization {
 		int getIndexOfNetworkStaticRoute(int netIndex, QString id);
 		int getIndexOfNetworkVlan(int netIndex, QString id);
 		int getIndexOfNetworkPhone(int netIndex, QString serial);
-
 		int getIndexOfNetworkSMDevice(int netIndex, QString id);
-
 
 
 		// debug

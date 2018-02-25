@@ -711,39 +711,68 @@ void APIHelper::processQuery(QNetworkReply *r) {
 			break;
 		}
 
-
-
-
 		case 101: {
 			// GET /networks/[networkId]/staticRoutes
-			processNetworkStaticRoutesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-											, queueEventRequests.at(eventIndex).netIndex);
+			processNetworkStaticRoutesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 102: {
 			// GET /networks/[networkId]/staticRoutes/[id]
-			processNetworkStaticRoutesQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-											, queueEventRequests.at(eventIndex).netIndex
-											, queueEventRequests.at(eventIndex).id);
+			processNetworkStaticRoutesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 103: {
+			// PUT /networks/[networkId]/staticRoutes/[id]
+			processNetworkStaticRoutesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 104: {
+			// POST /networks/[networkId]/staticRoutes
+			processNetworkStaticRoutesQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 105: {
+			// DELETE /networks/[networkId]/staticRoutes/[id]
+			processNetworkStaticRoutesQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 
+
 		case 106: {
 			// GET /networks/[networkId]/vlans
-			processNetworkVlansQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									 , queueEventRequests.at(eventIndex).netIndex);
+			processNetworkVlansQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
 
 		case 107: {
 			// GET /networks/[networkId]/vlans/[id]
-			processNetworkVlansQuery(jDoc, queueEventRequests.at(eventIndex).orgIndex
-									 , queueEventRequests.at(eventIndex).netIndex
-									 , queueEventRequests.at(eventIndex).id);
+			processNetworkVlansQuery(jDoc, queueEventRequests.at(eventIndex));
 			break;
 		}
+
+		case 108: {
+			// PUT /networks/[networkId]/vlans/[vlanId]
+			processNetworkVlansQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 109: {
+			// POST /networks/[networkId]/vlans
+			processNetworkVlansQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
+		case 110: {
+			// DELETE /networks/[networkId]/vlans/[id]
+			processNetworkVlansQuery(jDoc, queueEventRequests.at(eventIndex));
+			break;
+		}
+
 
 
 	}
@@ -1510,7 +1539,7 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, eventRequest e) {
 	int i = 0;
 	int count = jArray.size();
 	if (e.urlListIndex == 98) {
-		parent->orgList.at(e.orgIndex)->setSwitchPortNum(devIndex, jArray.size());
+		parent->orgList[e.orgIndex]->setSwitchPortNum(devIndex, jArray.size());
 	} else if (e.urlListIndex == 99 || e.urlListIndex == 100) {
 		i = e.portIndex;
 		count = i+1;
@@ -1536,7 +1565,7 @@ bool APIHelper::processSwitchPortQuery(QJsonDocument doc, eventRequest e) {
 		tmpPort.stpGuard = jObj["stpGuard"].toString();
 		tmpPort.accessPolicyNumber = jObj["accessPolicyNumber"].toString();
 
-		parent->orgList.at(e.orgIndex)->setSwitchPort(devIndex, tmpPort, i);
+		parent->orgList[e.orgIndex]->setSwitchPort(devIndex, tmpPort, i);
 
 	}
 
@@ -2608,9 +2637,9 @@ bool APIHelper::processNetworkAvailablePhoneNumbersQuery(QJsonDocument doc, even
 
 }
 
-bool APIHelper::processNetworkStaticRoutesQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id) {
-	qDebug() << "\nAPIHelper::processNetworkStaticRoutesQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex << "\tid: " << id;
+bool APIHelper::processNetworkStaticRoutesQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkStaticRoutesQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex << "\tid: " << e.id;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkStaticRoutesQuery(...)";
@@ -2620,14 +2649,26 @@ bool APIHelper::processNetworkStaticRoutesQuery(QJsonDocument doc, int orgIndex,
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
+	// urlList 101 returns a JSON array with all the static routed in the network, GET
+	// urlList 102 returns a JSON object with the static route, GET
+	// urlList 103 returns a JSON object with the static route, PUT
+	// urlList 104 returns a JSON object with the static route just added, POST
+	// urlList 105 returns nothing after deleting the static route, DELETE
+	int routeIndex = parent->orgList[e.orgIndex]->getIndexOfNetworkStaticRoute(e.netIndex, e.id);
 	int i = 0;
 	int count = jArray.size();
-	if (id.length() > 0) {
-		// only do single id
-		i = parent->orgList[orgIndex]->getIndexOfNetworkStaticRoute(netIndex, id);
+
+	if (e.urlListIndex == 101) {
+		parent->orgList[e.orgIndex]->setNetworkStaticRoutesNum(e.netIndex, jArray.size());
+	} else if (e.urlListIndex == 102 || e.urlListIndex  == 103) {
+		i = routeIndex;
 		count = i+1;
-	} else {
-		parent->orgList[orgIndex]->setNetworkStaticRoutesNum(netIndex, jArray.size());
+	} else if (e.urlListIndex == 104) {
+		i = parent->orgList[e.orgIndex]->getNetworkStaticRoutesNum(e.netIndex);
+		count = i+1;
+		parent->orgList[e.orgIndex]->setNetworkStaticRoutesNum(e.netIndex, count);
+	} else if (e.urlListIndex == 105) {
+		return parent->orgList[e.orgIndex]->removeNetworkStaticRoute(e.netIndex, routeIndex);
 	}
 
 
@@ -2641,7 +2682,7 @@ bool APIHelper::processNetworkStaticRoutesQuery(QJsonDocument doc, int orgIndex,
 		tmpRoute.gatewayIp = jObj["gatewayIp"].toString();
 		tmpRoute.subnet = jObj["subnet"].toString();
 
-		parent->orgList[orgIndex]->setNetworkStaticRoute(netIndex, tmpRoute, i);
+		parent->orgList[e.orgIndex]->setNetworkStaticRoute(e.netIndex, tmpRoute, i);
 
 	}
 
@@ -2649,9 +2690,9 @@ bool APIHelper::processNetworkStaticRoutesQuery(QJsonDocument doc, int orgIndex,
 
 }
 
-bool APIHelper::processNetworkVlansQuery(QJsonDocument doc, int orgIndex, int netIndex, QString id) {
-	qDebug() << "\nAPIHelper::processNetworkVlansQuery(...), orgIndex: " << orgIndex
-			 << "\tnetIndex" << netIndex << "\tid: " << id;
+bool APIHelper::processNetworkVlansQuery(QJsonDocument doc, eventRequest e) {
+	qDebug() << "\nAPIHelper::processNetworkVlansQuery(...), orgIndex: " << e.orgIndex
+			 << "\tnetIndex" << e.netIndex << "\tid: " << e.id;
 
 	if (doc.isNull()) {
 		qDebug() << "JSON IS NOT VALID, APIHelper::processNetworkVlansQuery(...)";
@@ -2661,14 +2702,26 @@ bool APIHelper::processNetworkVlansQuery(QJsonDocument doc, int orgIndex, int ne
 	QJsonArray jArray = doc.array();
 	qDebug() << jArray << "\t" << jArray.size();
 
+	// urlList 106 returns a JSON array with a list of VLANs in the network, GET
+	// urlList 107 returns a JSON object with a single VLAN, GET
+	// urlList 108 returns a JSON object with a single VLAN, PUT
+	// urlList 109 returns a JSON object with the VLAN just added, POST
+	// urlList 110 returns nothing after deleting the VLAN, DELETE
+	int vlanIndex = parent->orgList[e.orgIndex]->getIndexOfNetworkVlan(e.netIndex, e.id);
 	int i = 0;
 	int count = jArray.size();
-	if (id.length() > 0) {
-		// only do single id
-		i = parent->orgList[orgIndex]->getIndexOfNetworkVlan(netIndex, id);
+
+	if (e.urlListIndex == 106) {
+		parent->orgList[e.orgIndex]->setNetworkVlansNum(e.netIndex, jArray.size());
+	} else if (e.urlListIndex == 107 || e.urlListIndex  == 108) {
+		i = vlanIndex;
 		count = i+1;
-	} else {
-		parent->orgList[orgIndex]->setNetworkVlansNum(netIndex, jArray.size());
+	} else if (e.urlListIndex == 109) {
+		i = parent->orgList[e.orgIndex]->getNetworkVlansNum(e.netIndex);
+		count = i+1;
+		parent->orgList[e.orgIndex]->setNetworkStaticRoutesNum(e.netIndex, count);
+	} else if (e.urlListIndex == 110) {
+		return parent->orgList[e.orgIndex]->removeNetworkStaticRoute(e.netIndex, vlanIndex);
 	}
 
 
@@ -2682,7 +2735,7 @@ bool APIHelper::processNetworkVlansQuery(QJsonDocument doc, int orgIndex, int ne
 		tmpVlan.applianceIp = jObj["applianceIp"].toString();
 		tmpVlan.subnet = jObj["subnet"].toString();
 
-		parent->orgList[orgIndex]->setNetworkVlan(netIndex, tmpVlan, i);
+		parent->orgList[e.orgIndex]->setNetworkVlan(e.netIndex, tmpVlan, i);
 
 	}
 

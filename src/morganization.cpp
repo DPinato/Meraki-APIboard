@@ -617,6 +617,24 @@ bool MOrganization::removeNetworkPhoneContact(int netIndex, int index) {
 	}
 }
 
+bool MOrganization::removeNetworkStaticRoute(int netIndex, int index) {
+	if (index != -1 && netList[netIndex].netStaticRoutes.size() > index) {
+		netList[netIndex].netStaticRoutes.remove(index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool MOrganization::removeNetworkVlan(int netIndex, int index) {
+	if (index != -1 && netList[netIndex].netVlans.size() > index) {
+		netList[netIndex].netVlans.remove(index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
 
 
 
